@@ -178,8 +178,7 @@
   .result-badge-icon { font-size: 32px; line-height: 1; }
   .result-badge-text { color: white; }
   .result-badge-title { font-size: 20px; font-weight: 600; }
-  .result-score { font-size: 28px; font-weight: 600; color: white; letter-spacing: -0.02em; margin-top: 4px; line-height: 1.2; }
-  .result-score-max { font-size: 16px; font-weight: 500; opacity: .75; }
+  .result-score { font-size: 28px; font-weight: 600; color: white; letter-spacing: normal; font-variant-ligatures: none; margin-top: 4px; line-height: 1.2; white-space: nowrap; }
   .result-badge-sub { font-size: 13px; opacity: .85; margin-top: 6px; }
   .result-score-wrap.hidden { display: none; }
   .result-card { background: var(--white); border-radius: 18px; margin: 12px 24px; padding: 18px; border: 1.5px solid var(--border); }
@@ -484,21 +483,33 @@
         <div class="result-badge-text">
           <div class="result-badge-title" id="result-badge-title">Отличный выбор</div>
           <div class="result-score-wrap" id="result-score-wrap">
-            <div class="result-score"><span id="result-score-value">—</span><span class="result-score-max">/10</span></div>
+            <div class="result-score" id="result-score-display">—</div>
           </div>
           <div class="result-badge-sub" id="result-badge-sub">Хорошо подходит твоему профилю</div>
         </div>
       </div>
       <div class="result-card">
-        <div class="result-card-title" id="result-summary-card-title">Итог</div>
+        <div class="result-card-title">Вижу на тарелке</div>
+        <div class="result-text" id="result-vision-text">—</div>
+      </div>
+      <div class="result-card">
+        <div class="result-card-title">Итог</div>
         <div class="result-text" id="result-summary-text">—</div>
+      </div>
+      <div class="result-card">
+        <div class="result-card-title">Как это работает</div>
+        <div class="result-text" id="result-education-text">—</div>
+      </div>
+      <div class="result-card">
+        <div class="result-card-title">Нюансы</div>
+        <div class="result-text" id="result-nuances-text">—</div>
       </div>
       <div class="result-card">
         <div class="result-card-title">Как сделать 10/10</div>
         <div class="result-text" id="result-upgrade-text">—</div>
       </div>
       <div class="result-card">
-        <div class="result-card-title">Что влияет на твой холестерин</div>
+        <div class="result-card-title">Факторы</div>
         <div id="result-factors-list"></div>
       </div>
       <div style="padding: 0 24px; display:flex; flex-direction:column; gap:8px;">
@@ -772,7 +783,7 @@ function getProfileForPrompt() {
 
 function buildVisionPrompt() {
   const p = getProfileForPrompt();
-  return `Ты персональный нутриционист. Анализируй еду на фото строго в контексте липидного профиля пользователя.
+  return `Ты персональный нутриционист. Анализируй фото еды в контексте липидного профиля пользователя.
 
 ПРОФИЛЬ:
 - Общий холестерин: ${p.total} ммоль/л (цель: снизить до <5.0)
@@ -782,32 +793,31 @@ function buildVisionPrompt() {
 - Пол: ${p.sex}, возраст: ${p.age}, ИМТ: ${p.bmi}
 - Статины: ${p.statins}
 
-Отвечай ТОЛЬКО в JSON:
+Отвечай ТОЛЬКО в JSON без лишнего текста:
 {
   "verdict": "green" | "yellow" | "red" | "error",
   "score": 8.5,
   "title": "3-4 слова вердикт",
-  "summary": "1-2 предложения — почему такая оценка",
+  "vision": "Перечисли все продукты которые видишь, через запятую (формат: блюдо — ингредиент1, ингредиент2, ...)",
+  "summary": "2-3 предложения общей оценки с похвалой если уместно и объяснением оценки в контексте липидного профиля",
+  "education": "3-5 предложений: как продукты с тарелки влияют на холестерин, что происходит в организме, почему сочетание хорошо или плохо для его показателей",
+  "nuances": "2-4 предложения: нюансы — что станет проблемой при больших порциях; что убрать или заменить без потери удовольствия; мягко, без запретов",
+  "upgrade": "2-3 предложения: конкретные шаги чтобы поднять оценку до 10/10 — что добавить, заменить или убрать и почему это даст эффект для профиля",
   "factors": [
-    {"name": "продукт/элемент", "impact": "ok|mid|bad",
-     "effect": "как влияет на холестерин"}
-  ],
-  "upgrade": "1 конкретное действие чтобы поднять оценку"
+    {"name": "продукт", "impact": "ok|mid|bad", "effect": "коротко как влияет на холестерин"}
+  ]
 }
 
 Правила оценки score (1-10):
 - 9-10: активно снижает холестерин
 - 7-8: нейтрально или слабо полезно
-- 5-6: есть риски, но допустимо
+- 5-6: есть риски но допустимо
 - 3-4: вредно для липидного профиля
 - 1-2: категорически не подходит
 
-Правила:
-- verdict соответствует score: green=7+, yellow=5-6, red=<5
-- factors максимум 4 пункта
-- upgrade — всегда одно конкретное улучшение (формат «заменить X на Y» или аналог)
-- Если не еда: verdict "error", title "Это не еда", score можно null, summary коротко почему не еда, factors [] и upgrade пустая строка
-- Только JSON, никакого лишнего текста`;
+verdict соответствует score: green=7+, yellow=5-6, red=<5
+factors максимум 4 пункта — только самые важные
+Если не еда: verdict "error", title "Это не еда", остальные поля пустые строки или пустой массив для factors`;
 }
 
 function fileToDataUrl(file) {
@@ -839,7 +849,7 @@ function verdictToBadgeIcon(v) {
 }
 
 function verdictToBadgeSub(v) {
-  if (v === 'green') return 'Зона липидного комфорта (7–10)';
+  if (v === 'green') return 'Отлично для твоего профиля';
   if (v === 'yellow') return 'На грани — есть куда улучшить (5–6)';
   if (v === 'red') return 'Сложно для профиля (<5)';
   return 'Попробуй сфотографировать блюдо';
@@ -849,6 +859,13 @@ function formatScoreDisplay(score) {
   if (score == null || score === '' || Number.isNaN(Number(score))) return '—';
   const n = Number(score);
   return Number.isInteger(n) ? String(n) : n.toFixed(1);
+}
+
+function resultFieldText(val, isError) {
+  if (isError) return '—';
+  if (val == null) return '—';
+  const s = String(val).trim();
+  return s === '' ? '—' : s;
 }
 
 function renderFactors(factors) {
@@ -872,7 +889,7 @@ function renderFactors(factors) {
     const row = document.createElement('div');
     row.className = 'result-text';
     row.style.padding = '4px 0';
-    row.textContent = 'Нет данных по факторам.';
+    row.textContent = '—';
     wrap.appendChild(row);
   }
 }
@@ -898,7 +915,7 @@ async function analyzeFoodPhoto(file) {
     body: JSON.stringify({
       model: 'gpt-4o',
       response_format: { type: 'json_object' },
-      max_tokens: 1000,
+      max_tokens: 2500,
       messages: [
         {
           role: 'user',
@@ -926,6 +943,7 @@ async function analyzeFoodPhoto(file) {
 
 function applyResultToUI(data) {
   const v = data.verdict;
+  const err = v === 'error';
   const badge = document.getElementById('result-badge');
   badge.className = 'result-badge ' + verdictToBadgeClass(v);
 
@@ -933,28 +951,34 @@ function applyResultToUI(data) {
   document.getElementById('result-badge-title').textContent = data.title || '—';
 
   const scoreWrap = document.getElementById('result-score-wrap');
-  const scoreVal = document.getElementById('result-score-value');
-  if (v === 'error') {
+  const scoreDisplay = document.getElementById('result-score-display');
+  if (err) {
     scoreWrap.classList.add('hidden');
-    scoreVal.textContent = '—';
+    scoreDisplay.textContent = '—';
   } else {
     scoreWrap.classList.remove('hidden');
-    scoreVal.textContent = formatScoreDisplay(data.score);
+    const n = formatScoreDisplay(data.score);
+    scoreDisplay.textContent = n + '/' + '10';
   }
 
   document.getElementById('result-badge-sub').textContent = verdictToBadgeSub(v);
 
-  document.getElementById('result-summary-card-title').textContent =
-    v === 'error' ? 'Не удалось оценить' : 'Итог';
-  const summaryText = data.summary != null && data.summary !== ''
-    ? data.summary
-    : (data.reason || '—');
+  document.getElementById('result-vision-text').textContent = resultFieldText(data.vision, err);
+
+  let summaryText = '—';
+  if (err) {
+    const s = data.summary != null ? String(data.summary).trim() : '';
+    summaryText = s !== '' ? s : '—';
+  } else {
+    const fromSummary = data.summary != null ? String(data.summary).trim() : '';
+    const fromReason = data.reason != null ? String(data.reason).trim() : '';
+    summaryText = fromSummary !== '' ? fromSummary : (fromReason !== '' ? fromReason : '—');
+  }
   document.getElementById('result-summary-text').textContent = summaryText;
 
-  const upg = data.upgrade != null && String(data.upgrade).trim() !== ''
-    ? String(data.upgrade).trim()
-    : '—';
-  document.getElementById('result-upgrade-text').textContent = v === 'error' ? '—' : upg;
+  document.getElementById('result-education-text').textContent = resultFieldText(data.education, err);
+  document.getElementById('result-nuances-text').textContent = resultFieldText(data.nuances, err);
+  document.getElementById('result-upgrade-text').textContent = resultFieldText(data.upgrade, err);
 
   renderFactors(data.factors);
 }
@@ -982,8 +1006,11 @@ document.getElementById('food-camera-input').addEventListener('change', async (e
   setResultLoading(true);
   document.getElementById('result-badge-title').textContent = '…';
   document.getElementById('result-badge-sub').textContent = 'Загружаем анализ';
-  document.getElementById('result-score-value').textContent = '…';
+  document.getElementById('result-score-display').textContent = '…';
+  document.getElementById('result-vision-text').textContent = '—';
   document.getElementById('result-summary-text').textContent = '—';
+  document.getElementById('result-education-text').textContent = '—';
+  document.getElementById('result-nuances-text').textContent = '—';
   document.getElementById('result-upgrade-text').textContent = '—';
   document.getElementById('result-factors-list').innerHTML = '';
 
@@ -995,8 +1022,11 @@ document.getElementById('food-camera-input').addEventListener('change', async (e
       verdict: 'error',
       title: 'Ошибка',
       summary: String(err.message || err),
-      factors: [],
-      upgrade: ''
+      vision: '',
+      education: '',
+      nuances: '',
+      upgrade: '',
+      factors: []
     });
   } finally {
     setResultLoading(false);
