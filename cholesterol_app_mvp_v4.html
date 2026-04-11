@@ -196,7 +196,9 @@
   /* история */
   .history-item { background: var(--white); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; border: 1.5px solid var(--border); display: flex; align-items: center; gap: 14px; cursor: pointer; transition: transform .15s; }
   .history-item:active { transform: scale(0.98); }
-  .history-thumb { width: 52px; height: 52px; border-radius: 10px; background: var(--surface); font-size: 28px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .history-thumb { width: 52px; height: 52px; border-radius: 10px; background: var(--surface); font-size: 28px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; }
+  .history-thumb-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .history-empty { text-align: center; padding: 32px 20px; color: var(--ink3); font-size: 15px; line-height: 1.5; }
   .history-info { flex: 1; }
   .history-name { font-size: 15px; font-weight: 500; color: var(--ink); }
   .history-date { font-size: 12px; color: var(--ink3); margin-top: 2px; }
@@ -274,7 +276,7 @@
   <div class="screen active" id="screen-onboard1">
     <div class="nav">
       <div class="nav-title">Мой профиль</div>
-      <div class="nav-skip" onclick="goTo('screen-main')">Пропустить</div>
+      <div class="nav-skip" onclick="skipOnboardingToMain()">Пропустить</div>
     </div>
     <div class="dots">
       <div class="dot active"></div><div class="dot"></div>
@@ -407,7 +409,7 @@
         <div class="seg-btn" onclick="setSeg('seg-units',this)">мг/дл</div>
       </div>
 
-      <button class="btn-primary" onclick="goTo('screen-main')">Начать →</button>
+      <button class="btn-primary" onclick="saveProfileAndStart()">Начать →</button>
     </div>
   </div>
 
@@ -513,8 +515,8 @@
         <div id="result-factors-list"></div>
       </div>
       <div style="padding: 0 24px; display:flex; flex-direction:column; gap:8px;">
-        <button class="btn-primary" onclick="goTo('screen-main')">Сохранить в историю</button>
-        <button class="btn-secondary" onclick="goTo('screen-main')">← Назад</button>
+        <button type="button" class="btn-primary" onclick="saveMealToHistoryAndGoMain()">Сохранить в историю</button>
+        <button type="button" class="btn-secondary" onclick="backFromResult()">← Назад</button>
       </div>
     </div>
   </div>
@@ -525,53 +527,8 @@
       <div class="nav-title">История</div>
     </div>
     <div class="content">
-      <div class="section-label">Сегодня</div>
-      <div class="day-summary">
-        <div class="day-stat"><div class="day-stat-num num-green">2</div><div class="day-stat-label">хорошо</div></div>
-        <div class="day-stat"><div class="day-stat-num num-yellow">1</div><div class="day-stat-label">осторожно</div></div>
-        <div class="day-stat"><div class="day-stat-num num-red">0</div><div class="day-stat-label">нельзя</div></div>
-      </div>
-      <div class="history-item" onclick="goTo('screen-result')">
-        <div class="history-thumb">🥗</div>
-        <div class="history-info">
-          <div class="history-name">Греческий салат</div>
-          <div class="history-date">Сегодня, 13:22</div>
-        </div>
-        <div class="history-pill pill-green">Можно</div>
-      </div>
-      <div class="history-item">
-        <div class="history-thumb">🍳</div>
-        <div class="history-info">
-          <div class="history-name">Яичница с беконом</div>
-          <div class="history-date">Сегодня, 9:14</div>
-        </div>
-        <div class="history-pill pill-yellow">Осторожно</div>
-      </div>
-      <div class="section-label">Вчера</div>
-      <div class="history-item">
-        <div class="history-thumb">🍝</div>
-        <div class="history-info">
-          <div class="history-name">Паста карбонара</div>
-          <div class="history-date">Вчера, 19:40</div>
-        </div>
-        <div class="history-pill pill-red">Лучше не есть</div>
-      </div>
-      <div class="history-item">
-        <div class="history-thumb">🐟</div>
-        <div class="history-info">
-          <div class="history-name">Лосось на гриле</div>
-          <div class="history-date">Вчера, 13:05</div>
-        </div>
-        <div class="history-pill pill-green">Можно</div>
-      </div>
-      <div class="history-item">
-        <div class="history-thumb">🥑</div>
-        <div class="history-info">
-          <div class="history-name">Тост с авокадо</div>
-          <div class="history-date">Вчера, 8:30</div>
-        </div>
-        <div class="history-pill pill-green">Можно</div>
-      </div>
+      <div class="history-empty" id="history-empty" style="display:none;">Пока нет записей. Сфоткай свою первую еду!</div>
+      <div id="history-list"></div>
     </div>
     <div class="bottom-nav">
       <div class="bnav-item" onclick="navTo('screen-main',this)">
@@ -591,6 +548,11 @@
 
 <script>
 const LS_OPENAI_KEY = 'cholesterol_app_openai_api_key';
+const LS_USER_PROFILE = 'cholesterol_app_user_profile';
+const LS_MEAL_HISTORY = 'meal_history';
+
+let lastMealPhotoDataUrl = null;
+let lastMealAnalysisData = null;
 
 function getStoredApiKey() {
   try {
@@ -646,6 +608,206 @@ function toggleApiKeyVisibility() {
 function initApiKeyGate() {
   if (getStoredApiKey()) hideApiKeyModal();
   else showApiKeyModal();
+}
+
+function saveProfileToStorage() {
+  const genderEl = document.querySelector('#seg-gender .seg-btn.active');
+  const unitsEl = document.querySelector('#seg-units .seg-btn.active');
+  const profile = {
+    name: document.getElementById('input-name')?.value ?? '',
+    v_total: document.getElementById('v-total')?.value ?? '',
+    v_ldl: document.getElementById('v-ldl')?.value ?? '',
+    v_hdl: document.getElementById('v-hdl')?.value ?? '',
+    v_trig: document.getElementById('v-trig')?.value ?? '',
+    dontKnowOn: !!dontKnowOn,
+    gender: genderEl ? genderEl.textContent.trim() : 'Мужской',
+    units: unitsEl ? unitsEl.textContent.trim() : 'ммоль/л',
+    age: document.getElementById('input-age')?.value ?? '',
+    height: document.getElementById('input-height')?.value ?? '',
+    weight: document.getElementById('input-weight')?.value ?? '',
+    statins: document.getElementById('toggle-statins')?.classList.contains('on') ?? false
+  };
+  try {
+    localStorage.setItem(LS_USER_PROFILE, JSON.stringify(profile));
+  } catch (e) {}
+}
+
+function setSegActiveByLabel(containerId, label) {
+  const c = document.getElementById(containerId);
+  if (!c || !label) return;
+  c.querySelectorAll('.seg-btn').forEach((btn) => {
+    btn.classList.toggle('active', btn.textContent.trim() === label);
+  });
+}
+
+function applyDontKnowVisual() {
+  const hint = document.getElementById('dontknow-hint');
+  const btn = document.getElementById('dontknow-btn');
+  const fields = ['f-total', 'f-ldl', 'f-hdl', 'f-trig'];
+  hint.classList.toggle('visible', dontKnowOn);
+  btn.classList.toggle('open', dontKnowOn);
+  fields.forEach((id) => document.getElementById(id).classList.toggle('dimmed', dontKnowOn));
+}
+
+function loadProfileFromStorage() {
+  try {
+    const raw = localStorage.getItem(LS_USER_PROFILE);
+    if (!raw) return false;
+    const p = JSON.parse(raw);
+    const nameEl = document.getElementById('input-name');
+    if (nameEl && p.name != null) nameEl.value = p.name;
+    if (p.v_total != null) document.getElementById('v-total').value = p.v_total;
+    if (p.v_ldl != null) document.getElementById('v-ldl').value = p.v_ldl;
+    if (p.v_hdl != null) document.getElementById('v-hdl').value = p.v_hdl;
+    if (p.v_trig != null) document.getElementById('v-trig').value = p.v_trig;
+    if (p.age != null) document.getElementById('input-age').value = p.age;
+    if (p.height != null) document.getElementById('input-height').value = p.height;
+    if (p.weight != null) document.getElementById('input-weight').value = p.weight;
+    dontKnowOn = !!p.dontKnowOn;
+    applyDontKnowVisual();
+    setSegActiveByLabel('seg-gender', p.gender || 'Мужской');
+    setSegActiveByLabel('seg-units', p.units || 'ммоль/л');
+    const st = document.getElementById('toggle-statins');
+    if (st) st.classList.toggle('on', !!p.statins);
+    updateName((p.name || '').trim());
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+function saveProfileAndStart() {
+  saveProfileToStorage();
+  goTo('screen-main');
+}
+
+function skipOnboardingToMain() {
+  goTo('screen-main');
+}
+
+function syncBottomNavForScreen(screenId) {
+  const idx =
+    screenId === 'screen-main' ? 0 : screenId === 'screen-history' ? 1 : screenId === 'screen-onboard1' ? 2 : -1;
+  if (idx < 0) return;
+  document.querySelectorAll('.bottom-nav').forEach((nav) => {
+    nav.querySelectorAll('.bnav-item').forEach((item, i) => {
+      item.classList.toggle('active', i === idx);
+    });
+  });
+}
+
+function getMealHistory() {
+  try {
+    const r = localStorage.getItem(LS_MEAL_HISTORY);
+    if (!r) return [];
+    const arr = JSON.parse(r);
+    return Array.isArray(arr) ? arr : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function setMealHistory(arr) {
+  try {
+    localStorage.setItem(LS_MEAL_HISTORY, JSON.stringify(arr));
+  } catch (e) {}
+}
+
+function renderHistoryList() {
+  const listEl = document.getElementById('history-list');
+  const emptyEl = document.getElementById('history-empty');
+  if (!listEl || !emptyEl) return;
+  const items = getMealHistory().slice().reverse();
+  listEl.innerHTML = '';
+  if (!items.length) {
+    emptyEl.style.display = 'block';
+    listEl.style.display = 'none';
+    return;
+  }
+  emptyEl.style.display = 'none';
+  listEl.style.display = 'block';
+  items.forEach((item) => {
+    const v = item.verdict;
+    const pillClass =
+      v === 'green' ? 'pill-green' : v === 'yellow' ? 'pill-yellow' : v === 'red' ? 'pill-red' : 'pill-yellow';
+    const pillText =
+      v === 'green' ? 'Можно' : v === 'yellow' ? 'Осторожно' : v === 'red' ? 'Риск' : '—';
+    const title = (item.title || 'Без названия').trim() || 'Без названия';
+    let dateStr = '—';
+    try {
+      const dt = new Date(item.at);
+      if (!Number.isNaN(dt.getTime())) {
+        dateStr = dt.toLocaleString('ru-RU', {
+          day: 'numeric',
+          month: 'short',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+      }
+    } catch (e) {}
+    const row = document.createElement('div');
+    row.className = 'history-item';
+    if (item.photoBase64) {
+      const im = document.createElement('img');
+      im.className = 'history-thumb history-thumb-img';
+      im.alt = '';
+      im.src = item.photoBase64;
+      row.appendChild(im);
+    } else {
+      const ph = document.createElement('div');
+      ph.className = 'history-thumb';
+      ph.textContent = '🍽';
+      row.appendChild(ph);
+    }
+    const info = document.createElement('div');
+    info.className = 'history-info';
+    const nameEl = document.createElement('div');
+    nameEl.className = 'history-name';
+    nameEl.textContent = title;
+    const dateEl = document.createElement('div');
+    dateEl.className = 'history-date';
+    dateEl.textContent = dateStr;
+    info.appendChild(nameEl);
+    info.appendChild(dateEl);
+    row.appendChild(info);
+    const pill = document.createElement('div');
+    pill.className = 'history-pill ' + pillClass;
+    pill.textContent = pillText;
+    row.appendChild(pill);
+    listEl.appendChild(row);
+  });
+}
+
+function saveMealToHistoryAndGoMain() {
+  if (!lastMealPhotoDataUrl || !lastMealAnalysisData) {
+    goTo('screen-main');
+    return;
+  }
+  const d = lastMealAnalysisData;
+  if (d.verdict === 'error') {
+    goTo('screen-main');
+    return;
+  }
+  const verdict = d.verdict;
+  if (verdict !== 'green' && verdict !== 'yellow' && verdict !== 'red') {
+    goTo('screen-main');
+    return;
+  }
+  const arr = getMealHistory();
+  arr.push({
+    photoBase64: lastMealPhotoDataUrl,
+    verdict: verdict,
+    score: d.score,
+    title: d.title != null ? String(d.title) : '',
+    vision: d.vision != null ? String(d.vision) : '',
+    at: new Date().toISOString()
+  });
+  setMealHistory(arr);
+  goTo('screen-main');
+}
+
+function backFromResult() {
+  goTo('screen-main');
 }
 
 const AVG = { total: 5.2, ldl: 3.3, hdl: 1.3, trig: 1.5 };
@@ -899,11 +1061,10 @@ function setResultLoading(show) {
   if (el) el.style.display = show ? 'flex' : 'none';
 }
 
-async function analyzeFoodPhoto(file) {
+async function analyzeFoodPhoto(dataUrl) {
   const apiKey = getStoredApiKey();
   if (!apiKey) throw new Error('Сохраните API-ключ в настройках при первом запуске.');
 
-  const dataUrl = await fileToDataUrl(file);
   const prompt = buildVisionPrompt();
 
   const res = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -988,6 +1149,10 @@ document.getElementById('food-camera-input').addEventListener('change', async (e
   e.target.value = '';
   if (!file || !file.type.startsWith('image/')) return;
 
+  const dataUrl = await fileToDataUrl(file);
+  lastMealPhotoDataUrl = dataUrl;
+  lastMealAnalysisData = null;
+
   goTo('screen-result');
 
   const img = document.getElementById('result-photo-img');
@@ -1015,9 +1180,11 @@ document.getElementById('food-camera-input').addEventListener('change', async (e
   document.getElementById('result-factors-list').innerHTML = '';
 
   try {
-    const data = await analyzeFoodPhoto(file);
+    const data = await analyzeFoodPhoto(dataUrl);
+    lastMealAnalysisData = data;
     applyResultToUI(data);
   } catch (err) {
+    lastMealAnalysisData = { verdict: 'error' };
     applyResultToUI({
       verdict: 'error',
       title: 'Ошибка',
@@ -1037,6 +1204,8 @@ function goTo(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   if (id === 'screen-main') syncMainCholCard();
+  if (id === 'screen-history') renderHistoryList();
+  syncBottomNavForScreen(id);
 }
 function navTo(id, el) {
   goTo(id);
@@ -1054,25 +1223,16 @@ function updateName(val) {
 
 function toggleDontKnow() {
   dontKnowOn = !dontKnowOn;
-  const hint = document.getElementById('dontknow-hint');
-  const btn = document.getElementById('dontknow-btn');
-  const fields = ['f-total','f-ldl','f-hdl','f-trig'];
-
-  hint.classList.toggle('visible', dontKnowOn);
-  btn.classList.toggle('open', dontKnowOn);
-
+  const fields = ['f-total', 'f-ldl', 'f-hdl', 'f-trig'];
   if (dontKnowOn) {
-    // подставляем средние значения
     document.getElementById('v-total').value = AVG.total;
-    document.getElementById('v-ldl').value   = AVG.ldl;
-    document.getElementById('v-hdl').value   = AVG.hdl;
-    document.getElementById('v-trig').value  = AVG.trig;
-    fields.forEach(id => document.getElementById(id).classList.add('dimmed'));
+    document.getElementById('v-ldl').value = AVG.ldl;
+    document.getElementById('v-hdl').value = AVG.hdl;
+    document.getElementById('v-trig').value = AVG.trig;
   } else {
-    // очищаем
-    ['v-total','v-ldl','v-hdl','v-trig'].forEach(id => document.getElementById(id).value = '');
-    fields.forEach(id => document.getElementById(id).classList.remove('dimmed'));
+    ['v-total', 'v-ldl', 'v-hdl', 'v-trig'].forEach((id) => (document.getElementById(id).value = ''));
   }
+  applyDontKnowVisual();
   if (document.getElementById('screen-main')?.classList.contains('active')) syncMainCholCard();
 }
 
@@ -1084,4 +1244,7 @@ document.getElementById('api-key-input')?.addEventListener('keydown', (e) => {
 });
 
 initApiKeyGate();
+if (loadProfileFromStorage()) {
+  goTo('screen-main');
+}
 </script>
