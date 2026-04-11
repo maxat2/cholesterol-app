@@ -178,7 +178,10 @@
   .result-badge-icon { font-size: 32px; line-height: 1; }
   .result-badge-text { color: white; }
   .result-badge-title { font-size: 20px; font-weight: 600; }
-  .result-badge-sub { font-size: 13px; opacity: .85; margin-top: 2px; }
+  .result-score { font-size: 28px; font-weight: 600; color: white; letter-spacing: -0.02em; margin-top: 4px; line-height: 1.2; }
+  .result-score-max { font-size: 16px; font-weight: 500; opacity: .75; }
+  .result-badge-sub { font-size: 13px; opacity: .85; margin-top: 6px; }
+  .result-score-wrap.hidden { display: none; }
   .result-card { background: var(--white); border-radius: 18px; margin: 12px 24px; padding: 18px; border: 1.5px solid var(--border); }
   .result-card-title { font-size: 13px; font-weight: 600; color: var(--ink3); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 10px; }
   .result-text { font-size: 15px; color: var(--ink); line-height: 1.6; }
@@ -480,12 +483,19 @@
         <div class="result-badge-icon" id="result-badge-icon">✓</div>
         <div class="result-badge-text">
           <div class="result-badge-title" id="result-badge-title">Отличный выбор</div>
+          <div class="result-score-wrap" id="result-score-wrap">
+            <div class="result-score"><span id="result-score-value">—</span><span class="result-score-max">/10</span></div>
+          </div>
           <div class="result-badge-sub" id="result-badge-sub">Хорошо подходит твоему профилю</div>
         </div>
       </div>
       <div class="result-card">
-        <div class="result-card-title" id="result-reason-card-title">Комментарий</div>
-        <div class="result-text" id="result-reason-text">—</div>
+        <div class="result-card-title" id="result-summary-card-title">Итог</div>
+        <div class="result-text" id="result-summary-text">—</div>
+      </div>
+      <div class="result-card">
+        <div class="result-card-title">Как сделать 10/10</div>
+        <div class="result-text" id="result-upgrade-text">—</div>
       </div>
       <div class="result-card">
         <div class="result-card-title">Что влияет на твой холестерин</div>
@@ -762,33 +772,42 @@ function getProfileForPrompt() {
 
 function buildVisionPrompt() {
   const p = getProfileForPrompt();
-  return `Ты диетолог-ассистент. Пользователь следит за холестерином.
+  return `Ты персональный нутриционист. Анализируй еду на фото строго в контексте липидного профиля пользователя.
 
-Профиль пользователя:
-- Общий холестерин: ${p.total} ммоль/л (норма до 5.0)
-- LDL: ${p.ldl} ммоль/л (норма до 3.0)  
-- HDL: ${p.hdl} ммоль/л (норма от 1.0)
-- Триглицериды: ${p.trig} ммоль/л (норма до 1.7)
+ПРОФИЛЬ:
+- Общий холестерин: ${p.total} ммоль/л (цель: снизить до <5.0)
+- LDL: ${p.ldl} ммоль/л (цель: снизить до <3.0)
+- HDL: ${p.hdl} ммоль/л (цель: держать >1.0)
+- Триглицериды: ${p.trig} ммоль/л
 - Пол: ${p.sex}, возраст: ${p.age}, ИМТ: ${p.bmi}
 - Статины: ${p.statins}
 
-Посмотри на фото еды и ответь СТРОГО в таком JSON формате:
+Отвечай ТОЛЬКО в JSON:
 {
   "verdict": "green" | "yellow" | "red" | "error",
-  "title": "Короткий вердикт 3-4 слова",
-  "reason": "1-2 предложения почему",
+  "score": 8.5,
+  "title": "3-4 слова вердикт",
+  "summary": "1-2 предложения — почему такая оценка",
   "factors": [
-    {"name": "название фактора", "impact": "ok" | "mid" | "bad", "effect": "короткое описание"}
-  ]
+    {"name": "продукт/элемент", "impact": "ok|mid|bad",
+     "effect": "как влияет на холестерин"}
+  ],
+  "upgrade": "1 конкретное действие чтобы поднять оценку"
 }
 
+Правила оценки score (1-10):
+- 9-10: активно снижает холестерин
+- 7-8: нейтрально или слабо полезно
+- 5-6: есть риски, но допустимо
+- 3-4: вредно для липидного профиля
+- 1-2: категорически не подходит
+
 Правила:
-- green = хорошо подходит для снижения холестерина
-- yellow = можно но с осторожностью  
-- red = лучше избегать при повышенном холестерине
-- factors = максимум 4 пункта, только самые важные
-- Если на фото не еда — verdict: "error", title: "Это не еда"
-- Отвечай только JSON, без лишнего текста`;
+- verdict соответствует score: green=7+, yellow=5-6, red=<5
+- factors максимум 4 пункта
+- upgrade — всегда одно конкретное улучшение (формат «заменить X на Y» или аналог)
+- Если не еда: verdict "error", title "Это не еда", score можно null, summary коротко почему не еда, factors [] и upgrade пустая строка
+- Только JSON, никакого лишнего текста`;
 }
 
 function fileToDataUrl(file) {
@@ -820,10 +839,16 @@ function verdictToBadgeIcon(v) {
 }
 
 function verdictToBadgeSub(v) {
-  if (v === 'green') return 'Хорошо подходит твоему профилю';
-  if (v === 'yellow') return 'Можно, но с осторожностью';
-  if (v === 'red') return 'Лучше ограничить при твоём профиле';
+  if (v === 'green') return 'Зона липидного комфорта (7–10)';
+  if (v === 'yellow') return 'На грани — есть куда улучшить (5–6)';
+  if (v === 'red') return 'Сложно для профиля (<5)';
   return 'Попробуй сфотографировать блюдо';
+}
+
+function formatScoreDisplay(score) {
+  if (score == null || score === '' || Number.isNaN(Number(score))) return '—';
+  const n = Number(score);
+  return Number.isInteger(n) ? String(n) : n.toFixed(1);
 }
 
 function renderFactors(factors) {
@@ -873,7 +898,7 @@ async function analyzeFoodPhoto(file) {
     body: JSON.stringify({
       model: 'gpt-4o',
       response_format: { type: 'json_object' },
-      max_tokens: 800,
+      max_tokens: 1000,
       messages: [
         {
           role: 'user',
@@ -906,11 +931,30 @@ function applyResultToUI(data) {
 
   document.getElementById('result-badge-icon').textContent = verdictToBadgeIcon(v);
   document.getElementById('result-badge-title').textContent = data.title || '—';
+
+  const scoreWrap = document.getElementById('result-score-wrap');
+  const scoreVal = document.getElementById('result-score-value');
+  if (v === 'error') {
+    scoreWrap.classList.add('hidden');
+    scoreVal.textContent = '—';
+  } else {
+    scoreWrap.classList.remove('hidden');
+    scoreVal.textContent = formatScoreDisplay(data.score);
+  }
+
   document.getElementById('result-badge-sub').textContent = verdictToBadgeSub(v);
 
-  document.getElementById('result-reason-card-title').textContent =
-    v === 'error' ? 'Не удалось оценить' : 'Комментарий';
-  document.getElementById('result-reason-text').textContent = data.reason || '—';
+  document.getElementById('result-summary-card-title').textContent =
+    v === 'error' ? 'Не удалось оценить' : 'Итог';
+  const summaryText = data.summary != null && data.summary !== ''
+    ? data.summary
+    : (data.reason || '—');
+  document.getElementById('result-summary-text').textContent = summaryText;
+
+  const upg = data.upgrade != null && String(data.upgrade).trim() !== ''
+    ? String(data.upgrade).trim()
+    : '—';
+  document.getElementById('result-upgrade-text').textContent = v === 'error' ? '—' : upg;
 
   renderFactors(data.factors);
 }
@@ -938,7 +982,9 @@ document.getElementById('food-camera-input').addEventListener('change', async (e
   setResultLoading(true);
   document.getElementById('result-badge-title').textContent = '…';
   document.getElementById('result-badge-sub').textContent = 'Загружаем анализ';
-  document.getElementById('result-reason-text').textContent = '—';
+  document.getElementById('result-score-value').textContent = '…';
+  document.getElementById('result-summary-text').textContent = '—';
+  document.getElementById('result-upgrade-text').textContent = '—';
   document.getElementById('result-factors-list').innerHTML = '';
 
   try {
@@ -948,8 +994,9 @@ document.getElementById('food-camera-input').addEventListener('change', async (e
     applyResultToUI({
       verdict: 'error',
       title: 'Ошибка',
-      reason: String(err.message || err),
-      factors: []
+      summary: String(err.message || err),
+      factors: [],
+      upgrade: ''
     });
   } finally {
     setResultLoading(false);
