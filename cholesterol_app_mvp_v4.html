@@ -1839,9 +1839,24 @@ function getMealHistory() {
 }
 
 function setMealHistory(arr) {
+  const slim = arr.map((m) => {
+    if (m.supabaseId) {
+      const { photoBase64, ...rest } = m;
+      return rest;
+    }
+    return m;
+  });
   try {
-    localStorage.setItem(LS_MEAL_HISTORY, JSON.stringify(arr));
-  } catch (e) {}
+    localStorage.setItem(LS_MEAL_HISTORY, JSON.stringify(slim));
+  } catch (e) {
+    console.warn('[localStorage] quota exceeded, trimming...', e);
+    const trimmed = slim.slice(-20);
+    try {
+      localStorage.setItem(LS_MEAL_HISTORY, JSON.stringify(trimmed));
+    } catch (e2) {
+      console.warn('[localStorage] still failed after trim', e2);
+    }
+  }
 }
 
 function formatHistoryDateRu(iso) {
