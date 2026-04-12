@@ -660,6 +660,17 @@
   .history-thumb.history-thumb--no-photo {
     background: #ddd;
   }
+  .history-thumb.is-loading {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite;
+  }
+  .history-thumb.is-loading img.history-thumb-img {
+    opacity: 0;
+  }
+  .history-thumb img.history-thumb-img {
+    transition: opacity 0.3s ease;
+  }
   .history-info {
     flex: 1;
     min-width: 0;
@@ -1877,6 +1888,13 @@ function setMealHistory(arr) {
 
 async function loadMealPhoto(supabaseId, imgElement) {
   if (!supabaseId || !imgElement) return;
+  const thumb = imgElement.parentElement;
+  const useThumbSkel = thumb && thumb.classList.contains('history-thumb');
+  if (useThumbSkel) {
+    thumb.classList.add('is-loading');
+    thumb.classList.remove('history-thumb--no-photo');
+    imgElement.style.opacity = '0';
+  }
   try {
     const { data, error } = await supabaseClient
       .from('meals')
@@ -1885,13 +1903,54 @@ async function loadMealPhoto(supabaseId, imgElement) {
       .single();
     if (error) {
       console.warn('[meals] photo fetch', error);
+      if (useThumbSkel) {
+        thumb.classList.remove('is-loading');
+        imgElement.remove();
+        thumb.classList.add('history-thumb--no-photo');
+        thumb.textContent = '🍽';
+      }
       return;
     }
     if (data && data.photo_url) {
+      let doneOnce = false;
+      const onDone = () => {
+        if (doneOnce) return;
+        doneOnce = true;
+        if (useThumbSkel) {
+          thumb.classList.remove('is-loading');
+          imgElement.style.opacity = '1';
+        }
+      };
+      const onFail = () => {
+        if (doneOnce) return;
+        doneOnce = true;
+        if (useThumbSkel) {
+          thumb.classList.remove('is-loading');
+          imgElement.remove();
+          thumb.classList.add('history-thumb--no-photo');
+          thumb.textContent = '🍽';
+        }
+      };
+      imgElement.onload = onDone;
+      imgElement.onerror = onFail;
       imgElement.src = data.photo_url;
+      if (imgElement.complete && imgElement.naturalWidth) onDone();
+    } else {
+      if (useThumbSkel) {
+        thumb.classList.remove('is-loading');
+        imgElement.remove();
+        thumb.classList.add('history-thumb--no-photo');
+        thumb.textContent = '🍽';
+      }
     }
   } catch (e) {
     console.warn('[meals] loadMealPhoto', e);
+    if (useThumbSkel) {
+      thumb.classList.remove('is-loading');
+      if (imgElement.parentElement === thumb) imgElement.remove();
+      thumb.classList.add('history-thumb--no-photo');
+      thumb.textContent = '🍽';
+    }
   }
 }
 
@@ -2050,28 +2109,19 @@ async function renderHistoryList() {
       im.decoding = 'async';
       thumbWrap.appendChild(im);
     } else if (item.supabaseId) {
-      thumbWrap.classList.add('history-thumb--no-photo');
-      thumbWrap.textContent = '🍽';
+      thumbWrap.classList.add('is-loading');
+      const im = document.createElement('img');
+      im.className = 'history-thumb-img';
+      im.alt = '';
+      im.style.opacity = '0';
+      thumbWrap.appendChild(im);
       const sid = item.supabaseId;
       const io = new IntersectionObserver(
         (entries, observer) => {
           for (const ent of entries) {
             if (!ent.isIntersecting) continue;
             observer.unobserve(thumbWrap);
-            void (async () => {
-              const im = document.createElement('img');
-              im.className = 'history-thumb-img';
-              im.alt = '';
-              await loadMealPhoto(sid, im);
-              if (!im.src) return;
-              const done = () => {
-                thumbWrap.textContent = '';
-                thumbWrap.appendChild(im);
-                thumbWrap.classList.remove('history-thumb--no-photo');
-              };
-              if (im.complete) done();
-              else im.onload = done;
-            })();
+            void loadMealPhoto(sid, im);
           }
         },
         { root: null, rootMargin: '120px', threshold: 0.01 }
