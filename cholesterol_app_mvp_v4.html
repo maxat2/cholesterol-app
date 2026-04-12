@@ -1,7 +1,28 @@
-
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#FFFFFF" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <title>Холестериновая слежка</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html {
+    height: 100%;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    margin: 0;
+    min-height: 100%;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    font-family: system-ui, sans-serif;
+    background: var(--bg, #fff);
+  }
   :root {
     --bg: #FFFFFF;
     --accent: #000000;
@@ -16,22 +37,96 @@
     --dontknow-bg: #EEF2FF;
     --star-green: #22C55E;
     --sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    /* Главный экран (ориентир под Figma mobile / node main) */
+    --main-pad-x: 20px;
+    --main-pad-top: 24px;
+    --main-greeting-size: 32px;
+    --main-lead-size: 16px;
+    --main-lead-color: #666666;
+    --main-section-size: 22px;
+    --main-block-gap: 24px;
+    --chol-card-radius: 16px;
+    --chol-grid-gap: 12px;
+    --chol-name-color: #666666;
+    --chol-foot-size: 12px;
   }
-  .app-wrap { display: flex; justify-content: center; padding: 24px 0 48px; font-family: var(--sans); background: var(--bg); }
-  .phone { width: 375px; min-height: 720px; background: var(--bg); border-radius: 40px; overflow: hidden; box-shadow: 0 24px 64px rgba(0,0,0,0.12), 0 0 0 1px #EEEEEE; position: relative; }
-  .screen { display: none; flex-direction: column; min-height: 720px; background: var(--bg); animation: fadeIn 0.25s ease; }
-  .screen.active { display: flex; }
+  /* Мобильный: на весь экран, без «телефонной» рамки */
+  .app-wrap {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    width: 100%;
+    max-width: 100%;
+    min-height: 0;
+    padding: 0;
+    font-family: var(--sans);
+    background: var(--bg);
+  }
+  .phone {
+    width: 100%;
+    max-width: 100%;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    min-height: 100dvh;
+    background: var(--bg);
+    border-radius: 0;
+    overflow: hidden;
+    box-shadow: none;
+    position: relative;
+    padding-top: env(safe-area-inset-top);
+  }
+  .screen {
+    display: none;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    background: var(--bg);
+    animation: fadeIn 0.25s ease;
+  }
+  /* Активный экран заполняет .phone; нижнее меню прижато к низу через flex + margin-top: auto */
+  .screen.active {
+    display: flex;
+    overflow: hidden;
+  }
+  /* Десктоп: узкая мобильная колонка по центру */
+  @media (min-width: 600px) {
+    body { background: #ECECEC; }
+    .app-wrap {
+      align-items: center;
+      padding: 24px 16px 48px;
+      padding-top: max(24px, env(safe-area-inset-top));
+      padding-bottom: max(48px, env(safe-area-inset-bottom));
+      flex: 1;
+      min-height: 100vh;
+    }
+    .phone {
+      width: 100%;
+      max-width: 390px;
+      height: calc(100dvh - 96px);
+      min-height: 720px;
+      max-height: 900px;
+      border-radius: 40px;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.12), 0 0 0 1px #EEEEEE;
+      flex: 0 0 auto;
+    }
+    .screen {
+      min-height: 0;
+    }
+  }
   @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
 
   .h2-section { font-size: 22px; font-weight: 700; color: var(--accent); margin: 24px 0 12px; }
   .h2-section:first-of-type { margin-top: 0; }
 
-  .nav { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px 8px; min-height: 48px; }
+  .nav { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px 8px; min-height: 48px; flex-shrink: 0; }
   .nav-title { font-size: 17px; font-weight: 600; color: var(--accent); }
   .nav-back, .nav-skip, .nav-ico { cursor: pointer; font-size: 20px; color: var(--accent); line-height: 1; padding: 4px; background: none; border: none; }
   .nav-skip { font-size: 15px; font-weight: 400; color: var(--muted2); }
 
-  .content { flex: 1; padding: 8px 20px 24px; overflow-y: auto; }
+  .content { flex: 1; min-height: 0; padding: 8px 20px 24px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 
   .field { background: var(--bg); border-radius: 12px; padding: 12px 14px; margin-bottom: 10px; border: 1px solid var(--line); transition: opacity .3s; }
   .field:focus-within { border-color: #BBBBBB; }
@@ -94,7 +189,13 @@
   .btn-secondary { background: var(--bg); color: var(--accent); border: 1px solid var(--line); border-radius: 16px; height: 52px; width: 100%; font-size: 15px; font-weight: 500; cursor: pointer; margin-top: 8px; font-family: var(--sans); }
   .disclaimer { font-size: 11px; color: var(--muted2); text-align: center; padding: 16px 8px 0; }
 
-  .screen-api-inner { padding: 24px 20px 32px; flex: 1; display: flex; flex-direction: column; }
+  .screen-api-inner {
+    padding: 24px 20px calc(32px + env(safe-area-inset-bottom));
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
   .api-title { font-size: 28px; font-weight: 700; color: var(--accent); margin-bottom: 20px; }
   .api-key-area {
     width: 100%; min-height: 120px; padding: 14px; border-radius: 12px; border: none;
@@ -105,29 +206,99 @@
   .api-key-error { font-size: 13px; color: #DC2626; margin: -8px 0 12px; display: none; }
   .api-key-error.visible { display: block; }
 
-  .main-wrap { flex: 1; padding: 8px 20px 16px; display: flex; flex-direction: column; gap: 16px; }
-  .main-greeting { font-size: 32px; font-weight: 700; color: var(--accent); line-height: 1.15; letter-spacing: -0.02em; }
-  .main-lead { font-size: 15px; color: var(--muted); line-height: 1.45; }
-  .btn-camera-wide {
-    background: var(--accent); color: #fff; border: none; border-radius: 16px; height: 56px; width: 100%;
-    font-size: 17px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; font-family: var(--sans);
+  #screen-main .main-wrap {
+    flex: 1;
+    min-height: 0;
+    padding: var(--main-pad-top) var(--main-pad-x) 20px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--main-block-gap);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
-  .btn-camera-wide:active { opacity: .9; }
-  .btn-camera-wide .cam-ico { font-size: 22px; }
+  .main-header { display: flex; flex-direction: column; gap: 8px; }
+  .main-greeting {
+    font-size: var(--main-greeting-size);
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1.12;
+    letter-spacing: -0.03em;
+  }
+  .main-lead {
+    font-size: var(--main-lead-size);
+    font-weight: 400;
+    color: var(--main-lead-color);
+    line-height: 1.5;
+    max-width: 36em;
+  }
+  .btn-camera-wide {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 16px;
+    height: 56px;
+    width: 100%;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-family: var(--sans);
+    flex-shrink: 0;
+  }
+  .btn-camera-wide:active { opacity: .92; transform: scale(0.998); }
+  .btn-camera-wide .cam-svg { flex-shrink: 0; display: block; }
 
-  .lipid-section-title { font-size: 18px; font-weight: 700; color: var(--accent); margin-top: 8px; }
-  .chol-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+  .main-lipids { display: flex; flex-direction: column; gap: 12px; flex-shrink: 0; }
+  .lipid-section-title {
+    font-size: var(--main-section-size);
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    margin: 0;
+  }
+  .chol-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--chol-grid-gap);
+  }
   .chol-mini {
-    border-radius: 14px; padding: 12px 12px 10px; min-height: 100px;
-    display: flex; flex-direction: column; justify-content: space-between;
+    border-radius: var(--chol-card-radius);
+    padding: 14px 14px 12px;
+    min-height: 104px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
   }
   .chol-mini--bad { background: var(--bad-bg); }
   .chol-mini--ok { background: var(--ok-bg); }
-  .chol-mini--empty { background: #F9F9F9; border: 1px dashed var(--line); }
-  .chol-mini > div:first-child { display: flex; justify-content: space-between; align-items: flex-start; gap: 6px; }
-  .chol-mini-name { font-size: 11px; font-weight: 600; color: var(--muted); line-height: 1.25; }
-  .chol-mini-val { font-size: 22px; font-weight: 700; color: var(--accent); margin-top: 0; flex-shrink: 0; }
-  .chol-mini-foot { font-size: 11px; color: var(--muted); margin-top: 6px; }
+  .chol-mini--empty { background: #FAFAFA; border: 1px dashed #E5E5E5; }
+  .chol-mini > div:first-child { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .chol-mini-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--chol-name-color);
+    line-height: 1.3;
+    max-width: 56%;
+  }
+  .chol-mini-val {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+    flex-shrink: 0;
+    letter-spacing: -0.02em;
+  }
+  .chol-mini-foot {
+    font-size: var(--chol-foot-size);
+    color: var(--muted);
+    margin-top: 10px;
+    line-height: 1.35;
+  }
   .chol-mini-foot .st { font-weight: 600; color: var(--accent); }
 
   .result-screen-inner { flex: 1; min-height: 0; overflow-y: auto; padding-bottom: 24px; background: var(--bg); position: relative; }
@@ -202,7 +373,19 @@
   .history-star { color: #F59E0B; }
   .history-empty { text-align: center; padding: 40px 16px; color: var(--muted); font-size: 15px; line-height: 1.5; }
 
-  .bottom-nav { display: flex; background: var(--bg); border-top: 1px solid #F0F0F0; padding: 12px 0 20px; justify-content: space-around; align-items: center; }
+  .bottom-nav {
+    display: flex;
+    background: var(--bg);
+    border-top: 1px solid #F0F0F0;
+    padding: 12px 0 calc(20px + env(safe-area-inset-bottom));
+    justify-content: space-around;
+    align-items: center;
+    flex-shrink: 0;
+    margin-top: auto;
+  }
+  @media (min-width: 600px) {
+    .bottom-nav { padding-bottom: 20px; }
+  }
   .bnav-item { cursor: pointer; padding: 8px 16px; border: none; background: none; font-family: var(--sans); }
   .bnav-item .bnav-icon { font-size: 24px; color: #BBBBBB; transition: color .2s; line-height: 1; }
   .bnav-item.active .bnav-icon { color: var(--accent); }
@@ -225,6 +408,8 @@
   .units-mini { margin: 8px 0 4px; font-size: 12px; color: var(--muted2); }
 
 </style>
+</head>
+<body>
 
 <input type="file" id="food-camera-input" accept="image/*" capture="environment" style="display:none" />
 
@@ -364,15 +549,21 @@
 
   <div class="screen" id="screen-main">
     <div class="main-wrap">
-      <div class="main-greeting" id="main-greeting-line">Привет!</div>
-      <p class="main-lead">Что ешь сегодня? Сфотографируй еду — узнай подходит ли она тебе.</p>
-      <button type="button" class="btn-camera-wide" onclick="openFoodCamera()">
-        <span class="cam-ico">📷</span>
+      <div class="main-header">
+        <div class="main-greeting" id="main-greeting-line">Привет!</div>
+        <p class="main-lead">Что ешь сегодня? Сфотографируй еду — узнай подходит ли она тебе.</p>
+      </div>
+      <button type="button" class="btn-camera-wide" onclick="openFoodCamera()" aria-label="Сделать фото еды">
+        <svg class="cam-svg" width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2v11z" stroke="#fff" stroke-width="2" stroke-linejoin="round"/>
+          <circle cx="12" cy="13" r="4" stroke="#fff" stroke-width="2"/>
+        </svg>
         Фото
       </button>
 
-      <div class="lipid-section-title">Твой липидный профиль</div>
-      <div class="chol-grid" id="main-chol-grid">
+      <section class="main-lipids" aria-labelledby="lipid-heading">
+        <h2 class="lipid-section-title" id="lipid-heading">Твой липидный профиль</h2>
+        <div class="chol-grid" id="main-chol-grid">
         <div class="chol-mini chol-mini--empty" id="main-chol-cell-total">
           <div>
             <div class="chol-mini-name">Общий холестерин</div>
@@ -396,12 +587,13 @@
         </div>
         <div class="chol-mini chol-mini--empty" id="main-chol-cell-trig">
           <div>
-            <div class="chol-mini-name">Триглицериды</div>
+            <div class="chol-mini-name">Триглицер</div>
             <div class="chol-mini-val" id="main-chol-trig-num">—</div>
           </div>
           <div class="chol-mini-foot"><span id="main-chol-trig-unit">ммоль/л</span><span class="st" id="main-chol-trig-st"></span></div>
         </div>
-      </div>
+        </div>
+      </section>
     </div>
     <div class="bottom-nav">
       <button type="button" class="bnav-item active" onclick="navTo('screen-main',this)" aria-label="Главная">
@@ -1272,3 +1464,6 @@ function bootstrapApp() {
 
 bootstrapApp();
 </script>
+
+</body>
+</html>
