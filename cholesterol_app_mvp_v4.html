@@ -2607,7 +2607,7 @@ async function analyzeFoodPhoto(dataUrl) {
     body: JSON.stringify({
       model: 'gpt-4o',
       response_format: { type: 'json_object' },
-      max_tokens: 3000,
+      max_tokens: 4000,
       messages: [
         {
           role: 'user',
@@ -2627,11 +2627,26 @@ async function analyzeFoodPhoto(dataUrl) {
   }
   const raw = body.choices?.[0]?.message?.content;
   try {
-    const parsed = parseModelJson(raw);
+    let jsonStr = String(raw || '').trim();
+    jsonStr = jsonStr.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim();
+    const first = jsonStr.indexOf('{');
+    const last = jsonStr.lastIndexOf('}');
+    if (first !== -1 && last !== -1) {
+      jsonStr = jsonStr.substring(first, last + 1);
+    }
+    const parsed = JSON.parse(jsonStr);
     resultViewSource = 'camera';
     return parsed;
-  } catch (e) {
-    throw new Error('Не удалось разобрать ответ модели: ' + (e.message || e));
+  } catch (e1) {
+    try {
+      const parsed = parseModelJson(raw);
+      resultViewSource = 'camera';
+      return parsed;
+    } catch (e2) {
+      throw new Error(
+        'Не удалось разобрать ответ модели: ' + (e2.message || e2 || e1.message || e1)
+      );
+    }
   }
 }
 
@@ -2881,6 +2896,13 @@ async function bootstrapApp() {
     return;
   }
   if (loadProfileFromStorage()) {
+    if (getStoredUserId()) {
+      try {
+        await refreshMealsCacheFromSupabase();
+      } catch (e) {
+        console.warn('[bootstrap] refreshMealsCacheFromSupabase', e);
+      }
+    }
     goTo('screen-main');
   } else {
     goTo('screen-profile', { mode: 'onboarding' });
