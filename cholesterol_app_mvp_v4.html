@@ -219,7 +219,18 @@
   }
   .app-init-error.visible { display: flex; }
   .field.field--error { border-color: #DC2626; }
-  #screen-profile .nav-skip { display: none !important; }
+  #screen-profile.mode-edit .profile-nav--onboarding {
+    display: none !important;
+  }
+  #screen-profile.mode-onboarding .profile-nav--edit {
+    display: none !important;
+  }
+  #screen-profile .profile-nav--edit {
+    display: flex;
+  }
+  #profile-cta-btn.profile-cta--hidden {
+    display: none !important;
+  }
 
   #screen-main .main-wrap {
     flex: 1;
@@ -767,10 +778,22 @@
 <div class="phone" style="position:relative;">
   <div id="app-init-error" class="app-init-error" role="alert">Не удалось загрузить настройки приложения</div>
 
-  <div class="screen active" id="screen-profile">
-    <div class="nav">
+  <div class="screen active mode-onboarding" id="screen-profile">
+    <div class="nav profile-nav--onboarding">
       <div class="nav-title" id="profile-nav-title">Профиль</div>
       <div class="nav-skip" onclick="skipOnboardingToMain()">Пропустить</div>
+    </div>
+    <div class="nav history-top-nav profile-nav--edit" aria-hidden="true">
+      <button type="button" class="history-nav-side" onclick="goTo('screen-main')" aria-label="Назад" title="Назад">
+        <svg width="10" height="17" viewBox="0 0 10 17" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M8.5 15.5L1.5 8.5L8.5 1.5" stroke="#1C1B1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="history-nav-title">Профиль</div>
+      <button type="button" class="history-nav-side" onclick="showPurchaseModal()" aria-label="Настройки">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M12 15a3 3 0 100-6 3 3 0 000 6z" stroke="#1C1B1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" stroke="#1C1B1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
     </div>
     <div class="content">
       <div class="h2-section">Личные данные</div>
@@ -1318,6 +1341,53 @@ let profileAutofillFromSupabase = false;
 let emailAutofillSeq = 0;
 let emailAutofillTimer = null;
 
+/** 'onboarding' — первый вход / гейт без профиля; 'edit' — вкладка «Профиль» из нижней навигации */
+let profileScreenMode = 'onboarding';
+let profileEditBaseline = null;
+
+function getProfileFormSnapshot() {
+  const genderEl = document.querySelector('#seg-gender .seg-btn.active');
+  const unitsEl = document.querySelector('#seg-units .seg-btn.active');
+  return JSON.stringify({
+    email: (document.getElementById('input-email')?.value ?? '').trim(),
+    name: (document.getElementById('input-name')?.value ?? '').trim(),
+    v_total: document.getElementById('v-total')?.value ?? '',
+    v_ldl: document.getElementById('v-ldl')?.value ?? '',
+    v_hdl: document.getElementById('v-hdl')?.value ?? '',
+    v_trig: document.getElementById('v-trig')?.value ?? '',
+    dontKnowOn: !!dontKnowOn,
+    gender: genderEl ? genderEl.textContent.trim() : 'Мужской',
+    units: unitsEl ? unitsEl.textContent.trim() : 'ммоль/л',
+    age: document.getElementById('input-age')?.value ?? '',
+    height: document.getElementById('input-height')?.value ?? '',
+    weight: document.getElementById('input-weight')?.value ?? '',
+    statins: document.getElementById('toggle-statins')?.classList.contains('on') ?? false
+  });
+}
+
+function captureProfileEditBaseline() {
+  profileEditBaseline = getProfileFormSnapshot();
+}
+
+function isProfileFormDirty() {
+  if (profileEditBaseline === null) return false;
+  return getProfileFormSnapshot() !== profileEditBaseline;
+}
+
+function applyProfileScreenModeToDom() {
+  const root = document.getElementById('screen-profile');
+  if (!root) return;
+  root.classList.toggle('mode-edit', profileScreenMode === 'edit');
+  root.classList.toggle('mode-onboarding', profileScreenMode === 'onboarding');
+  const editNav = root.querySelector('.profile-nav--edit');
+  if (editNav) editNav.setAttribute('aria-hidden', profileScreenMode === 'edit' ? 'false' : 'true');
+}
+
+function refreshProfileEditBaselineAfterAutofill() {
+  if (profileScreenMode === 'edit') captureProfileEditBaseline();
+  syncProfileCtaButton();
+}
+
 async function tryAutofillProfileFromSupabaseEmail() {
   const emailEl = document.getElementById('input-email');
   if (!emailEl || !document.getElementById('screen-profile')?.classList.contains('active')) return;
@@ -1326,24 +1396,28 @@ async function tryAutofillProfileFromSupabaseEmail() {
     .toLowerCase();
   if (!email) {
     profileAutofillFromSupabase = false;
-    syncProfileCtaButton();
+    refreshProfileEditBaselineAfterAutofill();
     return;
   }
   const probe = document.createElement('input');
   probe.type = 'email';
   probe.value = email;
-  if (!probe.validity.valid) return;
+  if (!probe.validity.valid) {
+    refreshProfileEditBaselineAfterAutofill();
+    return;
+  }
 
   const seq = ++emailAutofillSeq;
   const { data, error } = await supabaseClient.from('users').select('*').eq('email', email).maybeSingle();
   if (seq !== emailAutofillSeq) return;
   if (error) {
     console.warn('[supabase] users autofill', error);
+    refreshProfileEditBaselineAfterAutofill();
     return;
   }
   if (!data) {
     profileAutofillFromSupabase = false;
-    syncProfileCtaButton();
+    refreshProfileEditBaselineAfterAutofill();
     return;
   }
 
@@ -1351,17 +1425,27 @@ async function tryAutofillProfileFromSupabaseEmail() {
   applySupabaseUserRowToForm(data);
   saveProfileToStorage();
   setStoredUserId(data.id);
-  syncProfileCtaButton();
+  refreshProfileEditBaselineAfterAutofill();
 }
 
 function syncProfileCtaButton() {
   const btn = document.getElementById('profile-cta-btn');
   if (!btn) return;
-  if (profileAutofillFromSupabase && profileCompleteFromStorage()) {
+  if (!document.getElementById('screen-profile')?.classList.contains('active')) return;
+
+  if (profileScreenMode === 'onboarding') {
+    btn.classList.remove('profile-cta--hidden');
     btn.textContent = 'Продолжить';
     return;
   }
-  btn.textContent = profileCompleteFromStorage() ? 'Сохранить изменения' : 'Продолжить';
+
+  btn.textContent = 'Сохранить изменения';
+  if (profileEditBaseline === null) {
+    btn.classList.add('profile-cta--hidden');
+    return;
+  }
+  if (isProfileFormDirty()) btn.classList.remove('profile-cta--hidden');
+  else btn.classList.add('profile-cta--hidden');
 }
 
 async function upsertUserToSupabase() {
@@ -1657,11 +1741,16 @@ async function saveProfileAndStart() {
   } catch (e) {
     console.warn(e);
   }
+  if (profileScreenMode === 'edit') {
+    captureProfileEditBaseline();
+    syncProfileCtaButton();
+    return;
+  }
   goTo('screen-main');
 }
 
 function skipOnboardingToMain() {
-  goTo('screen-profile');
+  goTo('screen-main');
 }
 
 function syncBottomNavForScreen(screenId) {
@@ -2390,32 +2479,53 @@ document.getElementById('food-camera-input').addEventListener('change', async (e
   }
 });
 
-function goTo(id) {
+function goTo(id, opts) {
+  let targetId = id;
+  let forcedProfileGate = false;
   if (
     (id === 'screen-main' || id === 'screen-history' || id === 'screen-result') &&
     !profileCompleteFromStorage()
   ) {
-    id = 'screen-profile';
+    targetId = 'screen-profile';
+    forcedProfileGate = true;
     const err = document.getElementById('profile-validate-error');
     if (err) {
       err.textContent = 'Укажите e-mail и имя, чтобы пользоваться приложением.';
       err.classList.add('visible');
     }
   }
-  const target = document.getElementById(id);
+  const target = document.getElementById(targetId);
   if (!target) return;
   document.querySelectorAll('.screen').forEach((s) => s.classList.remove('active'));
   target.classList.add('active');
-  if (id === 'screen-main') void prepareMainScreenLipids();
-  if (id === 'screen-history') void renderHistoryList();
-  if (id === 'screen-profile') {
-    syncProfileCtaButton();
-    setTimeout(() => void tryAutofillProfileFromSupabaseEmail(), 0);
+  if (targetId === 'screen-main') void prepareMainScreenLipids();
+  if (targetId === 'screen-history') void renderHistoryList();
+  if (targetId === 'screen-profile') {
+    if (forcedProfileGate || !profileCompleteFromStorage()) {
+      profileScreenMode = 'onboarding';
+    } else if (opts && (opts.mode === 'edit' || opts.mode === 'onboarding')) {
+      profileScreenMode = opts.mode;
+    } else {
+      profileScreenMode = 'onboarding';
+    }
+    applyProfileScreenModeToDom();
+    profileEditBaseline = null;
+    if (profileScreenMode === 'edit') {
+      syncProfileCtaButton();
+      setTimeout(async () => {
+        await tryAutofillProfileFromSupabaseEmail();
+        captureProfileEditBaseline();
+        syncProfileCtaButton();
+      }, 0);
+    } else {
+      syncProfileCtaButton();
+      setTimeout(() => void tryAutofillProfileFromSupabaseEmail(), 0);
+    }
   }
-  syncBottomNavForScreen(id);
+  syncBottomNavForScreen(targetId);
 }
 function navTo(id, el) {
-  goTo(id);
+  goTo(id, id === 'screen-profile' ? { mode: 'edit' } : undefined);
   const actualId = document.querySelector('.phone .screen.active')?.id || id;
   const navIdx = { 'screen-main': 0, 'screen-history': 1, 'screen-profile': 2 };
   const idx = navIdx[actualId];
@@ -2429,13 +2539,33 @@ function setSeg(id, el) {
   document.getElementById(id).querySelectorAll('.seg-btn').forEach((b) => b.classList.remove('active'));
   el.classList.add('active');
   if (id === 'seg-units' && document.getElementById('screen-main')?.classList.contains('active')) syncMainCholCard();
+  if (
+    profileScreenMode === 'edit' &&
+    document.getElementById('screen-profile')?.classList.contains('active')
+  ) {
+    syncProfileCtaButton();
+  }
 }
-function toggleSwitch(el) { el.classList.toggle('on'); }
+function toggleSwitch(el) {
+  el.classList.toggle('on');
+  if (
+    profileScreenMode === 'edit' &&
+    document.getElementById('screen-profile')?.classList.contains('active')
+  ) {
+    syncProfileCtaButton();
+  }
+}
 function updateName(val) {
   const line = document.getElementById('main-greeting-line');
   if (!line) return;
   const t = String(val || '').trim();
   line.textContent = t ? 'Привет, ' + t + '!' : 'Привет!';
+  if (
+    profileScreenMode === 'edit' &&
+    document.getElementById('screen-profile')?.classList.contains('active')
+  ) {
+    syncProfileCtaButton();
+  }
 }
 
 function toggleDontKnow() {
@@ -2451,12 +2581,31 @@ function toggleDontKnow() {
   }
   applyDontKnowVisual();
   if (document.getElementById('screen-main')?.classList.contains('active')) syncMainCholCard();
+  if (
+    profileScreenMode === 'edit' &&
+    document.getElementById('screen-profile')?.classList.contains('active')
+  ) {
+    syncProfileCtaButton();
+  }
+}
+
+function syncProfileCtaIfEditOpen() {
+  if (
+    profileScreenMode === 'edit' &&
+    document.getElementById('screen-profile')?.classList.contains('active')
+  ) {
+    syncProfileCtaButton();
+  }
 }
 
 ['v-total', 'v-ldl', 'v-hdl', 'v-trig'].forEach((fid) => {
   document.getElementById(fid)?.addEventListener('input', () => {
     if (document.getElementById('screen-main')?.classList.contains('active')) syncMainCholCard();
+    syncProfileCtaIfEditOpen();
   });
+});
+['input-age', 'input-height', 'input-weight'].forEach((fid) => {
+  document.getElementById(fid)?.addEventListener('input', syncProfileCtaIfEditOpen);
 });
 
 document.getElementById('input-email')?.addEventListener('input', () => {
@@ -2464,6 +2613,7 @@ document.getElementById('input-email')?.addEventListener('input', () => {
   document.getElementById('profile-validate-error')?.classList.remove('visible');
   clearTimeout(emailAutofillTimer);
   emailAutofillTimer = setTimeout(() => void tryAutofillProfileFromSupabaseEmail(), 500);
+  syncProfileCtaIfEditOpen();
 });
 document.getElementById('input-email')?.addEventListener('blur', () => {
   void tryAutofillProfileFromSupabaseEmail();
@@ -2471,6 +2621,7 @@ document.getElementById('input-email')?.addEventListener('blur', () => {
 document.getElementById('input-name')?.addEventListener('input', () => {
   document.getElementById('field-wrap-name')?.classList.remove('field--error');
   document.getElementById('profile-validate-error')?.classList.remove('visible');
+  syncProfileCtaIfEditOpen();
 });
 
 async function bootstrapApp() {
@@ -2483,7 +2634,7 @@ async function bootstrapApp() {
   if (loadProfileFromStorage()) {
     goTo('screen-main');
   } else {
-    goTo('screen-profile');
+    goTo('screen-profile', { mode: 'onboarding' });
   }
 }
 
