@@ -394,17 +394,18 @@
   .factor-name { font-size: 14px; font-weight: 500; color: var(--accent); flex: 1; }
   .factor-value { font-size: 13px; color: var(--muted); }
 
-  /* История — по макету Figma (Inter, 351px контент) */
+  /* История: карточки на всю ширину контента (как блоки на главной) */
   #screen-history .content.history-content {
     flex: 1;
     min-height: 0;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    padding: 0 12px 16px;
+    padding: 0 var(--main-pad-x) 16px;
     display: flex;
     flex-direction: column;
     align-items: stretch;
     gap: 16px;
+    box-sizing: border-box;
   }
   .nav.history-top-nav {
     display: flex;
@@ -441,8 +442,7 @@
 
   .history-summary {
     width: 100%;
-    max-width: 351px;
-    margin: 0 auto;
+    box-sizing: border-box;
     min-height: 132px;
     background: var(--card-blue);
     border-radius: 16px;
@@ -451,7 +451,6 @@
     flex-direction: column;
     justify-content: space-between;
     gap: 8px;
-    box-sizing: border-box;
   }
   .history-summary-top {
     display: flex;
@@ -460,7 +459,8 @@
     gap: 12px;
   }
   .history-summary-label {
-    max-width: 164px;
+    flex: 1;
+    min-width: 0;
     font-size: 15.24px;
     font-weight: 400;
     line-height: 1.25;
@@ -468,6 +468,7 @@
     font-family: var(--sans);
   }
   .history-summary-num {
+    flex-shrink: 0;
     font-size: 50.75px;
     font-weight: 700;
     line-height: 0.95;
@@ -484,7 +485,8 @@
   }
   .history-summary-motiv {
     margin: 0;
-    max-width: 220px;
+    flex: 1;
+    min-width: 0;
     font-size: 11px;
     font-weight: 400;
     line-height: 1.35;
@@ -501,8 +503,7 @@
 
   #history-list {
     width: 100%;
-    max-width: 351px;
-    margin: 0 auto;
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -510,7 +511,7 @@
 
   .history-item {
     width: 100%;
-    max-width: 100%;
+    box-sizing: border-box;
     min-height: 132px;
     border-radius: 16px;
     padding: 16px 12px;
@@ -518,7 +519,6 @@
     flex-direction: row;
     align-items: center;
     gap: 12px;
-    box-sizing: border-box;
     overflow: hidden;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
