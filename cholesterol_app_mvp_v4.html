@@ -2044,22 +2044,29 @@ async function renderHistoryList() {
 }
 
 async function saveMealToHistoryAndGoMain() {
-  console.log('[debug] resultViewSource =', resultViewSource);
+  console.log('[save] 1. start, resultViewSource =', resultViewSource);
   if (resultViewSource === 'history') return;
+
+  console.log('[save] 2. lastMealPhotoDataUrl =', !!lastMealPhotoDataUrl, 'lastMealAnalysisData =', !!lastMealAnalysisData);
   if (!lastMealPhotoDataUrl || !lastMealAnalysisData) {
     goTo('screen-main');
     return;
   }
+
   const d = lastMealAnalysisData;
+  console.log('[save] 3. verdict =', d.verdict);
   if (d.verdict === 'error') {
     goTo('screen-main');
     return;
   }
+
   const verdict = d.verdict;
+  console.log('[save] 4. verdict check =', verdict);
   if (verdict !== 'green' && verdict !== 'yellow' && verdict !== 'red') {
     goTo('screen-main');
     return;
   }
+
   const atIso = new Date().toISOString();
   const mealLocal = {
     photoBase64: lastMealPhotoDataUrl,
@@ -2074,12 +2081,15 @@ async function saveMealToHistoryAndGoMain() {
     factors: Array.isArray(d.factors) ? d.factors : [],
     at: atIso
   };
+
+  console.log('[save] 5. saving to localStorage...');
   const arr = getMealHistory();
   arr.push(mealLocal);
   setMealHistory(arr);
 
   const uid = getStoredUserId();
   if (uid) {
+    console.log('[save] 6. saving to Supabase...');
     try {
       const { data, error } = await supabaseClient
         .from('meals')
@@ -2109,8 +2119,11 @@ async function saveMealToHistoryAndGoMain() {
     } catch (e) {
       console.warn(e);
     }
+  } else {
+    console.log('[save] 6. skip Supabase (no uid)');
   }
 
+  console.log('[save] 7. done, going to main');
   goTo('screen-main');
 }
 
