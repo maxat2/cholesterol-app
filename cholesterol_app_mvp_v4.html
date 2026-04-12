@@ -2437,10 +2437,14 @@ function fileToDataUrl(file) {
 }
 
 function parseModelJson(raw) {
-  let t = String(raw || '').trim();
-  const m = t.match(/^```(?:json)?\s*([\s\S]*?)```$/i);
-  if (m) t = m[1].trim();
-  return JSON.parse(t);
+  let jsonStr = String(raw || '').trim();
+  jsonStr = jsonStr.replace(/```json\n?/gi, '').replace(/```\n?/g, '');
+  jsonStr = jsonStr.trim();
+  const lastBrace = jsonStr.lastIndexOf('}');
+  if (lastBrace !== -1) {
+    jsonStr = jsonStr.substring(0, lastBrace + 1);
+  }
+  return JSON.parse(jsonStr);
 }
 
 function formatScoreDisplay(score) {
@@ -2503,7 +2507,7 @@ async function analyzeFoodPhoto(dataUrl) {
     body: JSON.stringify({
       model: 'gpt-4o',
       response_format: { type: 'json_object' },
-      max_tokens: 2500,
+      max_tokens: 3000,
       messages: [
         {
           role: 'user',
