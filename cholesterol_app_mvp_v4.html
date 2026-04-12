@@ -1058,6 +1058,156 @@ function parseFloatProfile(v) {
   return Number.isFinite(n) ? n : null;
 }
 
+/** Достаточно данных для полного update (не только email). */
+function hasRealProfileData(profile) {
+  const name = String(profile.name ?? '').trim();
+  if (name) return true;
+  const totalSrc = profile.total != null ? profile.total : profile.v_total;
+  return parseFloatProfile(totalSrc) != null;
+}
+
+function buildFullUserRow(profile, emailNormalized) {
+  const totalSrc = profile.total != null ? profile.total : profile.v_total;
+  const ldlSrc = profile.ldl != null ? profile.ldl : profile.v_ldl;
+  const hdlSrc = profile.hdl != null ? profile.hdl : profile.v_hdl;
+  const trigSrc = profile.trig != null ? profile.trig : profile.v_trig;
+  return {
+    email: emailNormalized,
+    name: String(profile.name ?? '').trim(),
+    age: parseIntProfile(profile.age),
+    sex: profileToSex(profile),
+    height_cm: parseIntProfile(profile.height),
+    weight_kg: parseFloatProfile(profile.weight),
+    statins: profile.statins === true,
+    cholesterol: parseFloatProfile(totalSrc),
+    ldl: parseFloatProfile(ldlSrc),
+    hdl: parseFloatProfile(hdlSrc),
+    triglycerides: parseFloatProfile(trigSrc),
+    units: profileUnitsToDb(profile.units) || 'mmol',
+    profile_json: profile,
+    updated_at: new Date().toISOString()
+  };
+}
+
+/** Обновление без затирания существующих значений пустыми полями формы. */
+function buildMergedUserUpdate(existing, profile) {
+  const totalSrc = profile.total != null ? profile.total : profile.v_total;
+  const ldlSrc = profile.ldl != null ? profile.ldl : profile.v_ldl;
+  const hdlSrc = profile.hdl != null ? profile.hdl : profile.v_hdl;
+  const trigSrc = profile.trig != null ? profile.trig : profile.v_trig;
+  const nameNew = String(profile.name ?? '').trim();
+  const sexNew = profileToSex(profile);
+  return {
+    name: nameNew !== '' ? nameNew : existing.name ?? null,
+    age: parseIntProfile(profile.age) ?? existing.age ?? null,
+    sex: sexNew != null ? sexNew : existing.sex ?? null,
+    height_cm: parseIntProfile(profile.height) ?? existing.height_cm ?? null,
+    weight_kg: parseFloatProfile(profile.weight) ?? existing.weight_kg ?? null,
+    statins: profile.statins === true,
+    cholesterol: parseFloatProfile(totalSrc) ?? existing.cholesterol ?? null,
+    ldl: parseFloatProfile(ldlSrc) ?? existing.ldl ?? null,
+    hdl: parseFloatProfile(hdlSrc) ?? existing.hdl ?? null,
+    triglycerides: parseFloatProfile(trigSrc) ?? existing.triglycerides ?? null,
+    units: profileUnitsToDb(profile.units) || existing.units || 'mmol',
+    profile_json: profile,
+    updated_at: new Date().toISOString()
+  };
+}
+
+function formatNumberForProfileInput(n) {
+  if (n == null || n === '') return '';
+  const x = Number(n);
+  if (!Number.isFinite(x)) return '';
+  if (Math.abs(x - Math.round(x)) < 1e-9) return String(Math.round(x));
+  const s = x.toFixed(1);
+  return s.endsWith('.0') ? String(Math.round(x)) : s;
+}
+
+function dbSexToGenderLabel(sex) {
+  const s = String(sex || '').toLowerCase();
+  if (s === 'female' || s === 'женский' || s.includes('жен')) return 'Женский';
+  return 'Мужской';
+}
+
+function dbUnitsToLabel(units) {
+  const u = String(units || '').toLowerCase();
+  if (u === 'mgdl' || u.includes('mg')) return 'мг/дл';
+  return 'ммоль/л';
+}
+
+/** Заполняет форму профиля из строки users (ответ Supabase). */
+function applySupabaseUserRowToForm(row) {
+  if (!row) return;
+  const emailEl = document.getElementById('input-email');
+  if (emailEl && row.email != null) emailEl.value = String(row.email).trim();
+  const nameEl = document.getElementById('input-name');
+  if (nameEl) nameEl.value = row.name != null ? String(row.name) : '';
+  if (row.age != null) document.getElementById('input-age').value = formatNumberForProfileInput(row.age);
+  if (row.height_cm != null) document.getElementById('input-height').value = formatNumberForProfileInput(row.height_cm);
+  if (row.weight_kg != null) document.getElementById('input-weight').value = formatNumberForProfileInput(row.weight_kg);
+  if (row.cholesterol != null) document.getElementById('v-total').value = formatNumberForProfileInput(row.cholesterol);
+  if (row.ldl != null) document.getElementById('v-ldl').value = formatNumberForProfileInput(row.ldl);
+  if (row.hdl != null) document.getElementById('v-hdl').value = formatNumberForProfileInput(row.hdl);
+  if (row.triglycerides != null) document.getElementById('v-trig').value = formatNumberForProfileInput(row.triglycerides);
+  setSegActiveByLabel('seg-gender', dbSexToGenderLabel(row.sex));
+  setSegActiveByLabel('seg-units', dbUnitsToLabel(row.units));
+  const st = document.getElementById('toggle-statins');
+  if (st) st.classList.toggle('on', row.statins === true);
+  dontKnowOn = false;
+  applyDontKnowVisual();
+  updateName((nameEl?.value || '').trim());
+}
+
+let profileAutofillFromSupabase = false;
+let emailAutofillSeq = 0;
+let emailAutofillTimer = null;
+
+async function tryAutofillProfileFromSupabaseEmail() {
+  const emailEl = document.getElementById('input-email');
+  if (!emailEl || !document.getElementById('screen-profile')?.classList.contains('active')) return;
+  const email = String(emailEl.value || '')
+    .trim()
+    .toLowerCase();
+  if (!email) {
+    profileAutofillFromSupabase = false;
+    syncProfileCtaButton();
+    return;
+  }
+  const probe = document.createElement('input');
+  probe.type = 'email';
+  probe.value = email;
+  if (!probe.validity.valid) return;
+
+  const seq = ++emailAutofillSeq;
+  const { data, error } = await supabaseClient.from('users').select('*').eq('email', email).maybeSingle();
+  if (seq !== emailAutofillSeq) return;
+  if (error) {
+    console.warn('[supabase] users autofill', error);
+    return;
+  }
+  if (!data) {
+    profileAutofillFromSupabase = false;
+    syncProfileCtaButton();
+    return;
+  }
+
+  profileAutofillFromSupabase = true;
+  applySupabaseUserRowToForm(data);
+  saveProfileToStorage();
+  setStoredUserId(data.id);
+  syncProfileCtaButton();
+}
+
+function syncProfileCtaButton() {
+  const btn = document.getElementById('profile-cta-btn');
+  if (!btn) return;
+  if (profileAutofillFromSupabase && profileCompleteFromStorage()) {
+    btn.textContent = 'Продолжить';
+    return;
+  }
+  btn.textContent = profileCompleteFromStorage() ? 'Сохранить изменения' : 'Продолжить';
+}
+
 async function upsertUserToSupabase() {
   const raw = localStorage.getItem(LS_USER_PROFILE);
   if (!raw) {
@@ -1077,38 +1227,65 @@ async function upsertUserToSupabase() {
     setStoredUserId(null);
     return null;
   }
-  const totalSrc = profile.total != null ? profile.total : profile.v_total;
-  const ldlSrc = profile.ldl != null ? profile.ldl : profile.v_ldl;
-  const hdlSrc = profile.hdl != null ? profile.hdl : profile.v_hdl;
-  const trigSrc = profile.trig != null ? profile.trig : profile.v_trig;
-  const row = {
-    email,
-    name: String(profile.name ?? '').trim(),
-    age: parseIntProfile(profile.age),
-    sex: profileToSex(profile),
-    height_cm: parseIntProfile(profile.height),
-    weight_kg: parseFloatProfile(profile.weight),
-    statins: profile.statins === true,
-    cholesterol: parseFloatProfile(totalSrc),
-    ldl: parseFloatProfile(ldlSrc),
-    hdl: parseFloatProfile(hdlSrc),
-    triglycerides: parseFloatProfile(trigSrc),
-    units: profileUnitsToDb(profile.units) || 'mmol',
-    profile_json: profile,
-    updated_at: new Date().toISOString()
-  };
-  const { data, error } = await supabaseClient
+
+  const { data: existing, error: selErr } = await supabaseClient
     .from('users')
-    .upsert(row, { onConflict: 'email' })
-    .select('id')
-    .single();
-  if (error) {
-    console.warn('[supabase] users upsert', error);
+    .select('*')
+    .eq('email', email)
+    .maybeSingle();
+  if (selErr) {
+    console.warn('[supabase] users select', selErr);
     return null;
   }
-  if (data && data.id) {
-    setStoredUserId(data.id);
-    return data.id;
+
+  if (existing) {
+    setStoredUserId(existing.id);
+    if (!hasRealProfileData(profile)) {
+      return existing.id;
+    }
+    const patch = buildMergedUserUpdate(existing, profile);
+    const { error: upErr } = await supabaseClient.from('users').update(patch).eq('id', existing.id);
+    if (upErr) {
+      console.warn('[supabase] users update', upErr);
+      return null;
+    }
+    return existing.id;
+  }
+
+  if (!hasRealProfileData(profile)) {
+    const { data: ins, error: insErr } = await supabaseClient
+      .from('users')
+      .insert({
+        email,
+        profile_json: profile,
+        updated_at: new Date().toISOString()
+      })
+      .select('id')
+      .single();
+    if (insErr) {
+      console.warn('[supabase] users insert (email only)', insErr);
+      return null;
+    }
+    if (ins && ins.id) {
+      setStoredUserId(ins.id);
+      return ins.id;
+    }
+    return null;
+  }
+
+  const row = buildFullUserRow(profile, email);
+  const { data: created, error: crErr } = await supabaseClient
+    .from('users')
+    .insert(row)
+    .select('id')
+    .single();
+  if (crErr) {
+    console.warn('[supabase] users insert', crErr);
+    return null;
+  }
+  if (created && created.id) {
+    setStoredUserId(created.id);
+    return created.id;
   }
   return null;
 }
@@ -1348,6 +1525,7 @@ async function saveProfileAndStart() {
   }
   errEl?.classList.remove('visible');
   saveProfileToStorage();
+  profileAutofillFromSupabase = false;
   try {
     await upsertUserToSupabase();
   } catch (e) {
@@ -1998,9 +2176,8 @@ function goTo(id) {
     document.getElementById('api-key-error')?.classList.remove('visible');
   }
   if (id === 'screen-profile') {
-    const hasSaved = profileCompleteFromStorage();
-    const btn = document.getElementById('profile-cta-btn');
-    if (btn) btn.textContent = hasSaved ? 'Сохранить изменения' : 'Продолжить';
+    syncProfileCtaButton();
+    setTimeout(() => void tryAutofillProfileFromSupabaseEmail(), 0);
   }
   syncBottomNavForScreen(id);
 }
@@ -2059,6 +2236,11 @@ document.getElementById('api-key-input')?.addEventListener('keydown', (e) => {
 document.getElementById('input-email')?.addEventListener('input', () => {
   document.getElementById('field-wrap-email')?.classList.remove('field--error');
   document.getElementById('profile-validate-error')?.classList.remove('visible');
+  clearTimeout(emailAutofillTimer);
+  emailAutofillTimer = setTimeout(() => void tryAutofillProfileFromSupabaseEmail(), 500);
+});
+document.getElementById('input-email')?.addEventListener('blur', () => {
+  void tryAutofillProfileFromSupabaseEmail();
 });
 document.getElementById('input-name')?.addEventListener('input', () => {
   document.getElementById('field-wrap-name')?.classList.remove('field--error');
