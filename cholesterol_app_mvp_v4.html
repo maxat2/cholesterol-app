@@ -200,24 +200,24 @@
   .btn-secondary { background: var(--bg); color: var(--accent); border: 1px solid var(--line); border-radius: 16px; height: 52px; width: 100%; font-size: 15px; font-weight: 500; cursor: pointer; margin-top: 8px; font-family: var(--sans); }
   .disclaimer { font-size: 11px; color: var(--muted2); text-align: center; padding: 16px 8px 0; }
 
-  .screen-api-inner {
-    padding: 24px 20px calc(32px + env(safe-area-inset-bottom));
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
+  .inline-error { font-size: 13px; color: #DC2626; margin: -8px 0 12px; display: none; }
+  .inline-error.visible { display: block; }
+  .app-init-error {
+    display: none;
+    position: absolute;
+    inset: 0;
+    z-index: 500;
+    background: var(--bg);
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    text-align: center;
+    font-size: 16px;
+    color: #333;
+    line-height: 1.5;
+    font-family: var(--sans);
   }
-  .api-title { font-size: 28px; font-weight: 700; color: var(--accent); margin-bottom: 20px; }
-  .api-key-area {
-    width: 100%; min-height: 120px; padding: 14px; border-radius: 12px; border: none;
-    background: #F5F5F5; font-family: var(--sans); font-size: 14px; color: var(--text);
-    resize: vertical; margin-bottom: 16px;
-  }
-  .api-key-area::placeholder { color: #AAAAAA; }
-  .api-key-error { font-size: 13px; color: #DC2626; margin: -8px 0 12px; display: none; }
-  .api-key-error.visible { display: block; }
+  .app-init-error.visible { display: flex; }
   .field.field--error { border-color: #DC2626; }
   #screen-profile .nav-skip { display: none !important; }
 
@@ -658,18 +658,9 @@
 
 <div class="app-wrap">
 <div class="phone" style="position:relative;">
+  <div id="app-init-error" class="app-init-error" role="alert">Не удалось загрузить настройки приложения</div>
 
-
-  <div class="screen active" id="screen-api-key">
-    <div class="screen-api-inner">
-      <div class="api-title">API-Key</div>
-      <textarea id="api-key-input" class="api-key-area" placeholder="sk-..." autocomplete="off" autocapitalize="off" spellcheck="false" rows="4"></textarea>
-      <div class="api-key-error" id="api-key-error">Введите непустой ключ.</div>
-      <button type="button" class="btn-primary" onclick="saveApiKeyFromModal()">Продолжить</button>
-    </div>
-  </div>
-
-  <div class="screen" id="screen-profile">
+  <div class="screen active" id="screen-profile">
     <div class="nav">
       <div class="nav-title" id="profile-nav-title">Профиль</div>
       <div class="nav-skip" onclick="skipOnboardingToMain()">Пропустить</div>
@@ -774,7 +765,7 @@
         <div class="seg-btn" onclick="setSeg('seg-units',this)">мг/дл</div>
       </div>
 
-      <div class="api-key-error" id="profile-validate-error" role="alert">Укажите e-mail и имя.</div>
+      <div class="inline-error" id="profile-validate-error" role="alert">Укажите e-mail и имя.</div>
       <button type="button" class="btn-primary" id="profile-cta-btn" onclick="saveProfileAndStart()">Продолжить</button>
       <div class="disclaimer">Данные хранятся только на твоём устройстве</div>
     </div>
@@ -977,7 +968,31 @@ const SUPABASE_ANON_KEY =
 const __supabaseSdk = supabase;
 const supabaseClient = __supabaseSdk.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const LS_OPENAI_KEY = 'cholesterol_app_openai_api_key';
+/** Ключ OpenAI из Supabase app_settings (без localStorage). */
+let openaiApiKey = null;
+
+async function loadOpenAiKeyFromSupabase() {
+  openaiApiKey = null;
+  try {
+    const { data, error } = await supabaseClient
+      .from('app_settings')
+      .select('value')
+      .eq('key', 'openai_api_key')
+      .single();
+    if (error) {
+      console.warn('[supabase] app_settings', error);
+      return false;
+    }
+    const v = data?.value != null ? String(data.value).trim() : '';
+    if (!v) return false;
+    openaiApiKey = v;
+    return true;
+  } catch (e) {
+    console.warn(e);
+    return false;
+  }
+}
+
 const LS_USER_PROFILE = 'cholesterol_app_user_profile';
 const LS_MEAL_HISTORY = 'meal_history';
 const LS_SUPABASE_USER_ID = 'cholesterol_app_supabase_user_id';
@@ -1361,36 +1376,6 @@ function openHistoryMealDetail(item) {
   setResultLoading(false);
   updateResultActionButtons();
   goTo('screen-result');
-}
-
-function getStoredApiKey() {
-  try {
-    const k = localStorage.getItem(LS_OPENAI_KEY);
-    return k && String(k).trim() ? String(k).trim() : null;
-  } catch (e) {
-    return null;
-  }
-}
-
-function setStoredApiKey(key) {
-  localStorage.setItem(LS_OPENAI_KEY, key);
-}
-
-function saveApiKeyFromModal() {
-  const inp = document.getElementById('api-key-input');
-  const err = document.getElementById('api-key-error');
-  const v = inp ? inp.value.trim() : '';
-  if (!v) {
-    err?.classList.add('visible');
-    return;
-  }
-  err?.classList.remove('visible');
-  setStoredApiKey(v);
-  if (loadProfileFromStorage()) {
-    goTo('screen-main');
-  } else {
-    goTo('screen-profile');
-  }
 }
 
 function showPurchaseModal() {
@@ -1874,8 +1859,8 @@ function syncMainCholCard() {
 }
 
 function openFoodCamera() {
-  if (!getStoredApiKey()) {
-    goTo('screen-api-key');
+  if (!openaiApiKey) {
+    document.getElementById('app-init-error')?.classList.add('visible');
     return;
   }
   document.getElementById('food-camera-input').click();
@@ -2016,8 +2001,9 @@ function setResultLoading(show) {
 }
 
 async function analyzeFoodPhoto(dataUrl) {
-  const apiKey = getStoredApiKey();
-  if (!apiKey) throw new Error('Сохраните API-ключ в настройках при первом запуске.');
+  if (!openaiApiKey) {
+    throw new Error('Не удалось загрузить настройки приложения');
+  }
 
   const prompt = buildVisionPrompt();
 
@@ -2025,7 +2011,7 @@ async function analyzeFoodPhoto(dataUrl) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: 'Bearer ' + apiKey
+      Authorization: 'Bearer ' + openaiApiKey
     },
     body: JSON.stringify({
       model: 'gpt-4o',
@@ -2167,14 +2153,6 @@ function goTo(id) {
   target.classList.add('active');
   if (id === 'screen-main') syncMainCholCard();
   if (id === 'screen-history') void renderHistoryList();
-  if (id === 'screen-api-key') {
-    const inp = document.getElementById('api-key-input');
-    if (inp) {
-      inp.value = getStoredApiKey() || '';
-      setTimeout(() => inp.focus(), 50);
-    }
-    document.getElementById('api-key-error')?.classList.remove('visible');
-  }
   if (id === 'screen-profile') {
     syncProfileCtaButton();
     setTimeout(() => void tryAutofillProfileFromSupabaseEmail(), 0);
@@ -2220,13 +2198,6 @@ function toggleDontKnow() {
   if (document.getElementById('screen-main')?.classList.contains('active')) syncMainCholCard();
 }
 
-document.getElementById('api-key-input')?.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-    e.preventDefault();
-    saveApiKeyFromModal();
-  }
-});
-
 ['v-total', 'v-ldl', 'v-hdl', 'v-trig'].forEach((fid) => {
   document.getElementById(fid)?.addEventListener('input', () => {
     if (document.getElementById('screen-main')?.classList.contains('active')) syncMainCholCard();
@@ -2247,9 +2218,11 @@ document.getElementById('input-name')?.addEventListener('input', () => {
   document.getElementById('profile-validate-error')?.classList.remove('visible');
 });
 
-function bootstrapApp() {
-  if (!getStoredApiKey()) {
-    goTo('screen-api-key');
+async function bootstrapApp() {
+  document.getElementById('app-init-error')?.classList.remove('visible');
+  const ok = await loadOpenAiKeyFromSupabase();
+  if (!ok) {
+    document.getElementById('app-init-error')?.classList.add('visible');
     return;
   }
   if (loadProfileFromStorage()) {
