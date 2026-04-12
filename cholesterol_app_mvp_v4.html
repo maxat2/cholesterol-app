@@ -1611,13 +1611,13 @@ let lastMealPhotoDataUrl = null;
 let lastMealAnalysisData = null;
 /** Куда вернуться с экрана результата: свежий анализ → главная, просмотр из истории → история */
 let resultBackScreen = 'screen-main';
-/** fresh — можно сохранить в историю; history — только просмотр */
-let resultViewSource = 'fresh';
+/** camera — новый снимок, можно сохранить в историю; history — только просмотр записи из списка */
+let resultViewSource = 'camera';
 
 function updateResultActionButtons() {
   const saveBtn = document.getElementById('result-btn-save-history');
   if (!saveBtn) return;
-  saveBtn.style.display = resultViewSource === 'fresh' ? '' : 'none';
+  saveBtn.style.display = resultViewSource === 'camera' ? '' : 'none';
 }
 
 function openHistoryMealDetail(item) {
@@ -2044,6 +2044,7 @@ async function renderHistoryList() {
 }
 
 async function saveMealToHistoryAndGoMain() {
+  console.log('[debug] resultViewSource =', resultViewSource);
   if (resultViewSource === 'history') return;
   if (!lastMealPhotoDataUrl || !lastMealAnalysisData) {
     goTo('screen-main');
@@ -2436,15 +2437,92 @@ function fileToDataUrl(file) {
   });
 }
 
-function parseModelJson(raw) {
-  let jsonStr = String(raw || '').trim();
-  jsonStr = jsonStr.replace(/```json\n?/gi, '').replace(/```\n?/g, '');
-  jsonStr = jsonStr.trim();
-  const lastBrace = jsonStr.lastIndexOf('}');
-  if (lastBrace !== -1) {
-    jsonStr = jsonStr.substring(0, lastBrace + 1);
+function extractBalancedJsonObject(s) {
+  const start = s.indexOf('{');
+  if (start === -1) return null;
+  let depth = 0;
+  let inStr = false;
+  let esc = false;
+  for (let i = start; i < s.length; i++) {
+    const ch = s[i];
+    if (esc) {
+      esc = false;
+      continue;
+    }
+    if (ch === '\\' && inStr) {
+      esc = true;
+      continue;
+    }
+    if (ch === '"') {
+      inStr = !inStr;
+      continue;
+    }
+    if (inStr) continue;
+    if (ch === '{') depth++;
+    else if (ch === '}') {
+      depth--;
+      if (depth === 0) return s.slice(start, i + 1);
+    }
   }
-  return JSON.parse(jsonStr);
+  return null;
+}
+
+function parseModelJson(raw) {
+  const rawTrim = String(raw || '').trim().replace(/^\uFEFF/, '');
+  const wholeFence = rawTrim.match(/^```(?:json)?\s*([\s\S]*?)```\s*$/i);
+  let t = rawTrim;
+  if (!rawTrim.startsWith('{')) {
+    const fenceIdx = t.search(/```(?:json)?/i);
+    if (fenceIdx !== -1) {
+      const head = t.slice(fenceIdx).match(/^```(?:json)?\s*/i);
+      if (head) {
+        const afterOpen = t.slice(fenceIdx + head[0].length);
+        const closeIdx = afterOpen.indexOf('```');
+        t = (closeIdx !== -1 ? afterOpen.slice(0, closeIdx) : afterOpen).trim();
+      }
+    }
+  }
+  const stripped = t.replace(/```json\n?/gi, '').replace(/```\n?/g, '').trim();
+  const cutAtLastBrace = (s) => {
+    if (s == null || s === '') return s;
+    const lb = s.lastIndexOf('}');
+    return lb !== -1 ? s.substring(0, lb + 1) : s;
+  };
+  const candidates = [];
+  const seen = new Set();
+  function add(s) {
+    if (s == null || s === '') return;
+    if (!seen.has(s)) {
+      seen.add(s);
+      candidates.push(s);
+    }
+  }
+  if (wholeFence && wholeFence[1] != null) {
+    const wf = wholeFence[1].trim();
+    add(wf);
+    const bwf = extractBalancedJsonObject(wf);
+    if (bwf) add(bwf);
+  }
+  const balanced =
+    extractBalancedJsonObject(stripped) ||
+    extractBalancedJsonObject(t) ||
+    extractBalancedJsonObject(rawTrim);
+  if (balanced) add(balanced);
+  add(cutAtLastBrace(stripped));
+  add(stripped);
+  add(cutAtLastBrace(t));
+  add(t);
+  add(rawTrim);
+
+  let lastErr;
+  for (const c of candidates) {
+    try {
+      return JSON.parse(c);
+    } catch (e) {
+      lastErr = e;
+    }
+  }
+  throw lastErr || new Error('Не удалось распарсить JSON');
 }
 
 function formatScoreDisplay(score) {
@@ -2527,7 +2605,9 @@ async function analyzeFoodPhoto(dataUrl) {
   }
   const raw = body.choices?.[0]?.message?.content;
   try {
-    return parseModelJson(raw);
+    const parsed = parseModelJson(raw);
+    resultViewSource = 'camera';
+    return parsed;
   } catch (e) {
     throw new Error('Не удалось разобрать ответ модели: ' + (e.message || e));
   }
@@ -2576,7 +2656,7 @@ document.getElementById('food-camera-input').addEventListener('change', async (e
   lastMealPhotoDataUrl = dataUrl;
   lastMealAnalysisData = null;
   resultBackScreen = 'screen-main';
-  resultViewSource = 'fresh';
+  resultViewSource = 'camera';
   updateResultActionButtons();
 
   goTo('screen-result');
