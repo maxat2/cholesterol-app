@@ -1612,7 +1612,9 @@ async function refreshMealsCacheFromSupabase() {
   );
   const merged = fromServer.concat(syncedNotInResponse).concat(pending);
   merged.sort((a, b) => new Date(a.at).getTime() - new Date(b.at).getTime());
+  console.log('[refresh] merged count before setMealHistory =', merged.length);
   setMealHistory(merged);
+  console.log('[refresh] after setMealHistory, getMealHistory().length =', getMealHistory().length);
 }
 
 let lastMealPhotoDataUrl = null;
