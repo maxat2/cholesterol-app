@@ -313,20 +313,48 @@
   }
   .chol-mini-foot .st { font-weight: 600; color: var(--accent); }
 
-  .result-screen-inner { flex: 1; min-height: 0; overflow-y: auto; padding-bottom: 24px; background: var(--bg); position: relative; }
+  .result-screen-inner {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding-bottom: max(24px, env(safe-area-inset-bottom));
+    background: var(--bg);
+    position: relative;
+  }
+  /* Как .nav и #screen-main .main-wrap — горизонталь var(--main-pad-x) */
   .result-nav {
-    display: flex; align-items: center; justify-content: space-between; padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px var(--main-pad-x) 8px;
+    min-height: 48px;
+    flex-shrink: 0;
     border-bottom: 1px solid #F0F0F0;
   }
   .result-nav-title { font-size: 17px; font-weight: 600; color: var(--accent); }
   .result-nav-left { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 22px; color: var(--accent); }
-  .result-photo { width: 100%; height: 240px; background: #F0F0F0; overflow: hidden; position: relative; }
+  .result-photo {
+    width: auto;
+    margin: 0 var(--main-pad-x);
+    height: 240px;
+    background: #F0F0F0;
+    overflow: hidden;
+    position: relative;
+    border-radius: var(--chol-card-radius);
+  }
   .result-photo-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 56px; }
   .result-photo-img { width: 100%; height: 100%; object-fit: cover; display: none; }
   .result-gpt-line {
-    display: flex; align-items: center; gap: 6px; padding: 10px 16px; font-size: 12px; color: var(--muted2); background: #FAFAFA; border-bottom: 1px solid #F0F0F0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px var(--main-pad-x);
+    font-size: 12px;
+    color: var(--muted2);
+    background: #FAFAFA;
+    border-bottom: 1px solid #F0F0F0;
   }
-  .result-body { padding: 20px 20px 8px; }
+  .result-body { padding: 20px var(--main-pad-x) 8px; }
   .result-dish-title { font-size: 26px; font-weight: 700; color: var(--accent); line-height: 1.2; margin-bottom: 12px; }
   .result-summary-text { font-size: 15px; color: #333; line-height: 1.55; margin-bottom: 16px; }
   .result-score-row { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
@@ -337,7 +365,7 @@
   .result-block { margin-bottom: 20px; }
   .result-block-title { font-size: 16px; font-weight: 700; color: var(--accent); margin-bottom: 8px; }
   .result-block-text { font-size: 15px; color: #333; line-height: 1.55; }
-  .result-actions { padding: 0 20px 24px; display: flex; flex-direction: column; gap: 8px; }
+  .result-actions { padding: 0 var(--main-pad-x) 24px; display: flex; flex-direction: column; gap: 8px; }
 
   .result-loader-overlay {
     position: absolute; inset: 0; z-index: 20; background: rgba(255,255,255,0.92);
@@ -485,7 +513,11 @@
     gap: 12px;
     box-sizing: border-box;
     overflow: hidden;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
   }
+  .history-item:active { opacity: 0.94; }
   .history-item--green { background: var(--history-green-card); }
   .history-item--yellow { background: var(--history-yellow); }
   .history-item--red { background: var(--bad-bg); }
@@ -857,8 +889,8 @@
           <div id="result-factors-list"></div>
         </div>
       </div>
-      <div class="result-actions">
-        <button type="button" class="btn-primary" onclick="saveMealToHistoryAndGoMain()">Сохранить в историю</button>
+      <div class="result-actions" id="result-actions">
+        <button type="button" class="btn-primary" id="result-btn-save-history" onclick="saveMealToHistoryAndGoMain()">Сохранить в историю</button>
         <button type="button" class="btn-secondary" onclick="backFromResult()">← Назад</button>
       </div>
     </div>
@@ -941,6 +973,56 @@ const LS_MEAL_HISTORY = 'meal_history';
 
 let lastMealPhotoDataUrl = null;
 let lastMealAnalysisData = null;
+/** Куда вернуться с экрана результата: свежий анализ → главная, просмотр из истории → история */
+let resultBackScreen = 'screen-main';
+/** fresh — можно сохранить в историю; history — только просмотр */
+let resultViewSource = 'fresh';
+
+function updateResultActionButtons() {
+  const saveBtn = document.getElementById('result-btn-save-history');
+  if (!saveBtn) return;
+  saveBtn.style.display = resultViewSource === 'fresh' ? '' : 'none';
+}
+
+function openHistoryMealDetail(item) {
+  if (!item) return;
+  const verdict = item.verdict;
+  if (verdict === 'error') return;
+  resultBackScreen = 'screen-history';
+  resultViewSource = 'history';
+  lastMealPhotoDataUrl = item.photoBase64 || null;
+  lastMealAnalysisData = {
+    verdict: verdict,
+    score: item.score,
+    title: item.title,
+    vision: item.vision != null ? String(item.vision) : '',
+    summary: item.summary,
+    education: item.education,
+    nuances: item.nuances,
+    upgrade: item.upgrade,
+    factors: Array.isArray(item.factors) ? item.factors : []
+  };
+  if (lastFoodObjectUrl) {
+    URL.revokeObjectURL(lastFoodObjectUrl);
+    lastFoodObjectUrl = null;
+  }
+  const img = document.getElementById('result-photo-img');
+  const ph = document.getElementById('result-photo-placeholder');
+  if (item.photoBase64) {
+    img.src = item.photoBase64;
+    img.onload = () => {
+      img.style.display = 'block';
+      if (ph) ph.style.display = 'none';
+    };
+  } else {
+    img.style.display = 'none';
+    if (ph) ph.style.display = 'flex';
+  }
+  applyResultToUI(lastMealAnalysisData);
+  setResultLoading(false);
+  updateResultActionButtons();
+  goTo('screen-result');
+}
 
 function getStoredApiKey() {
   try {
@@ -1222,11 +1304,21 @@ function renderHistoryList() {
     info.appendChild(nameEl);
     info.appendChild(ratingEl);
     row.appendChild(info);
+    row.setAttribute('role', 'button');
+    row.tabIndex = 0;
+    row.addEventListener('click', () => openHistoryMealDetail(item));
+    row.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Enter' || ev.key === ' ') {
+        ev.preventDefault();
+        openHistoryMealDetail(item);
+      }
+    });
     listEl.appendChild(row);
   });
 }
 
 function saveMealToHistoryAndGoMain() {
+  if (resultViewSource === 'history') return;
   if (!lastMealPhotoDataUrl || !lastMealAnalysisData) {
     goTo('screen-main');
     return;
@@ -1248,6 +1340,11 @@ function saveMealToHistoryAndGoMain() {
     score: d.score,
     title: d.title != null ? String(d.title) : '',
     vision: d.vision != null ? String(d.vision) : '',
+    summary: d.summary != null ? String(d.summary) : '',
+    education: d.education != null ? String(d.education) : '',
+    nuances: d.nuances != null ? String(d.nuances) : '',
+    upgrade: d.upgrade != null ? String(d.upgrade) : '',
+    factors: Array.isArray(d.factors) ? d.factors : [],
     at: new Date().toISOString()
   });
   setMealHistory(arr);
@@ -1255,7 +1352,7 @@ function saveMealToHistoryAndGoMain() {
 }
 
 function backFromResult() {
-  goTo('screen-main');
+  goTo(resultBackScreen || 'screen-main');
 }
 
 const AVG = { total: 5.2, ldl: 3.3, hdl: 1.3, trig: 1.5 };
@@ -1566,6 +1663,9 @@ document.getElementById('food-camera-input').addEventListener('change', async (e
   const dataUrl = await fileToDataUrl(file);
   lastMealPhotoDataUrl = dataUrl;
   lastMealAnalysisData = null;
+  resultBackScreen = 'screen-main';
+  resultViewSource = 'fresh';
+  updateResultActionButtons();
 
   goTo('screen-result');
 
@@ -1610,6 +1710,7 @@ document.getElementById('food-camera-input').addEventListener('change', async (e
     });
   } finally {
     setResultLoading(false);
+    updateResultActionButtons();
   }
 });
 
