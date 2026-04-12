@@ -1806,6 +1806,21 @@ function formatHistoryDateRu(iso) {
   }
 }
 
+function getDateLabel(isoString) {
+  const date = new Date(isoString);
+  if (Number.isNaN(date.getTime())) return '—';
+  const today = new Date();
+  const yesterday = new Date();
+  yesterday.setDate(today.getDate() - 1);
+
+  if (date.toDateString() === today.toDateString()) return 'Сегодня';
+  if (date.toDateString() === yesterday.toDateString()) return 'Вчера';
+
+  return date
+    .toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })
+    .replace(' г.', '');
+}
+
 function profileNameForMotivation() {
   try {
     const raw = localStorage.getItem(LS_USER_PROFILE);
@@ -1881,7 +1896,19 @@ async function renderHistoryList() {
   } else {
     emptyEl.style.display = 'none';
     listEl.style.display = '';
+    let lastHistoryDayKey = null;
     items.forEach((item) => {
+    const dayKey = (() => {
+      const d = new Date(item.at);
+      return Number.isNaN(d.getTime()) ? '' : d.toDateString();
+    })();
+    if (dayKey !== lastHistoryDayKey) {
+      lastHistoryDayKey = dayKey;
+      const heading = document.createElement('h2');
+      heading.className = 'lipid-section-title';
+      heading.textContent = getDateLabel(item.at);
+      listEl.appendChild(heading);
+    }
     const v = item.verdict;
     const toneClass =
       v === 'green'
