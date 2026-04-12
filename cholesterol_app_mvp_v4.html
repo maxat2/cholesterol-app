@@ -1130,6 +1130,53 @@ const supabaseClient = __supabaseSdk.createClient(SUPABASE_URL, SUPABASE_ANON_KE
 /** Ключ OpenAI из Supabase app_settings (без localStorage). */
 let openaiApiKey = null;
 
+const APP_VERSION = '1.0.0';
+let cachedDeviceContext = null;
+let deviceContextPromise = null;
+
+async function refreshDeviceContext() {
+  const info = {
+    language: navigator.language,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    screen_width: screen.width,
+    screen_height: screen.height,
+    device_type: /Mobi|Android/i.test(navigator.userAgent) ? 'mobile' : 'desktop',
+    browser: navigator.userAgent,
+    app_version: APP_VERSION
+  };
+  cachedDeviceContext = { ...info };
+  try {
+    const geoRes = await fetch('https://ipapi.co/json/');
+    if (geoRes.ok) {
+      const geo = await geoRes.json();
+      info.country = geo.country_name;
+      info.city = geo.city;
+      cachedDeviceContext = { ...info };
+    }
+  } catch (e) {
+    console.warn('[device] geo', e);
+  }
+  return cachedDeviceContext;
+}
+
+function getDeviceInfoForUpsert() {
+  if (cachedDeviceContext) return { ...cachedDeviceContext };
+  return {
+    language: navigator.language,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    screen_width: screen.width,
+    screen_height: screen.height,
+    device_type: /Mobi|Android/i.test(navigator.userAgent) ? 'mobile' : 'desktop',
+    browser: navigator.userAgent,
+    app_version: APP_VERSION
+  };
+}
+
+deviceContextPromise = refreshDeviceContext().catch((e) => {
+  console.warn('[device] refreshDeviceContext', e);
+  return cachedDeviceContext;
+});
+
 async function loadOpenAiKeyFromSupabase() {
   openaiApiKey = null;
   try {
@@ -1259,7 +1306,8 @@ function buildFullUserRow(profile, emailNormalized) {
     triglycerides: parseFloatProfile(trigSrc),
     units: profileUnitsToDb(profile.units) || 'mmol',
     profile_json: profile,
-    updated_at: new Date().toISOString()
+    updated_at: new Date().toISOString(),
+    ...getDeviceInfoForUpsert()
   };
 }
 
@@ -1284,7 +1332,8 @@ function buildMergedUserUpdate(existing, profile) {
     triglycerides: parseFloatProfile(trigSrc) ?? existing.triglycerides ?? null,
     units: profileUnitsToDb(profile.units) || existing.units || 'mmol',
     profile_json: profile,
-    updated_at: new Date().toISOString()
+    updated_at: new Date().toISOString(),
+    ...getDeviceInfoForUpsert()
   };
 }
 
@@ -1451,6 +1500,11 @@ function syncProfileCtaButton() {
 }
 
 async function upsertUserToSupabase() {
+  try {
+    await deviceContextPromise;
+  } catch (e) {
+    console.warn('[device] context', e);
+  }
   const raw = localStorage.getItem(LS_USER_PROFILE);
   if (!raw) {
     setStoredUserId(null);
@@ -1500,7 +1554,8 @@ async function upsertUserToSupabase() {
       .insert({
         email,
         profile_json: profile,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
+        ...getDeviceInfoForUpsert()
       })
       .select('id')
       .single();
