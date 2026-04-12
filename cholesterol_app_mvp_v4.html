@@ -442,18 +442,6 @@
     background: var(--bg);
     position: relative;
   }
-  /* Как .nav и #screen-main .main-wrap — горизонталь var(--main-pad-x) */
-  .result-nav {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 16px var(--main-pad-x) 8px;
-    min-height: 48px;
-    flex-shrink: 0;
-    border-bottom: 1px solid #F0F0F0;
-  }
-  .result-nav-title { font-size: 17px; font-weight: 600; color: var(--accent); }
-  .result-nav-left { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 22px; color: var(--accent); }
   .result-photo {
     width: auto;
     margin: 0 var(--main-pad-x);
@@ -990,10 +978,17 @@
         <div class="result-loader-spinner"></div>
         <div class="result-loader-text">Анализируем фото…</div>
       </div>
-      <div class="result-nav">
-        <div class="result-nav-left" onclick="backFromResult()">←</div>
-        <div class="result-nav-title">Фотография</div>
-        <div class="nav-ico" onclick="showPurchaseModal()" aria-hidden="true">⚙</div>
+      <div class="nav history-top-nav">
+        <button type="button" class="history-nav-side" onclick="backFromResult()" aria-label="Назад" title="Назад">
+          <svg width="10" height="17" viewBox="0 0 10 17" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M8.5 15.5L1.5 8.5L8.5 1.5" stroke="#1C1B1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="history-nav-title">Фотография</div>
+        <button type="button" class="history-nav-side" onclick="showPurchaseModal()" aria-label="Настройки">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M12 15a3 3 0 100-6 3 3 0 000 6z" stroke="#1C1B1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" stroke="#1C1B1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
       </div>
       <div class="result-photo" id="result-photo-wrap">
         <div class="result-photo-placeholder" id="result-photo-placeholder">🥗</div>
@@ -1302,6 +1297,13 @@ function formatNumberForProfileInput(n) {
   return s.endsWith('.0') ? String(Math.round(x)) : s;
 }
 
+/** Липиды в полях формы и из Supabase — всегда два знака после запятой (parseFloat при сохранении в БД). */
+function formatLipidInputFromNumber(n) {
+  if (n == null || n === '') return '';
+  const x = parseFloat(n);
+  return Number.isFinite(x) ? x.toFixed(2) : '';
+}
+
 function dbSexToGenderLabel(sex) {
   const s = String(sex || '').toLowerCase();
   if (s === 'female' || s === 'женский' || s.includes('жен')) return 'Женский';
@@ -1324,10 +1326,10 @@ function applySupabaseUserRowToForm(row) {
   if (row.age != null) document.getElementById('input-age').value = formatNumberForProfileInput(row.age);
   if (row.height_cm != null) document.getElementById('input-height').value = formatNumberForProfileInput(row.height_cm);
   if (row.weight_kg != null) document.getElementById('input-weight').value = formatNumberForProfileInput(row.weight_kg);
-  if (row.cholesterol != null) document.getElementById('v-total').value = formatNumberForProfileInput(row.cholesterol);
-  if (row.ldl != null) document.getElementById('v-ldl').value = formatNumberForProfileInput(row.ldl);
-  if (row.hdl != null) document.getElementById('v-hdl').value = formatNumberForProfileInput(row.hdl);
-  if (row.triglycerides != null) document.getElementById('v-trig').value = formatNumberForProfileInput(row.triglycerides);
+  if (row.cholesterol != null) document.getElementById('v-total').value = formatLipidInputFromNumber(row.cholesterol);
+  if (row.ldl != null) document.getElementById('v-ldl').value = formatLipidInputFromNumber(row.ldl);
+  if (row.hdl != null) document.getElementById('v-hdl').value = formatLipidInputFromNumber(row.hdl);
+  if (row.triglycerides != null) document.getElementById('v-trig').value = formatLipidInputFromNumber(row.triglycerides);
   setSegActiveByLabel('seg-gender', dbSexToGenderLabel(row.sex));
   setSegActiveByLabel('seg-units', dbUnitsToLabel(row.units));
   const st = document.getElementById('toggle-statins');
@@ -2086,9 +2088,11 @@ function parseMmolInput(id) {
 function formatLipidDisplay(mmol, isMg, isTrig) {
   if (mmol == null) return '—';
   const fac = isTrig ? TRIG_MMOL_TO_MGDL : CHOL_MMOL_TO_MGDL;
-  if (isMg) return String(Math.round(mmol * fac));
-  const s = mmol.toFixed(1);
-  return s.endsWith('.0') ? mmol.toFixed(0) : s;
+  if (isMg) {
+    const v = mmol * fac;
+    return Number.isFinite(v) ? parseFloat(v).toFixed(2) : '—';
+  }
+  return parseFloat(mmol).toFixed(2);
 }
 
 /** Сравнение порогов всегда в ммоль/л; при вводе в мг/дл пересчитываем. */
@@ -2098,6 +2102,13 @@ function getMmolLipid(id) {
   if (!isProfileMgDl()) return raw;
   if (id === 'v-trig') return raw / TRIG_MMOL_TO_MGDL;
   return raw / CHOL_MMOL_TO_MGDL;
+}
+
+/** Значения липидов для промпта: ммоль/л, два знака; пустое поле → «не указано». */
+function getLipidMmolerForPrompt(id) {
+  const m = getMmolLipid(id);
+  if (m == null) return 'не указано';
+  return parseFloat(m).toFixed(2);
 }
 
 function profileGenderFemale() {
@@ -2237,18 +2248,11 @@ function openFoodCamera() {
   document.getElementById('food-camera-input').click();
 }
 
-function getCholValue(id) {
-  const el = document.getElementById(id);
-  if (!el) return 'не указано';
-  const v = el.value.trim();
-  return v === '' ? 'не указано' : v;
-}
-
 function getProfileForPrompt() {
-  const total = getCholValue('v-total');
-  const ldl = getCholValue('v-ldl');
-  const hdl = getCholValue('v-hdl');
-  const trig = getCholValue('v-trig');
+  const total = getLipidMmolerForPrompt('v-total');
+  const ldl = getLipidMmolerForPrompt('v-ldl');
+  const hdl = getLipidMmolerForPrompt('v-hdl');
+  const trig = getLipidMmolerForPrompt('v-trig');
 
   const genderEl = document.querySelector('#seg-gender .seg-btn.active');
   const sex = genderEl ? genderEl.textContent.trim() : 'не указан';
@@ -2599,10 +2603,10 @@ function toggleDontKnow() {
   dontKnowOn = !dontKnowOn;
   const fields = ['f-total', 'f-ldl', 'f-hdl', 'f-trig'];
   if (dontKnowOn) {
-    document.getElementById('v-total').value = AVG.total;
-    document.getElementById('v-ldl').value = AVG.ldl;
-    document.getElementById('v-hdl').value = AVG.hdl;
-    document.getElementById('v-trig').value = AVG.trig;
+    document.getElementById('v-total').value = AVG.total.toFixed(2);
+    document.getElementById('v-ldl').value = AVG.ldl.toFixed(2);
+    document.getElementById('v-hdl').value = AVG.hdl.toFixed(2);
+    document.getElementById('v-trig').value = AVG.trig.toFixed(2);
   } else {
     ['v-total', 'v-ldl', 'v-hdl', 'v-trig'].forEach((id) => (document.getElementById(id).value = ''));
   }
