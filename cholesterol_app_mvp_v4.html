@@ -1232,11 +1232,8 @@ function mealRowToLocal(row) {
       factors = [];
     }
   }
-  const photoUrl = row.photo_url != null ? String(row.photo_url) : '';
   return {
     supabaseId: row.id,
-    photoBase64: photoUrl,
-    photo_url: photoUrl,
     verdict: row.verdict,
     score: row.score,
     title: row.title != null ? String(row.title) : '',
@@ -1631,7 +1628,7 @@ function openHistoryMealDetail(item) {
   if (verdict === 'error') return;
   resultBackScreen = 'screen-history';
   resultViewSource = 'history';
-  lastMealPhotoDataUrl = item.photoBase64 || item.photo_url || null;
+  lastMealPhotoDataUrl = item.photoBase64 || null;
   lastMealAnalysisData = {
     verdict: verdict,
     score: item.score,
@@ -1649,13 +1646,26 @@ function openHistoryMealDetail(item) {
   }
   const img = document.getElementById('result-photo-img');
   const ph = document.getElementById('result-photo-placeholder');
-  const detailPhotoSrc = item.photoBase64 || item.photo_url || '';
-  if (detailPhotoSrc) {
-    img.src = detailPhotoSrc;
+  if (item.photoBase64) {
+    img.src = item.photoBase64;
     img.onload = () => {
       img.style.display = 'block';
       if (ph) ph.style.display = 'none';
     };
+  } else if (item.supabaseId) {
+    img.style.display = 'none';
+    if (ph) ph.style.display = 'flex';
+    void (async () => {
+      await loadMealPhoto(item.supabaseId, img);
+      if (!img.src) return;
+      lastMealPhotoDataUrl = img.src;
+      const show = () => {
+        img.style.display = 'block';
+        if (ph) ph.style.display = 'none';
+      };
+      if (img.complete) show();
+      else img.onload = show;
+    })();
   } else {
     img.style.display = 'none';
     if (ph) ph.style.display = 'flex';
@@ -1847,7 +1857,7 @@ function getMealHistory() {
 function setMealHistory(arr) {
   const slim = arr.map((m) => {
     if (m.supabaseId) {
-      const { photoBase64, ...rest } = m;
+      const { photoBase64, photo_url, ...rest } = m;
       return rest;
     }
     return m;
@@ -1862,6 +1872,26 @@ function setMealHistory(arr) {
     } catch (e2) {
       console.warn('[localStorage] still failed after trim', e2);
     }
+  }
+}
+
+async function loadMealPhoto(supabaseId, imgElement) {
+  if (!supabaseId || !imgElement) return;
+  try {
+    const { data, error } = await supabaseClient
+      .from('meals')
+      .select('photo_url')
+      .eq('id', supabaseId)
+      .single();
+    if (error) {
+      console.warn('[meals] photo fetch', error);
+      return;
+    }
+    if (data && data.photo_url) {
+      imgElement.src = data.photo_url;
+    }
+  } catch (e) {
+    console.warn('[meals] loadMealPhoto', e);
   }
 }
 
@@ -2012,14 +2042,41 @@ async function renderHistoryList() {
     row.className = 'history-item ' + toneClass;
     const thumbWrap = document.createElement('div');
     thumbWrap.className = 'history-thumb';
-    const imgSrc = item.photoBase64 || item.photo_url || null;
-    if (imgSrc) {
+    if (item.photoBase64) {
       const im = document.createElement('img');
       im.className = 'history-thumb-img';
       im.alt = '';
-      im.src = imgSrc;
+      im.src = item.photoBase64;
       im.decoding = 'async';
       thumbWrap.appendChild(im);
+    } else if (item.supabaseId) {
+      thumbWrap.classList.add('history-thumb--no-photo');
+      thumbWrap.textContent = '🍽';
+      const sid = item.supabaseId;
+      const io = new IntersectionObserver(
+        (entries, observer) => {
+          for (const ent of entries) {
+            if (!ent.isIntersecting) continue;
+            observer.unobserve(thumbWrap);
+            void (async () => {
+              const im = document.createElement('img');
+              im.className = 'history-thumb-img';
+              im.alt = '';
+              await loadMealPhoto(sid, im);
+              if (!im.src) return;
+              const done = () => {
+                thumbWrap.textContent = '';
+                thumbWrap.appendChild(im);
+                thumbWrap.classList.remove('history-thumb--no-photo');
+              };
+              if (im.complete) done();
+              else im.onload = done;
+            })();
+          }
+        },
+        { root: null, rootMargin: '120px', threshold: 0.01 }
+      );
+      io.observe(thumbWrap);
     } else {
       thumbWrap.classList.add('history-thumb--no-photo');
       thumbWrap.textContent = '🍽';
@@ -2125,7 +2182,6 @@ async function saveMealToHistoryAndGoMain() {
         console.warn('[supabase] meals insert', error);
       } else if (data && data.id) {
         mealLocal.supabaseId = data.id;
-        mealLocal.photo_url = mealLocal.photoBase64;
         arr[arr.length - 1] = mealLocal;
         setMealHistory(arr);
       }
