@@ -7,6 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <title>Холестериновая слежка</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -217,6 +218,8 @@
   .api-key-area::placeholder { color: #AAAAAA; }
   .api-key-error { font-size: 13px; color: #DC2626; margin: -8px 0 12px; display: none; }
   .api-key-error.visible { display: block; }
+  .field.field--error { border-color: #DC2626; }
+  #screen-profile .nav-skip { display: none !important; }
 
   #screen-main .main-wrap {
     flex: 1;
@@ -673,16 +676,16 @@
     </div>
     <div class="content">
       <div class="h2-section">Личные данные</div>
-      <div class="field">
-        <div class="field-label">E-mail</div>
+      <div class="field" id="field-wrap-email">
+        <div class="field-label">E-mail <span style="color:#DC2626">*</span></div>
         <div class="field-row">
-          <input type="email" id="input-email" placeholder="you@example.com" />
+          <input type="email" id="input-email" placeholder="you@example.com" required autocomplete="email" inputmode="email" aria-required="true" />
         </div>
       </div>
-      <div class="field">
-        <div class="field-label">Имя</div>
+      <div class="field" id="field-wrap-name">
+        <div class="field-label">Имя <span style="color:#DC2626">*</span></div>
         <div class="field-row">
-          <input type="text" id="input-name" placeholder="Имя" oninput="updateName(this.value)" />
+          <input type="text" id="input-name" placeholder="Имя" required autocomplete="name" aria-required="true" oninput="updateName(this.value)" />
         </div>
       </div>
       <div class="field-row-2">
@@ -771,6 +774,7 @@
         <div class="seg-btn" onclick="setSeg('seg-units',this)">мг/дл</div>
       </div>
 
+      <div class="api-key-error" id="profile-validate-error" role="alert">Укажите e-mail и имя.</div>
       <button type="button" class="btn-primary" id="profile-cta-btn" onclick="saveProfileAndStart()">Продолжить</button>
       <div class="disclaimer">Данные хранятся только на твоём устройстве</div>
     </div>
@@ -967,9 +971,120 @@
 </div>
 
 <script>
+const SUPABASE_URL = 'https://jwbhwwuznapaaeiuhxrp.supabase.co'.trim();
+const SUPABASE_ANON_KEY =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3Ymh3d3V6bmFwYWFlaXVoeHJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5Nzk3MjAsImV4cCI6MjA5MTU1NTcyMH0.j_ociAX5y8X1FbTuSwh8fv96fx8VZkOhURzltmrHdio'.trim();
+const __supabaseSdk = supabase;
+const supabaseClient = __supabaseSdk.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 const LS_OPENAI_KEY = 'cholesterol_app_openai_api_key';
 const LS_USER_PROFILE = 'cholesterol_app_user_profile';
 const LS_MEAL_HISTORY = 'meal_history';
+const LS_SUPABASE_USER_ID = 'cholesterol_app_supabase_user_id';
+
+function getStoredUserId() {
+  try {
+    const id = localStorage.getItem(LS_SUPABASE_USER_ID);
+    return id && String(id).trim() ? String(id).trim() : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function setStoredUserId(id) {
+  try {
+    if (id) localStorage.setItem(LS_SUPABASE_USER_ID, String(id));
+    else localStorage.removeItem(LS_SUPABASE_USER_ID);
+  } catch (e) {}
+}
+
+function mealRowToLocal(row) {
+  let factors = row.factors;
+  if (factors == null) factors = [];
+  else if (typeof factors === 'string') {
+    try {
+      factors = JSON.parse(factors);
+    } catch (e) {
+      factors = [];
+    }
+  }
+  return {
+    supabaseId: row.id,
+    photoBase64: row.photo_url || '',
+    verdict: row.verdict,
+    score: row.score,
+    title: row.title != null ? String(row.title) : '',
+    vision: row.vision != null ? String(row.vision) : '',
+    summary: row.summary != null ? String(row.summary) : '',
+    education: row.education != null ? String(row.education) : '',
+    nuances: row.nuances != null ? String(row.nuances) : '',
+    upgrade: row.upgrade != null ? String(row.upgrade) : '',
+    factors: Array.isArray(factors) ? factors : [],
+    at: row.created_at || row.at || new Date().toISOString()
+  };
+}
+
+async function upsertUserToSupabase() {
+  const raw = localStorage.getItem(LS_USER_PROFILE);
+  if (!raw) {
+    setStoredUserId(null);
+    return null;
+  }
+  let profile;
+  try {
+    profile = JSON.parse(raw);
+  } catch (e) {
+    return null;
+  }
+  const email = String(profile.email || '')
+    .trim()
+    .toLowerCase();
+  if (!email) {
+    setStoredUserId(null);
+    return null;
+  }
+  const { data, error } = await supabaseClient
+    .from('users')
+    .upsert(
+      {
+        email,
+        profile_json: profile,
+        updated_at: new Date().toISOString()
+      },
+      { onConflict: 'email' }
+    )
+    .select('id')
+    .single();
+  if (error) {
+    console.warn('[supabase] users upsert', error);
+    return null;
+  }
+  if (data && data.id) {
+    setStoredUserId(data.id);
+    return data.id;
+  }
+  return null;
+}
+
+async function refreshMealsCacheFromSupabase() {
+  const uid = getStoredUserId();
+  if (!uid) return;
+  const { data, error } = await supabaseClient
+    .from('meals')
+    .select('*')
+    .eq('user_id', uid)
+    .order('created_at', { ascending: true });
+  if (error) {
+    console.warn('[supabase] meals select', error);
+    return;
+  }
+  const fromServer = (data || []).map(mealRowToLocal);
+  const local = getMealHistory();
+  const pending = local.filter((m) => !m.supabaseId);
+  const merged = fromServer.concat(pending);
+  merged.sort((a, b) => new Date(a.at).getTime() - new Date(b.at).getTime());
+  setMealHistory(merged);
+}
 
 let lastMealPhotoDataUrl = null;
 let lastMealAnalysisData = null;
@@ -1062,6 +1177,26 @@ function dismissPurchaseModal() {
   document.getElementById('purchase-overlay')?.classList.remove('visible');
 }
 
+function profileIsCompleteData(p) {
+  const email = String(p?.email || '').trim();
+  const name = String(p?.name || '').trim();
+  if (!email || !name) return false;
+  const tmp = document.createElement('input');
+  tmp.type = 'email';
+  tmp.value = email;
+  return tmp.validity.valid;
+}
+
+function profileCompleteFromStorage() {
+  try {
+    const raw = localStorage.getItem(LS_USER_PROFILE);
+    if (!raw) return false;
+    return profileIsCompleteData(JSON.parse(raw));
+  } catch (e) {
+    return false;
+  }
+}
+
 function saveProfileToStorage() {
   const genderEl = document.querySelector('#seg-gender .seg-btn.active');
   const unitsEl = document.querySelector('#seg-units .seg-btn.active');
@@ -1125,19 +1260,57 @@ function loadProfileFromStorage() {
     const st = document.getElementById('toggle-statins');
     if (st) st.classList.toggle('on', !!p.statins);
     updateName((p.name || '').trim());
-    return true;
+    return profileIsCompleteData(p);
   } catch (e) {
     return false;
   }
 }
 
-function saveProfileAndStart() {
+async function saveProfileAndStart() {
+  const emailEl = document.getElementById('input-email');
+  const nameEl = document.getElementById('input-name');
+  const errEl = document.getElementById('profile-validate-error');
+  const wrapE = document.getElementById('field-wrap-email');
+  const wrapN = document.getElementById('field-wrap-name');
+  wrapE?.classList.remove('field--error');
+  wrapN?.classList.remove('field--error');
+  const name = (nameEl?.value ?? '').trim();
+  const email = (emailEl?.value ?? '').trim();
+  let msg = '';
+  if (!name) {
+    msg = 'Введите имя.';
+    wrapN?.classList.add('field--error');
+  } else if (!email) {
+    msg = 'Введите e-mail.';
+    wrapE?.classList.add('field--error');
+  } else if (emailEl) {
+    emailEl.value = email;
+    if (!emailEl.validity.valid) {
+      msg = 'Укажите корректный e-mail.';
+      wrapE?.classList.add('field--error');
+    }
+  }
+  if (msg) {
+    if (errEl) {
+      errEl.textContent = msg;
+      errEl.classList.add('visible');
+    }
+    if (!name) nameEl?.focus();
+    else emailEl?.focus();
+    return;
+  }
+  errEl?.classList.remove('visible');
   saveProfileToStorage();
+  try {
+    await upsertUserToSupabase();
+  } catch (e) {
+    console.warn(e);
+  }
   goTo('screen-main');
 }
 
 function skipOnboardingToMain() {
-  goTo('screen-main');
+  goTo('screen-profile');
 }
 
 function syncBottomNavForScreen(screenId) {
@@ -1233,7 +1406,8 @@ function updateHistorySummaryCard() {
   }
 }
 
-function renderHistoryList() {
+async function renderHistoryList() {
+  await refreshMealsCacheFromSupabase();
   const listEl = document.getElementById('history-list');
   const emptyEl = document.getElementById('history-empty');
   if (!listEl || !emptyEl) return;
@@ -1317,7 +1491,7 @@ function renderHistoryList() {
   });
 }
 
-function saveMealToHistoryAndGoMain() {
+async function saveMealToHistoryAndGoMain() {
   if (resultViewSource === 'history') return;
   if (!lastMealPhotoDataUrl || !lastMealAnalysisData) {
     goTo('screen-main');
@@ -1333,8 +1507,8 @@ function saveMealToHistoryAndGoMain() {
     goTo('screen-main');
     return;
   }
-  const arr = getMealHistory();
-  arr.push({
+  const atIso = new Date().toISOString();
+  const mealLocal = {
     photoBase64: lastMealPhotoDataUrl,
     verdict: verdict,
     score: d.score,
@@ -1345,9 +1519,45 @@ function saveMealToHistoryAndGoMain() {
     nuances: d.nuances != null ? String(d.nuances) : '',
     upgrade: d.upgrade != null ? String(d.upgrade) : '',
     factors: Array.isArray(d.factors) ? d.factors : [],
-    at: new Date().toISOString()
-  });
+    at: atIso
+  };
+  const arr = getMealHistory();
+  arr.push(mealLocal);
   setMealHistory(arr);
+
+  const uid = getStoredUserId();
+  if (uid) {
+    try {
+      const { data, error } = await supabaseClient
+        .from('meals')
+        .insert({
+          user_id: uid,
+          photo_url: mealLocal.photoBase64,
+          verdict: mealLocal.verdict,
+          score: mealLocal.score,
+          title: mealLocal.title,
+          vision: mealLocal.vision,
+          summary: mealLocal.summary,
+          education: mealLocal.education,
+          nuances: mealLocal.nuances,
+          upgrade: mealLocal.upgrade,
+          factors: mealLocal.factors,
+          created_at: atIso
+        })
+        .select('id')
+        .single();
+      if (error) {
+        console.warn('[supabase] meals insert', error);
+      } else if (data && data.id) {
+        mealLocal.supabaseId = data.id;
+        arr[arr.length - 1] = mealLocal;
+        setMealHistory(arr);
+      }
+    } catch (e) {
+      console.warn(e);
+    }
+  }
+
   goTo('screen-main');
 }
 
@@ -1715,12 +1925,23 @@ document.getElementById('food-camera-input').addEventListener('change', async (e
 });
 
 function goTo(id) {
+  if (
+    (id === 'screen-main' || id === 'screen-history' || id === 'screen-result') &&
+    !profileCompleteFromStorage()
+  ) {
+    id = 'screen-profile';
+    const err = document.getElementById('profile-validate-error');
+    if (err) {
+      err.textContent = 'Укажите e-mail и имя, чтобы пользоваться приложением.';
+      err.classList.add('visible');
+    }
+  }
   const target = document.getElementById(id);
   if (!target) return;
   document.querySelectorAll('.screen').forEach((s) => s.classList.remove('active'));
   target.classList.add('active');
   if (id === 'screen-main') syncMainCholCard();
-  if (id === 'screen-history') renderHistoryList();
+  if (id === 'screen-history') void renderHistoryList();
   if (id === 'screen-api-key') {
     const inp = document.getElementById('api-key-input');
     if (inp) {
@@ -1730,18 +1951,22 @@ function goTo(id) {
     document.getElementById('api-key-error')?.classList.remove('visible');
   }
   if (id === 'screen-profile') {
-    const hasSaved = !!localStorage.getItem(LS_USER_PROFILE);
+    const hasSaved = profileCompleteFromStorage();
     const btn = document.getElementById('profile-cta-btn');
-    const skip = document.querySelector('#screen-profile .nav-skip');
     if (btn) btn.textContent = hasSaved ? 'Сохранить изменения' : 'Продолжить';
-    if (skip) skip.style.display = hasSaved ? 'none' : 'block';
   }
   syncBottomNavForScreen(id);
 }
 function navTo(id, el) {
   goTo(id);
-  el.closest('.bottom-nav').querySelectorAll('.bnav-item').forEach(i => i.classList.remove('active'));
-  el.classList.add('active');
+  const actualId = document.querySelector('.phone .screen.active')?.id || id;
+  const navIdx = { 'screen-main': 0, 'screen-history': 1, 'screen-profile': 2 };
+  const idx = navIdx[actualId];
+  const nav = el?.closest('.bottom-nav');
+  if (!nav) return;
+  nav.querySelectorAll('.bnav-item').forEach((item, i) => {
+    if (idx !== undefined) item.classList.toggle('active', i === idx);
+  });
 }
 function setSeg(id, el) {
   document.getElementById(id).querySelectorAll('.seg-btn').forEach((b) => b.classList.remove('active'));
@@ -1782,6 +2007,15 @@ document.getElementById('api-key-input')?.addEventListener('keydown', (e) => {
   document.getElementById(fid)?.addEventListener('input', () => {
     if (document.getElementById('screen-main')?.classList.contains('active')) syncMainCholCard();
   });
+});
+
+document.getElementById('input-email')?.addEventListener('input', () => {
+  document.getElementById('field-wrap-email')?.classList.remove('field--error');
+  document.getElementById('profile-validate-error')?.classList.remove('visible');
+});
+document.getElementById('input-name')?.addEventListener('input', () => {
+  document.getElementById('field-wrap-name')?.classList.remove('field--error');
+  document.getElementById('profile-validate-error')?.classList.remove('visible');
 });
 
 function bootstrapApp() {
