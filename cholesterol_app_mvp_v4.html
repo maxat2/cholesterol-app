@@ -657,6 +657,9 @@
     object-fit: cover;
     object-position: center;
   }
+  .history-thumb.history-thumb--no-photo {
+    background: #ddd;
+  }
   .history-info {
     flex: 1;
     min-width: 0;
@@ -1229,9 +1232,11 @@ function mealRowToLocal(row) {
       factors = [];
     }
   }
+  const photoUrl = row.photo_url != null ? String(row.photo_url) : '';
   return {
     supabaseId: row.id,
-    photoBase64: row.photo_url || '',
+    photoBase64: photoUrl,
+    photo_url: photoUrl,
     verdict: row.verdict,
     score: row.score,
     title: row.title != null ? String(row.title) : '',
@@ -1626,7 +1631,7 @@ function openHistoryMealDetail(item) {
   if (verdict === 'error') return;
   resultBackScreen = 'screen-history';
   resultViewSource = 'history';
-  lastMealPhotoDataUrl = item.photoBase64 || null;
+  lastMealPhotoDataUrl = item.photoBase64 || item.photo_url || null;
   lastMealAnalysisData = {
     verdict: verdict,
     score: item.score,
@@ -1644,8 +1649,9 @@ function openHistoryMealDetail(item) {
   }
   const img = document.getElementById('result-photo-img');
   const ph = document.getElementById('result-photo-placeholder');
-  if (item.photoBase64) {
-    img.src = item.photoBase64;
+  const detailPhotoSrc = item.photoBase64 || item.photo_url || '';
+  if (detailPhotoSrc) {
+    img.src = detailPhotoSrc;
     img.onload = () => {
       img.style.display = 'block';
       if (ph) ph.style.display = 'none';
@@ -2006,14 +2012,16 @@ async function renderHistoryList() {
     row.className = 'history-item ' + toneClass;
     const thumbWrap = document.createElement('div');
     thumbWrap.className = 'history-thumb';
-    if (item.photoBase64) {
+    const imgSrc = item.photoBase64 || item.photo_url || null;
+    if (imgSrc) {
       const im = document.createElement('img');
       im.className = 'history-thumb-img';
       im.alt = '';
-      im.src = item.photoBase64;
+      im.src = imgSrc;
       im.decoding = 'async';
       thumbWrap.appendChild(im);
     } else {
+      thumbWrap.classList.add('history-thumb--no-photo');
       thumbWrap.textContent = '🍽';
     }
     row.appendChild(thumbWrap);
@@ -2117,6 +2125,7 @@ async function saveMealToHistoryAndGoMain() {
         console.warn('[supabase] meals insert', error);
       } else if (data && data.id) {
         mealLocal.supabaseId = data.id;
+        mealLocal.photo_url = mealLocal.photoBase64;
         arr[arr.length - 1] = mealLocal;
         setMealHistory(arr);
       }
