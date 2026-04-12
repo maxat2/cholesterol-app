@@ -1,255 +1,229 @@
 
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   :root {
-    --green: #2D9B6F; --green-light: #E8F7F1;
-    --yellow: #E8A020; --yellow-light: #FEF6E7;
-    --red: #D94F3D; --red-light: #FDECEA;
-    --blue: #2B6CB0; --blue-light: #EBF4FF;
-    --ink: #1A1A1A; --ink2: #555; --ink3: #999;
-    --surface: #F7F5F2; --white: #FFFFFF;
-    --border: rgba(0,0,0,0.08);
-    --sans: 'DM Sans', sans-serif;
-    --serif: 'DM Serif Display', serif;
+    --bg: #FFFFFF;
+    --accent: #000000;
+    --text: #000000;
+    --muted: #666666;
+    --muted2: #999999;
+    --line: #E0E0E0;
+    --bad-bg: #FFF0F0;
+    --ok-bg: #F0FFF4;
+    --history-yellow: #FFFBF0;
+    --card-blue: #EEF2FF;
+    --dontknow-bg: #EEF2FF;
+    --star-green: #22C55E;
+    --sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   }
-  .app-wrap { display: flex; justify-content: center; padding: 24px 0 48px; font-family: var(--sans); }
-  .phone { width: 375px; min-height: 720px; background: var(--surface); border-radius: 40px; overflow: hidden; box-shadow: 0 32px 80px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.06); }
-  .screen { display: none; flex-direction: column; min-height: 720px; background: var(--surface); animation: fadeIn 0.28s ease; }
+  .app-wrap { display: flex; justify-content: center; padding: 24px 0 48px; font-family: var(--sans); background: var(--bg); }
+  .phone { width: 375px; min-height: 720px; background: var(--bg); border-radius: 40px; overflow: hidden; box-shadow: 0 24px 64px rgba(0,0,0,0.12), 0 0 0 1px #EEEEEE; position: relative; }
+  .screen { display: none; flex-direction: column; min-height: 720px; background: var(--bg); animation: fadeIn 0.25s ease; }
   .screen.active { display: flex; }
-  @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
-  .nav { display: flex; justify-content: space-between; padding: 18px 24px 0; align-items: center; }
-  .nav-title { font-family: var(--serif); font-size: 22px; color: var(--ink); }
-  .nav-back { font-size: 13px; color: var(--green); font-weight: 500; cursor: pointer; padding: 6px 0; }
-  .nav-skip { font-size: 13px; color: var(--ink3); cursor: pointer; }
-  .dots { display: flex; gap: 6px; justify-content: center; padding: 16px 0 0; }
-  .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border); transition: all .3s; }
-  .dot.active { width: 20px; border-radius: 3px; background: var(--green); }
-  .content { flex: 1; padding: 20px 24px; overflow-y: auto; }
-  .section-label { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--ink3); margin-bottom: 10px; margin-top: 20px; }
-  .section-label:first-child { margin-top: 0; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
 
-  /* поле */
-  .field { background: var(--white); border-radius: 14px; padding: 14px 16px; margin-bottom: 8px; border: 1.5px solid var(--border); transition: border-color .2s, opacity .3s; }
-  .field:focus-within { border-color: var(--green); }
-  .field.dimmed { opacity: .35; pointer-events: none; }
-  .field-label { font-size: 12px; color: var(--ink3); margin-bottom: 4px; }
+  .h2-section { font-size: 22px; font-weight: 700; color: var(--accent); margin: 24px 0 12px; }
+  .h2-section:first-of-type { margin-top: 0; }
+
+  .nav { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px 8px; min-height: 48px; }
+  .nav-title { font-size: 17px; font-weight: 600; color: var(--accent); }
+  .nav-back, .nav-skip, .nav-ico { cursor: pointer; font-size: 20px; color: var(--accent); line-height: 1; padding: 4px; background: none; border: none; }
+  .nav-skip { font-size: 15px; font-weight: 400; color: var(--muted2); }
+
+  .content { flex: 1; padding: 8px 20px 24px; overflow-y: auto; }
+
+  .field { background: var(--bg); border-radius: 12px; padding: 12px 14px; margin-bottom: 10px; border: 1px solid var(--line); transition: opacity .3s; }
+  .field:focus-within { border-color: #BBBBBB; }
+  .field.dimmed { opacity: .4; pointer-events: none; }
+  .field-label { font-size: 12px; color: var(--muted); margin-bottom: 6px; font-weight: 500; }
   .field-row { display: flex; align-items: center; gap: 8px; }
-  .field input { flex: 1; border: none; outline: none; font-family: var(--sans); font-size: 17px; font-weight: 500; color: var(--ink); background: transparent; }
-  .field input::placeholder { color: var(--ink3); font-weight: 400; }
-  .field-unit { font-size: 13px; color: var(--ink3); white-space: nowrap; }
+  .field input, .field textarea {
+    flex: 1; border: none; outline: none; font-family: var(--sans); font-size: 16px; font-weight: 400; color: var(--text); background: transparent; width: 100%;
+  }
+  .field input::placeholder { color: var(--muted2); }
+  .field-unit { font-size: 13px; color: var(--muted2); white-space: nowrap; }
+  .field-row-2 { display: flex; gap: 10px; }
+  .field-row-2 .field { flex: 1; }
 
-  /* фото-кнопка */
-  .photo-btn { background: var(--green-light); border: 2px dashed var(--green); border-radius: 14px; padding: 16px; text-align: center; cursor: pointer; margin-bottom: 8px; transition: all .2s; }
-  .photo-btn:active { transform: scale(0.98); }
-  .photo-btn-icon { font-size: 24px; margin-bottom: 4px; }
-  .photo-btn-text { font-size: 14px; font-weight: 500; color: var(--green); }
-  .photo-btn-sub { font-size: 12px; color: var(--ink3); margin-top: 2px; }
-
-  /* ── кнопка "Я не знаю" — белая, как поле ── */
   .dontknow-btn {
-    background: var(--white);
-    border: 1.5px solid var(--border);
-    border-radius: 14px;
+    background: var(--dontknow-bg);
+    border: none;
+    border-radius: 12px;
     padding: 14px 16px;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    transition: border-color .2s;
-  }
-  .dontknow-btn:active { transform: scale(0.99); }
-  .dontknow-btn.open { border-color: var(--blue); }
-  .dontknow-btn-left { display: flex; align-items: center; gap: 10px; }
-  .dontknow-icon { font-size: 16px; }
-  .dontknow-text { font-size: 15px; font-weight: 500; color: var(--ink); }
-  .dontknow-arrow {
-    font-size: 13px; color: var(--ink3);
-    transition: transform .25s;
-    display: inline-block;
-  }
-  .dontknow-btn.open .dontknow-arrow { transform: rotate(180deg); }
-
-  /* подсказка */
-  .dontknow-hint {
-    background: var(--blue-light); border-radius: 14px; padding: 14px 16px;
-    margin-bottom: 8px; border: 1.5px solid rgba(43,108,176,0.15);
-    max-height: 0; overflow: hidden; opacity: 0;
-    transition: max-height .3s ease, opacity .3s ease, padding .3s ease, margin .3s ease;
-    padding-top: 0; padding-bottom: 0; margin-bottom: 0;
-  }
-  .dontknow-hint.visible {
-    max-height: 200px; opacity: 1;
-    padding: 14px 16px; margin-bottom: 8px;
-  }
-  .dontknow-hint-title { font-size: 14px; font-weight: 600; color: var(--blue); margin-bottom: 6px; }
-  .dontknow-hint-text { font-size: 13px; color: var(--ink2); line-height: 1.55; }
-  .dontknow-hint-text b { color: var(--ink); }
-
-  /* переключатель и сег */
-  .toggle-row { background: var(--white); border-radius: 14px; padding: 14px 16px; margin-bottom: 8px; border: 1.5px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
-  .toggle-label { font-size: 15px; color: var(--ink); font-weight: 500; }
-  .toggle-sub { font-size: 12px; color: var(--ink3); margin-top: 2px; }
-  .toggle-switch { width: 46px; height: 26px; border-radius: 13px; background: var(--border); position: relative; cursor: pointer; transition: background .2s; flex-shrink: 0; }
-  .toggle-switch.on { background: var(--green); }
-  .toggle-switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: white; transition: transform .2s; box-shadow: 0 1px 4px rgba(0,0,0,0.2); }
-  .toggle-switch.on::after { transform: translateX(20px); }
-  .seg { display: flex; background: var(--white); border-radius: 12px; padding: 3px; margin-bottom: 8px; border: 1.5px solid var(--border); }
-  .seg-btn { flex: 1; padding: 9px; text-align: center; font-size: 14px; font-weight: 500; color: var(--ink3); border-radius: 9px; cursor: pointer; transition: all .2s; }
-  .seg-btn.active { background: var(--green); color: white; }
-
-  /* кнопки */
-  .btn-primary { background: var(--ink); color: white; border: none; border-radius: 16px; padding: 17px; width: 100%; font-family: var(--sans); font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 8px; transition: all .15s; }
-  .btn-primary:active { transform: scale(0.98); opacity: .9; }
-  .btn-secondary { background: var(--white); color: var(--ink); border: 1.5px solid var(--border); border-radius: 16px; padding: 15px; width: 100%; font-family: var(--sans); font-size: 15px; font-weight: 500; cursor: pointer; margin-top: 8px; transition: all .15s; }
-  .disclaimer { font-size: 11px; color: var(--ink3); text-align: center; line-height: 1.5; padding: 12px 8px 0; }
-  .hint-text { font-size: 12px; color: var(--ink3); margin-top: -4px; margin-bottom: 8px; padding: 0 4px; line-height: 1.5; }
-
-  /* ── ГЛАВНЫЙ ЭКРАН ── */
-  .main-hero { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px 24px 16px; gap: 10px; }
-  .main-greeting { font-family: var(--serif); font-size: 26px; color: var(--ink); text-align: center; line-height: 1.25; }
-  .main-sub { font-size: 14px; color: var(--ink3); text-align: center; }
-  .camera-btn { width: 136px; height: 136px; border-radius: 50%; background: var(--ink); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; margin: 16px 0 12px; transition: transform .15s, box-shadow .15s; box-shadow: 0 12px 40px rgba(0,0,0,0.25); }
-  .camera-btn:active { transform: scale(0.95); }
-  .camera-icon { font-size: 38px; line-height: 1; }
-  .camera-label { font-size: 11px; color: rgba(255,255,255,0.7); margin-top: 6px; font-weight: 500; letter-spacing: .04em; text-transform: uppercase; }
-
-  /* ── холестерин-карточка на главной ── */
-  .chol-card {
     width: 100%;
-    background: var(--white);
-    border-radius: 20px;
-    padding: 16px 18px;
-    border: 1.5px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
   }
-  .chol-card-header { display: flex; justify-content: space-between; align-items: flex-start; }
-  .chol-card-title { font-size: 12px; color: var(--ink3); font-weight: 500; text-transform: uppercase; letter-spacing: .06em; }
-  .chol-card-date { font-size: 11px; color: var(--ink3); }
-  .chol-values { display: flex; gap: 0; }
-  .chol-val { flex: 1; }
-  .chol-val + .chol-val { border-left: 1px solid var(--border); padding-left: 14px; }
-  .chol-val-num { font-size: 22px; font-weight: 600; color: var(--ink); line-height: 1; }
-  .chol-val-unit { font-size: 11px; color: var(--ink3); margin-left: 2px; }
-  .chol-val-label { font-size: 11px; color: var(--ink3); margin-top: 3px; }
-  .chol-val-label.bad { color: var(--red); }
-  .chol-val-label.ok { color: var(--green); }
+  .dontknow-btn:active { opacity: .92; }
+  .dontknow-btn.open .dontknow-arrow { transform: rotate(180deg); }
+  .dontknow-text { font-size: 15px; font-weight: 500; color: var(--muted); }
+  .dontknow-arrow { font-size: 14px; color: var(--muted2); transition: transform .2s; }
 
-  /* прогресс-бар */
-  .chol-bar-wrap { display: flex; flex-direction: column; gap: 4px; }
-  .chol-bar-labels { display: flex; justify-content: space-between; font-size: 10px; color: var(--ink3); }
-  .chol-bar-track { height: 6px; border-radius: 3px; background: linear-gradient(to right, #2D9B6F 0%, #2D9B6F 38%, #E8A020 38%, #E8A020 60%, #D94F3D 60%, #D94F3D 100%); position: relative; }
-  .chol-bar-marker {
-    position: absolute; top: -3px;
-    width: 12px; height: 12px; border-radius: 50%;
-    background: var(--white); border: 2px solid var(--red);
-    transform: translateX(-50%);
-    transition: left .5s ease;
+  .dontknow-hint {
+    background: #F8FAFC; border-radius: 12px; padding: 0 14px;
+    margin-bottom: 10px; border: 1px solid #E8E8E8;
+    max-height: 0; overflow: hidden; opacity: 0;
+    transition: max-height .3s ease, opacity .25s ease, padding .3s ease;
   }
+  .dontknow-hint.visible { max-height: 220px; opacity: 1; padding: 14px; }
+  .dontknow-hint-title { font-size: 14px; font-weight: 600; color: var(--accent); margin-bottom: 6px; }
+  .dontknow-hint-text { font-size: 13px; color: var(--muted); line-height: 1.55; }
 
-  /* ── результат ── */
-  .result-screen-inner { flex: 1; overflow-y: auto; padding-bottom: 24px; }
-  .result-photo { width: 100%; height: 200px; background: #E8E4DF; overflow: hidden; flex-shrink: 0; position: relative; }
-  .result-photo-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 64px; }
+  .toggle-row-plain { display: flex; align-items: center; justify-content: space-between; padding: 12px 0 20px; border: none; background: transparent; }
+  .toggle-label { font-size: 16px; font-weight: 600; color: var(--accent); }
+  .toggle-switch { width: 51px; height: 31px; border-radius: 16px; background: #E5E5E5; position: relative; cursor: pointer; transition: background .2s; flex-shrink: 0; }
+  .toggle-switch.on { background: #34C759; }
+  .toggle-switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 27px; height: 27px; border-radius: 50%; background: white; transition: transform .2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+  .toggle-switch.on::after { transform: translateX(20px); }
+
+  .seg { display: flex; background: var(--bg); border-radius: 12px; padding: 4px; margin-bottom: 10px; border: 1px solid var(--line); gap: 4px; }
+  .seg-btn { flex: 1; padding: 10px; text-align: center; font-size: 14px; font-weight: 500; color: var(--muted); border-radius: 8px; cursor: pointer; border: none; background: transparent; font-family: var(--sans); }
+  .seg-btn.active { background: var(--accent); color: #fff; }
+
+  .btn-primary {
+    background: var(--accent); color: #fff; border: none; border-radius: 16px;
+    height: 56px; width: 100%; font-family: var(--sans); font-size: 16px; font-weight: 600;
+    cursor: pointer; margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .btn-primary:active { opacity: .88; }
+  .btn-primary--split { justify-content: space-between; padding: 0 20px; }
+  .btn-secondary { background: var(--bg); color: var(--accent); border: 1px solid var(--line); border-radius: 16px; height: 52px; width: 100%; font-size: 15px; font-weight: 500; cursor: pointer; margin-top: 8px; font-family: var(--sans); }
+  .disclaimer { font-size: 11px; color: var(--muted2); text-align: center; padding: 16px 8px 0; }
+
+  .screen-api-inner { padding: 24px 20px 32px; flex: 1; display: flex; flex-direction: column; }
+  .api-title { font-size: 28px; font-weight: 700; color: var(--accent); margin-bottom: 20px; }
+  .api-key-area {
+    width: 100%; min-height: 120px; padding: 14px; border-radius: 12px; border: none;
+    background: #F5F5F5; font-family: var(--sans); font-size: 14px; color: var(--text);
+    resize: vertical; margin-bottom: 16px;
+  }
+  .api-key-area::placeholder { color: #AAAAAA; }
+  .api-key-error { font-size: 13px; color: #DC2626; margin: -8px 0 12px; display: none; }
+  .api-key-error.visible { display: block; }
+
+  .main-wrap { flex: 1; padding: 8px 20px 16px; display: flex; flex-direction: column; gap: 16px; }
+  .main-greeting { font-size: 32px; font-weight: 700; color: var(--accent); line-height: 1.15; letter-spacing: -0.02em; }
+  .main-lead { font-size: 15px; color: var(--muted); line-height: 1.45; }
+  .btn-camera-wide {
+    background: var(--accent); color: #fff; border: none; border-radius: 16px; height: 56px; width: 100%;
+    font-size: 17px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; font-family: var(--sans);
+  }
+  .btn-camera-wide:active { opacity: .9; }
+  .btn-camera-wide .cam-ico { font-size: 22px; }
+
+  .lipid-section-title { font-size: 18px; font-weight: 700; color: var(--accent); margin-top: 8px; }
+  .chol-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+  .chol-mini {
+    border-radius: 14px; padding: 12px 12px 10px; min-height: 100px;
+    display: flex; flex-direction: column; justify-content: space-between;
+  }
+  .chol-mini--bad { background: var(--bad-bg); }
+  .chol-mini--ok { background: var(--ok-bg); }
+  .chol-mini--empty { background: #F9F9F9; border: 1px dashed var(--line); }
+  .chol-mini > div:first-child { display: flex; justify-content: space-between; align-items: flex-start; gap: 6px; }
+  .chol-mini-name { font-size: 11px; font-weight: 600; color: var(--muted); line-height: 1.25; }
+  .chol-mini-val { font-size: 22px; font-weight: 700; color: var(--accent); margin-top: 0; flex-shrink: 0; }
+  .chol-mini-foot { font-size: 11px; color: var(--muted); margin-top: 6px; }
+  .chol-mini-foot .st { font-weight: 600; color: var(--accent); }
+
+  .result-screen-inner { flex: 1; min-height: 0; overflow-y: auto; padding-bottom: 24px; background: var(--bg); position: relative; }
+  .result-nav {
+    display: flex; align-items: center; justify-content: space-between; padding: 12px 16px;
+    border-bottom: 1px solid #F0F0F0;
+  }
+  .result-nav-title { font-size: 17px; font-weight: 600; color: var(--accent); }
+  .result-nav-left { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 22px; color: var(--accent); }
+  .result-photo { width: 100%; height: 240px; background: #F0F0F0; overflow: hidden; position: relative; }
+  .result-photo-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 56px; }
   .result-photo-img { width: 100%; height: 100%; object-fit: cover; display: none; }
-  .result-badge { margin: 12px 24px 0; border-radius: 18px; padding: 16px 20px; display: flex; align-items: center; gap: 14px; }
-  .result-badge.green { background: var(--green); }
-  .result-badge.yellow { background: var(--yellow); }
-  .result-badge.red { background: var(--red); }
-  .result-badge.error { background: var(--ink3); }
+  .result-gpt-line {
+    display: flex; align-items: center; gap: 6px; padding: 10px 16px; font-size: 12px; color: var(--muted2); background: #FAFAFA; border-bottom: 1px solid #F0F0F0;
+  }
+  .result-body { padding: 20px 20px 8px; }
+  .result-dish-title { font-size: 26px; font-weight: 700; color: var(--accent); line-height: 1.2; margin-bottom: 12px; }
+  .result-summary-text { font-size: 15px; color: #333; line-height: 1.55; margin-bottom: 16px; }
+  .result-score-row { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .result-score-row.hidden { display: none !important; }
+  .result-score-star { font-size: 28px; line-height: 1; color: var(--star-green); }
+  .result-score-big { font-size: 28px; font-weight: 600; color: #666; }
+  .result-hr { height: 1px; background: var(--line); margin: 0 0 16px; }
+  .result-block { margin-bottom: 20px; }
+  .result-block-title { font-size: 16px; font-weight: 700; color: var(--accent); margin-bottom: 8px; }
+  .result-block-text { font-size: 15px; color: #333; line-height: 1.55; }
+  .result-actions { padding: 0 20px 24px; display: flex; flex-direction: column; gap: 8px; }
 
   .result-loader-overlay {
-    position: absolute; inset: 0; z-index: 10;
-    background: rgba(247,245,242,0.92);
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 14px; padding: 24px;
+    position: absolute; inset: 0; z-index: 20; background: rgba(255,255,255,0.92);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
   }
-  .result-screen-inner { position: relative; }
   .result-loader-spinner {
-    width: 40px; height: 40px; border-radius: 50%;
-    border: 3px solid var(--border); border-top-color: var(--green);
-    animation: spin 0.75s linear infinite;
+    width: 36px; height: 36px; border-radius: 50%; border: 3px solid #EEE; border-top-color: var(--accent);
+    animation: spin 0.7s linear infinite;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
-  .result-loader-text { font-size: 15px; color: var(--ink2); font-weight: 500; }
-  .result-badge-icon { font-size: 32px; line-height: 1; }
-  .result-badge-text { color: white; }
-  .result-badge-title { font-size: 20px; font-weight: 600; }
-  .result-score { font-size: 28px; font-weight: 600; color: white; letter-spacing: normal; font-variant-ligatures: none; margin-top: 4px; line-height: 1.2; white-space: nowrap; }
-  .result-badge-sub { font-size: 13px; opacity: .85; margin-top: 6px; }
-  .result-score-wrap.hidden { display: none; }
-  .result-card { background: var(--white); border-radius: 18px; margin: 12px 24px; padding: 18px; border: 1.5px solid var(--border); }
-  .result-card-title { font-size: 13px; font-weight: 600; color: var(--ink3); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 10px; }
-  .result-text { font-size: 15px; color: var(--ink); line-height: 1.6; }
-  .factor-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .result-loader-text { font-size: 15px; color: var(--muted); font-weight: 500; }
+
+  .factor-row { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 1px solid #F0F0F0; }
   .factor-row:last-child { border-bottom: none; }
-  .factor-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-  .factor-dot.bad { background: var(--red); }
-  .factor-dot.ok { background: var(--green); }
-  .factor-dot.mid { background: var(--yellow); }
-  .factor-name { font-size: 14px; color: var(--ink); flex: 1; }
-  .factor-value { font-size: 13px; color: var(--ink3); }
+  .factor-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 6px; }
+  .factor-dot.bad { background: #EF4444; }
+  .factor-dot.ok { background: var(--star-green); }
+  .factor-dot.mid { background: #F59E0B; }
+  .factor-name { font-size: 14px; font-weight: 500; color: var(--accent); flex: 1; }
+  .factor-value { font-size: 13px; color: var(--muted); }
 
-  /* история */
-  .history-item { background: var(--white); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; border: 1.5px solid var(--border); display: flex; align-items: center; gap: 14px; cursor: pointer; transition: transform .15s; }
-  .history-item:active { transform: scale(0.98); }
-  .history-thumb { width: 52px; height: 52px; border-radius: 10px; background: var(--surface); font-size: 28px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; }
-  .history-thumb-img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .history-empty { text-align: center; padding: 32px 20px; color: var(--ink3); font-size: 15px; line-height: 1.5; }
-  .history-info { flex: 1; }
-  .history-name { font-size: 15px; font-weight: 500; color: var(--ink); }
-  .history-date { font-size: 12px; color: var(--ink3); margin-top: 2px; }
-  .history-pill { font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 20px; }
-  .pill-green { background: var(--green-light); color: var(--green); }
-  .pill-yellow { background: var(--yellow-light); color: var(--yellow); }
-  .pill-red { background: var(--red-light); color: var(--red); }
-  .day-summary { background: var(--white); border-radius: 16px; padding: 16px; margin-bottom: 16px; border: 1.5px solid var(--border); display: flex; }
-  .day-stat { flex: 1; text-align: center; }
-  .day-stat + .day-stat { border-left: 1px solid var(--border); }
-  .day-stat-num { font-size: 24px; font-weight: 600; }
-  .day-stat-label { font-size: 11px; color: var(--ink3); margin-top: 2px; }
-  .num-green { color: var(--green); }
-  .num-yellow { color: var(--yellow); }
-  .num-red { color: var(--red); }
-
-  /* навигация */
-  .bottom-nav { display: flex; background: var(--white); border-top: 1px solid var(--border); padding: 10px 0 18px; }
-  .bnav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; opacity: .4; transition: opacity .2s; }
-  .bnav-item.active { opacity: 1; }
-  .bnav-icon { font-size: 22px; }
-  .bnav-label { font-size: 10px; font-weight: 500; color: var(--ink); }
-  #main-name { font-family: var(--serif); font-size: 22px; color: var(--ink); }
-
-  /* модалка API-ключа */
-  .api-key-modal {
-    display: none;
-    position: absolute; inset: 0; z-index: 200;
-    background: rgba(26,26,26,0.45);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-    align-items: center; justify-content: center;
-    padding: 24px;
+  .history-summary {
+    background: var(--card-blue); border-radius: 16px; padding: 16px; margin-bottom: 14px;
+    display: grid; grid-template-columns: 1fr auto; gap: 8px 12px; align-items: start;
   }
-  .api-key-modal.visible { display: flex; }
-  .api-key-modal-card {
-    width: 100%; max-width: 320px;
-    background: var(--white);
-    border-radius: 20px;
-    padding: 22px 20px 20px;
-    border: 1.5px solid var(--border);
-    box-shadow: 0 24px 60px rgba(0,0,0,0.15);
+  .history-summary-label { font-size: 13px; color: var(--accent); }
+  .history-summary-num { font-size: 32px; font-weight: 700; color: var(--accent); line-height: 1; }
+  .history-summary-motiv { grid-column: 1 / -1; font-size: 13px; color: #333; line-height: 1.4; padding-right: 28px; position: relative; }
+  .history-summary-motiv .star-deco { position: absolute; right: 0; bottom: 0; font-size: 18px; }
+
+  .history-item {
+    border-radius: 16px; padding: 12px; margin-bottom: 10px;
+    display: flex; align-items: flex-start; gap: 12px;
   }
-  .api-key-modal-title { font-family: var(--serif); font-size: 22px; color: var(--ink); margin-bottom: 8px; }
-  .api-key-modal-hint { font-size: 13px; color: var(--ink2); line-height: 1.5; margin-bottom: 14px; }
-  .api-key-modal-card .field { margin-bottom: 12px; }
-  .api-key-modal-card input[type="password"],
-  .api-key-modal-card input[type="text"] { font-size: 15px; letter-spacing: 0.02em; }
-  .api-key-error { font-size: 12px; color: var(--red); margin: -4px 0 10px; display: none; }
-  .api-key-error.visible { display: block; }
-  .api-key-toggle { font-size: 12px; color: var(--green); cursor: pointer; margin-top: 10px; text-align: center; font-weight: 500; }
+  .history-item--green { background: var(--ok-bg); }
+  .history-item--yellow { background: var(--history-yellow); }
+  .history-item--red { background: var(--bad-bg); }
+  .history-thumb { width: 56px; height: 56px; border-radius: 12px; background: #EEE; flex-shrink: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+  .history-thumb-img { width: 100%; height: 100%; object-fit: cover; }
+  .history-info { flex: 1; min-width: 0; }
+  .history-date { font-size: 12px; color: var(--muted2); margin-bottom: 4px; }
+  .history-name { font-size: 15px; font-weight: 700; color: var(--accent); line-height: 1.3; }
+  .history-score-line { font-size: 13px; color: var(--muted); margin-top: 6px; display: flex; align-items: center; gap: 4px; }
+  .history-rating { font-size: 13px; color: var(--muted); margin-top: 6px; display: flex; align-items: center; gap: 4px; }
+  .history-star { color: #F59E0B; }
+  .history-empty { text-align: center; padding: 40px 16px; color: var(--muted); font-size: 15px; line-height: 1.5; }
+
+  .bottom-nav { display: flex; background: var(--bg); border-top: 1px solid #F0F0F0; padding: 12px 0 20px; justify-content: space-around; align-items: center; }
+  .bnav-item { cursor: pointer; padding: 8px 16px; border: none; background: none; font-family: var(--sans); }
+  .bnav-item .bnav-icon { font-size: 24px; color: #BBBBBB; transition: color .2s; line-height: 1; }
+  .bnav-item.active .bnav-icon { color: var(--accent); }
+
+  .purchase-overlay {
+    display: none; position: absolute; inset: 0; z-index: 300; background: rgba(0,0,0,0.45);
+    align-items: flex-end; justify-content: center;
+  }
+  .purchase-overlay.visible { display: flex; }
+  .purchase-sheet {
+    width: 100%; background: var(--bg); border-radius: 24px 24px 0 0; padding: 12px 20px 28px;
+    max-height: 85%; animation: sheetUp 0.28s ease;
+  }
+  @keyframes sheetUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  .purchase-grab { width: 40px; height: 4px; background: #E0E0E0; border-radius: 2px; margin: 0 auto 16px; }
+  .purchase-icon-wrap { width: 56px; height: 56px; border-radius: 14px; background: #F5F5F5; margin: 0 auto 14px; display: flex; align-items: center; justify-content: center; }
+  .purchase-icon-inner { width: 36px; height: 36px; border-radius: 50%; background: #22C55E; color: #fff; font-size: 20px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .purchase-title { font-size: 22px; font-weight: 700; text-align: center; color: var(--accent); margin-bottom: 12px; }
+  .purchase-text { font-size: 15px; color: #333; line-height: 1.5; text-align: center; margin-bottom: 20px; }
+  .units-mini { margin: 8px 0 4px; font-size: 12px; color: var(--muted2); }
+
 </style>
 
 <input type="file" id="food-camera-input" accept="image/*" capture="environment" style="display:none" />
@@ -257,48 +231,69 @@
 <div class="app-wrap">
 <div class="phone" style="position:relative;">
 
-  <div class="api-key-modal" id="api-key-modal" aria-modal="true" role="dialog">
-    <div class="api-key-modal-card">
-      <div class="api-key-modal-title">Ключ OpenAI</div>
-      <p class="api-key-modal-hint">Введите API-ключ один раз — он сохранится только в этом браузере (localStorage). Ключ не отправляется никуда, кроме запросов к OpenAI.</p>
-      <div class="field">
-        <div class="field-row">
-          <input type="password" id="api-key-input" placeholder="sk-..." autocomplete="off" autocapitalize="off" spellcheck="false" />
-        </div>
-      </div>
+
+  <div class="screen active" id="screen-api-key">
+    <div class="screen-api-inner">
+      <div class="api-title">API-Key</div>
+      <textarea id="api-key-input" class="api-key-area" placeholder="sk-..." autocomplete="off" autocapitalize="off" spellcheck="false" rows="4"></textarea>
       <div class="api-key-error" id="api-key-error">Введите непустой ключ.</div>
-      <button type="button" class="btn-primary" style="margin-top:0;" onclick="saveApiKeyFromModal()">Сохранить и продолжить</button>
-      <div class="api-key-toggle" onclick="toggleApiKeyVisibility()">Показать / скрыть ключ</div>
+      <button type="button" class="btn-primary" onclick="saveApiKeyFromModal()">Продолжить</button>
     </div>
   </div>
 
-  <!-- ══ ЭКРАН 1: Онбординг — имя + показатели ══ -->
-  <div class="screen active" id="screen-onboard1">
+  <div class="screen" id="screen-profile">
     <div class="nav">
-      <div class="nav-title">Мой профиль</div>
+      <div class="nav-title" id="profile-nav-title">Профиль</div>
       <div class="nav-skip" onclick="skipOnboardingToMain()">Пропустить</div>
     </div>
-    <div class="dots">
-      <div class="dot active"></div><div class="dot"></div>
-    </div>
     <div class="content">
-
-      <div class="section-label">Как тебя зовут?</div>
+      <div class="h2-section">Личные данные</div>
       <div class="field">
+        <div class="field-label">E-mail</div>
+        <div class="field-row">
+          <input type="email" id="input-email" placeholder="you@example.com" />
+        </div>
+      </div>
+      <div class="field">
+        <div class="field-label">Имя</div>
         <div class="field-row">
           <input type="text" id="input-name" placeholder="Имя" oninput="updateName(this.value)" />
         </div>
       </div>
-
-      <div class="section-label">Анализы крови</div>
-      <div class="photo-btn">
-        <div class="photo-btn-icon">📄</div>
-        <div class="photo-btn-text">Сфоткать бланк анализов</div>
-        <div class="photo-btn-sub">AI сам распознает цифры</div>
+      <div class="field-row-2">
+        <div class="field">
+          <div class="field-label">Рост</div>
+          <div class="field-row">
+            <input type="number" id="input-height" placeholder="178" />
+            <span class="field-unit">см</span>
+          </div>
+        </div>
+        <div class="field">
+          <div class="field-label">Вес</div>
+          <div class="field-row">
+            <input type="number" id="input-weight" placeholder="80" />
+            <span class="field-unit">кг</span>
+          </div>
+        </div>
+      </div>
+      <div class="field-row-2">
+        <div class="field">
+          <div class="field-label">Возраст</div>
+          <div class="field-row">
+            <input type="number" id="input-age" placeholder="38" />
+            <span class="field-unit">лет</span>
+          </div>
+        </div>
+        <div>
+          <div class="field-label" style="margin-bottom:6px;">Пол</div>
+          <div class="seg" id="seg-gender">
+            <div class="seg-btn active" onclick="setSeg('seg-gender',this)">Мужской</div>
+            <div class="seg-btn" onclick="setSeg('seg-gender',this)">Женский</div>
+          </div>
+        </div>
       </div>
 
-      <div class="section-label">Или введи вручную</div>
-
+      <div class="h2-section">Твой липидный профиль</div>
       <div class="field" id="f-total">
         <div class="field-label">Общий холестерин</div>
         <div class="field-row">
@@ -307,14 +302,14 @@
         </div>
       </div>
       <div class="field" id="f-ldl">
-        <div class="field-label">LDL — «плохой»</div>
+        <div class="field-label">Липопротеины низкой плотности (ЛПНП, «плохой» холестерин)</div>
         <div class="field-row">
           <input type="number" id="v-ldl" placeholder="3.3" />
           <span class="field-unit">ммоль/л</span>
         </div>
       </div>
       <div class="field" id="f-hdl">
-        <div class="field-label">HDL — «хороший»</div>
+        <div class="field-label">Липопротеины высокой плотности (ЛПВП, «хороший» холестерин)</div>
         <div class="field-row">
           <input type="number" id="v-hdl" placeholder="1.3" />
           <span class="field-unit">ммоль/л</span>
@@ -328,220 +323,203 @@
         </div>
       </div>
 
-      <!-- Кнопка "Я не знаю" — белая как поле -->
-      <div class="dontknow-btn" id="dontknow-btn" onclick="toggleDontKnow()">
-        <div class="dontknow-btn-left">
-          <span class="dontknow-icon">🤷</span>
-          <span class="dontknow-text">Я не знаю свои показатели</span>
-        </div>
+      <button type="button" class="dontknow-btn" id="dontknow-btn" onclick="toggleDontKnow()">
+        <span class="dontknow-text">Я не знаю свои показатели</span>
         <span class="dontknow-arrow">▾</span>
-      </div>
+      </button>
 
-      <!-- Подсказка раскрывается вниз -->
       <div class="dontknow-hint" id="dontknow-hint">
         <div class="dontknow-hint-title">Всё равно начнём!</div>
         <div class="dontknow-hint-text">
-          Мы подставили <b>средние показатели</b> для твоего возраста — AI будет давать <b>общие рекомендации</b> по снижению холестерина.<br><br>
-          Как только сдашь анализы — обнови цифры в профиле, советы станут точнее. Это займёт 5 минут.
+          Мы подставили <b>средние показатели</b> — AI даст общие рекомендации. После анализов обнови цифры в профиле.
         </div>
       </div>
 
-      <button class="btn-primary" onclick="goTo('screen-onboard2')">Далее →</button>
-      <div class="disclaimer">Данные хранятся только на твоём устройстве</div>
-    </div>
-  </div>
-
-  <!-- ══ ЭКРАН 2: Онбординг — профиль ══ -->
-  <div class="screen" id="screen-onboard2">
-    <div class="nav">
-      <div class="nav-back" onclick="goTo('screen-onboard1')">← Назад</div>
-    </div>
-    <div class="dots">
-      <div class="dot"></div><div class="dot active"></div>
-    </div>
-    <div class="content">
-
-      <div class="section-label">Пол</div>
-      <div class="seg" id="seg-gender">
-        <div class="seg-btn active" onclick="setSeg('seg-gender',this)">Мужской</div>
-        <div class="seg-btn" onclick="setSeg('seg-gender',this)">Женский</div>
-      </div>
-
-      <div class="section-label">Возраст</div>
-      <div class="field">
-        <div class="field-row">
-          <input type="number" id="input-age" placeholder="38" />
-          <span class="field-unit">лет</span>
-        </div>
-      </div>
-
-      <div class="section-label">Рост и вес</div>
-      <div style="display:flex; gap:8px;">
-        <div class="field" style="flex:1; margin-bottom:0;">
-          <div class="field-label">Рост</div>
-          <div class="field-row">
-            <input type="number" id="input-height" placeholder="178" />
-            <span class="field-unit">см</span>
-          </div>
-        </div>
-        <div class="field" style="flex:1; margin-bottom:0;">
-          <div class="field-label">Вес</div>
-          <div class="field-row">
-            <input type="number" id="input-weight" placeholder="80" />
-            <span class="field-unit">кг</span>
-          </div>
-        </div>
-      </div>
-      <div class="hint-text" style="margin-top:6px;">ИМТ влияет на интерпретацию нормы холестерина</div>
-
-      <div class="section-label">Медикаменты</div>
-      <div class="toggle-row">
-        <div>
-          <div class="toggle-label">Принимаю статины</div>
-          <div class="toggle-sub">Розувастатин, Аторвастатин и др.</div>
-        </div>
+      <div class="toggle-row-plain">
+        <span class="toggle-label">Принимаю статины</span>
         <div class="toggle-switch" id="toggle-statins" onclick="toggleSwitch(this)"></div>
       </div>
 
-      <div class="section-label">Единицы измерения</div>
+      <div class="field-label units-mini">Единицы измерения анализов</div>
       <div class="seg" id="seg-units">
         <div class="seg-btn active" onclick="setSeg('seg-units',this)">ммоль/л</div>
         <div class="seg-btn" onclick="setSeg('seg-units',this)">мг/дл</div>
       </div>
 
-      <button class="btn-primary" onclick="saveProfileAndStart()">Начать →</button>
-    </div>
-  </div>
-
-  <!-- ══ ЭКРАН 3: Главный ══ -->
-  <div class="screen" id="screen-main">
-    <div class="nav">
-      <div id="main-name">Привет!</div>
-    </div>
-    <div class="main-hero">
-      <div class="main-sub">Что ешь сегодня?</div>
-      <div class="main-greeting">Сфоткай еду —<br>узнай подходит ли она тебе</div>
-
-      <div class="camera-btn" onclick="openFoodCamera()">
-        <div class="camera-icon">📸</div>
-        <div class="camera-label">Сфоткать</div>
-      </div>
-
-      <!-- Карточка холестерина (значения из профиля) -->
-      <div class="chol-card" id="main-chol-card">
-        <div class="chol-card-header">
-          <div class="chol-card-title">Мой холестерин</div>
-          <div class="chol-card-date" id="main-chol-date">данные из профиля</div>
-        </div>
-        <div class="chol-values">
-          <div class="chol-val">
-            <div><span class="chol-val-num" id="main-chol-total-num">—</span><span class="chol-val-unit" id="main-chol-total-unit">ммоль/л</span></div>
-            <div class="chol-val-label" id="main-chol-total-label">общий</div>
-          </div>
-          <div class="chol-val" style="padding-left:14px;">
-            <div><span class="chol-val-num" id="main-chol-ldl-num">—</span><span class="chol-val-unit" id="main-chol-ldl-unit">ммоль/л</span></div>
-            <div class="chol-val-label" id="main-chol-ldl-label">LDL</div>
-          </div>
-        </div>
-        <div class="chol-bar-wrap">
-          <div class="chol-bar-labels">
-            <span id="main-chol-bar-l">норма &lt;5.0</span>
-            <span id="main-chol-bar-m">погранично</span>
-            <span id="main-chol-bar-r">высокий &gt;6.2</span>
-          </div>
-          <div class="chol-bar-track">
-            <div class="chol-bar-marker" id="main-chol-bar-marker" style="left:50%; opacity:0;"></div>
-          </div>
-        </div>
-      </div>
-
+      <button type="button" class="btn-primary" id="profile-cta-btn" onclick="saveProfileAndStart()">Продолжить</button>
+      <div class="disclaimer">Данные хранятся только на твоём устройстве</div>
     </div>
     <div class="bottom-nav">
-      <div class="bnav-item active" onclick="navTo('screen-main',this)">
-        <div class="bnav-icon">🏠</div><div class="bnav-label">Главная</div>
-      </div>
-      <div class="bnav-item" onclick="navTo('screen-history',this)">
-        <div class="bnav-icon">🕐</div><div class="bnav-label">История</div>
-      </div>
-      <div class="bnav-item" onclick="navTo('screen-onboard1',this)">
-        <div class="bnav-icon">👤</div><div class="bnav-label">Профиль</div>
-      </div>
+      <button type="button" class="bnav-item" onclick="navTo('screen-main',this)" aria-label="Главная">
+        <span class="bnav-icon">📷</span>
+      </button>
+      <button type="button" class="bnav-item" onclick="navTo('screen-history',this)" aria-label="История">
+        <span class="bnav-icon">🍽</span>
+      </button>
+      <button type="button" class="bnav-item active" onclick="navTo('screen-profile',this)" aria-label="Профиль">
+        <span class="bnav-icon">👤</span>
+      </button>
     </div>
   </div>
 
-  <!-- ══ ЭКРАН 4: Результат ══ -->
+  <div class="screen" id="screen-main">
+    <div class="main-wrap">
+      <div class="main-greeting" id="main-greeting-line">Привет!</div>
+      <p class="main-lead">Что ешь сегодня? Сфотографируй еду — узнай подходит ли она тебе.</p>
+      <button type="button" class="btn-camera-wide" onclick="openFoodCamera()">
+        <span class="cam-ico">📷</span>
+        Фото
+      </button>
+
+      <div class="lipid-section-title">Твой липидный профиль</div>
+      <div class="chol-grid" id="main-chol-grid">
+        <div class="chol-mini chol-mini--empty" id="main-chol-cell-total">
+          <div>
+            <div class="chol-mini-name">Общий холестерин</div>
+            <div class="chol-mini-val" id="main-chol-total-num">—</div>
+          </div>
+          <div class="chol-mini-foot"><span id="main-chol-total-unit">ммоль/л</span><span class="st" id="main-chol-total-st"></span></div>
+        </div>
+        <div class="chol-mini chol-mini--empty" id="main-chol-cell-ldl">
+          <div>
+            <div class="chol-mini-name">LDL</div>
+            <div class="chol-mini-val" id="main-chol-ldl-num">—</div>
+          </div>
+          <div class="chol-mini-foot"><span id="main-chol-ldl-unit">ммоль/л</span><span class="st" id="main-chol-ldl-st"></span></div>
+        </div>
+        <div class="chol-mini chol-mini--empty" id="main-chol-cell-hdl">
+          <div>
+            <div class="chol-mini-name">HDL</div>
+            <div class="chol-mini-val" id="main-chol-hdl-num">—</div>
+          </div>
+          <div class="chol-mini-foot"><span id="main-chol-hdl-unit">ммоль/л</span><span class="st" id="main-chol-hdl-st"></span></div>
+        </div>
+        <div class="chol-mini chol-mini--empty" id="main-chol-cell-trig">
+          <div>
+            <div class="chol-mini-name">Триглицериды</div>
+            <div class="chol-mini-val" id="main-chol-trig-num">—</div>
+          </div>
+          <div class="chol-mini-foot"><span id="main-chol-trig-unit">ммоль/л</span><span class="st" id="main-chol-trig-st"></span></div>
+        </div>
+      </div>
+    </div>
+    <div class="bottom-nav">
+      <button type="button" class="bnav-item active" onclick="navTo('screen-main',this)" aria-label="Главная">
+        <span class="bnav-icon">📷</span>
+      </button>
+      <button type="button" class="bnav-item" onclick="navTo('screen-history',this)" aria-label="История">
+        <span class="bnav-icon">🍽</span>
+      </button>
+      <button type="button" class="bnav-item" onclick="navTo('screen-profile',this)" aria-label="Профиль">
+        <span class="bnav-icon">👤</span>
+      </button>
+    </div>
+  </div>
+
   <div class="screen" id="screen-result">
     <div class="result-screen-inner">
       <div id="result-loader" class="result-loader-overlay" style="display:none;">
         <div class="result-loader-spinner"></div>
         <div class="result-loader-text">Анализируем фото…</div>
       </div>
+      <div class="result-nav">
+        <div class="result-nav-left" onclick="backFromResult()">←</div>
+        <div class="result-nav-title">Фотография</div>
+        <div class="nav-ico" onclick="showPurchaseModal()" aria-hidden="true">⚙</div>
+      </div>
       <div class="result-photo" id="result-photo-wrap">
         <div class="result-photo-placeholder" id="result-photo-placeholder">🥗</div>
-        <img class="result-photo-img" id="result-photo-img" alt="Фото блюда" />
+        <img class="result-photo-img" id="result-photo-img" alt="" />
       </div>
-      <div class="result-badge green" id="result-badge">
-        <div class="result-badge-icon" id="result-badge-icon">✓</div>
-        <div class="result-badge-text">
-          <div class="result-badge-title" id="result-badge-title">Отличный выбор</div>
-          <div class="result-score-wrap" id="result-score-wrap">
-            <div class="result-score" id="result-score-display">—</div>
-          </div>
-          <div class="result-badge-sub" id="result-badge-sub">Хорошо подходит твоему профилю</div>
+      <div class="result-gpt-line">ⓘ Ответ подготовлен на основе GPT-4o</div>
+      <div class="result-body">
+        <div class="result-dish-title" id="result-dish-title">—</div>
+        <div class="result-summary-text" id="result-summary-text">—</div>
+        <div class="result-score-row" id="result-score-row">
+          <span class="result-score-star" id="result-score-star" aria-hidden="true">★</span>
+          <span class="result-score-big" id="result-score-display">—</span>
+        </div>
+        <div class="result-hr"></div>
+        <div class="result-block">
+          <div class="result-block-title">Нюансы</div>
+          <div class="result-block-text" id="result-nuances-text">—</div>
+        </div>
+        <div class="result-block">
+          <div class="result-block-title">Как это работает</div>
+          <div class="result-block-text" id="result-education-text">—</div>
+        </div>
+        <div class="result-block">
+          <div class="result-block-title">Как сделать 10/10</div>
+          <div class="result-block-text" id="result-upgrade-text">—</div>
+        </div>
+        <div class="result-block">
+          <div class="result-block-title">Факторы</div>
+          <div id="result-factors-list"></div>
         </div>
       </div>
-      <div class="result-card">
-        <div class="result-card-title">Вижу на тарелке</div>
-        <div class="result-text" id="result-vision-text">—</div>
-      </div>
-      <div class="result-card">
-        <div class="result-card-title">Итог</div>
-        <div class="result-text" id="result-summary-text">—</div>
-      </div>
-      <div class="result-card">
-        <div class="result-card-title">Как это работает</div>
-        <div class="result-text" id="result-education-text">—</div>
-      </div>
-      <div class="result-card">
-        <div class="result-card-title">Нюансы</div>
-        <div class="result-text" id="result-nuances-text">—</div>
-      </div>
-      <div class="result-card">
-        <div class="result-card-title">Как сделать 10/10</div>
-        <div class="result-text" id="result-upgrade-text">—</div>
-      </div>
-      <div class="result-card">
-        <div class="result-card-title">Факторы</div>
-        <div id="result-factors-list"></div>
-      </div>
-      <div style="padding: 0 24px; display:flex; flex-direction:column; gap:8px;">
+      <div class="result-actions">
         <button type="button" class="btn-primary" onclick="saveMealToHistoryAndGoMain()">Сохранить в историю</button>
         <button type="button" class="btn-secondary" onclick="backFromResult()">← Назад</button>
       </div>
     </div>
+    <div class="bottom-nav">
+      <button type="button" class="bnav-item" onclick="navTo('screen-main',this)" aria-label="Главная">
+        <span class="bnav-icon">📷</span>
+      </button>
+      <button type="button" class="bnav-item active" onclick="navTo('screen-history',this)" aria-label="История">
+        <span class="bnav-icon">🍽</span>
+      </button>
+      <button type="button" class="bnav-item" onclick="navTo('screen-profile',this)" aria-label="Профиль">
+        <span class="bnav-icon">👤</span>
+      </button>
+    </div>
   </div>
 
-  <!-- ══ ЭКРАН 5: История ══ -->
   <div class="screen" id="screen-history">
     <div class="nav">
       <div class="nav-title">История</div>
+      <div class="nav-ico" onclick="showPurchaseModal()">⚙</div>
     </div>
     <div class="content">
+      <div id="history-summary-card" class="history-summary" style="display:none;">
+        <div class="history-summary-label">Средняя оценка питания</div>
+        <div class="history-summary-num" id="history-avg-num">—</div>
+        <div class="history-summary-motiv">
+          <span id="history-avg-motiv">Это очень круто! Так держать!</span>
+          <span class="star-deco">★</span>
+        </div>
+      </div>
       <div class="history-empty" id="history-empty" style="display:none;">Пока нет записей. Сфоткай свою первую еду!</div>
       <div id="history-list"></div>
     </div>
     <div class="bottom-nav">
-      <div class="bnav-item" onclick="navTo('screen-main',this)">
-        <div class="bnav-icon">🏠</div><div class="bnav-label">Главная</div>
-      </div>
-      <div class="bnav-item active" onclick="navTo('screen-history',this)">
-        <div class="bnav-icon">🕐</div><div class="bnav-label">История</div>
-      </div>
-      <div class="bnav-item" onclick="navTo('screen-onboard1',this)">
-        <div class="bnav-icon">👤</div><div class="bnav-label">Профиль</div>
-      </div>
+      <button type="button" class="bnav-item" onclick="navTo('screen-main',this)" aria-label="Главная">
+        <span class="bnav-icon">📷</span>
+      </button>
+      <button type="button" class="bnav-item active" onclick="navTo('screen-history',this)" aria-label="История">
+        <span class="bnav-icon">🍽</span>
+      </button>
+      <button type="button" class="bnav-item" onclick="navTo('screen-profile',this)" aria-label="Профиль">
+        <span class="bnav-icon">👤</span>
+      </button>
     </div>
   </div>
+
+  <div class="purchase-overlay" id="purchase-overlay" onclick="if(event.target===this)dismissPurchaseModal()">
+    <div class="purchase-sheet" onclick="event.stopPropagation()">
+      <div class="purchase-grab"></div>
+      <div class="purchase-icon-wrap">
+        <div class="purchase-icon-inner">!</div>
+      </div>
+      <div class="purchase-title">Покупка</div>
+      <p class="purchase-text">Обычно за 30 дней можно научиться определять еду. Поэтому это единоразовый платёж за приложение. Это дешевле, чем сходить к диетологу!</p>
+      <button type="button" class="btn-primary btn-primary--split" onclick="dismissPurchaseModal()">
+        <span>Купить</span>
+        <span>$29</span>
+      </button>
+    </div>
+  </div>
+
 
 </div>
 </div>
@@ -567,24 +545,6 @@ function setStoredApiKey(key) {
   localStorage.setItem(LS_OPENAI_KEY, key);
 }
 
-function showApiKeyModal() {
-  const m = document.getElementById('api-key-modal');
-  if (m) {
-    m.classList.add('visible');
-    const inp = document.getElementById('api-key-input');
-    if (inp) {
-      inp.value = getStoredApiKey() || '';
-      setTimeout(() => inp.focus(), 100);
-    }
-  }
-}
-
-function hideApiKeyModal() {
-  const m = document.getElementById('api-key-modal');
-  if (m) m.classList.remove('visible');
-  document.getElementById('api-key-error')?.classList.remove('visible');
-}
-
 function saveApiKeyFromModal() {
   const inp = document.getElementById('api-key-input');
   const err = document.getElementById('api-key-error');
@@ -595,25 +555,26 @@ function saveApiKeyFromModal() {
   }
   err?.classList.remove('visible');
   setStoredApiKey(v);
-  if (inp) inp.value = '';
-  hideApiKeyModal();
+  if (loadProfileFromStorage()) {
+    goTo('screen-main');
+  } else {
+    goTo('screen-profile');
+  }
 }
 
-function toggleApiKeyVisibility() {
-  const inp = document.getElementById('api-key-input');
-  if (!inp) return;
-  inp.type = inp.type === 'password' ? 'text' : 'password';
+function showPurchaseModal() {
+  document.getElementById('purchase-overlay')?.classList.add('visible');
 }
 
-function initApiKeyGate() {
-  if (getStoredApiKey()) hideApiKeyModal();
-  else showApiKeyModal();
+function dismissPurchaseModal() {
+  document.getElementById('purchase-overlay')?.classList.remove('visible');
 }
 
 function saveProfileToStorage() {
   const genderEl = document.querySelector('#seg-gender .seg-btn.active');
   const unitsEl = document.querySelector('#seg-units .seg-btn.active');
   const profile = {
+    email: document.getElementById('input-email')?.value ?? '',
     name: document.getElementById('input-name')?.value ?? '',
     v_total: document.getElementById('v-total')?.value ?? '',
     v_ldl: document.getElementById('v-ldl')?.value ?? '',
@@ -654,6 +615,8 @@ function loadProfileFromStorage() {
     const raw = localStorage.getItem(LS_USER_PROFILE);
     if (!raw) return false;
     const p = JSON.parse(raw);
+    const emailEl = document.getElementById('input-email');
+    if (emailEl && p.email != null) emailEl.value = p.email;
     const nameEl = document.getElementById('input-name');
     if (nameEl && p.name != null) nameEl.value = p.name;
     if (p.v_total != null) document.getElementById('v-total').value = p.v_total;
@@ -687,7 +650,13 @@ function skipOnboardingToMain() {
 
 function syncBottomNavForScreen(screenId) {
   const idx =
-    screenId === 'screen-main' ? 0 : screenId === 'screen-history' ? 1 : screenId === 'screen-onboard1' ? 2 : -1;
+    screenId === 'screen-main'
+      ? 0
+      : screenId === 'screen-history' || screenId === 'screen-result'
+        ? 1
+        : screenId === 'screen-profile'
+          ? 2
+          : -1;
   if (idx < 0) return;
   document.querySelectorAll('.bottom-nav').forEach((nav) => {
     nav.querySelectorAll('.bnav-item').forEach((item, i) => {
@@ -713,12 +682,69 @@ function setMealHistory(arr) {
   } catch (e) {}
 }
 
+function formatHistoryDateRu(iso) {
+  try {
+    const dt = new Date(iso);
+    if (Number.isNaN(dt.getTime())) return '—';
+    const now = new Date();
+    const today0 = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    const d0 = new Date(dt.getFullYear(), dt.getMonth(), dt.getDate()).getTime();
+    const diffDays = Math.round((today0 - d0) / 864e5);
+    let dayPart;
+    if (diffDays === 0) dayPart = 'Сегодня';
+    else if (diffDays === 1) dayPart = 'Вчера';
+    else dayPart = dt.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
+    const timePart = dt.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+    return `${dayPart} в ${timePart}`;
+  } catch (e) {
+    return '—';
+  }
+}
+
+function profileNameForMotivation() {
+  try {
+    const raw = localStorage.getItem(LS_USER_PROFILE);
+    if (!raw) return 'друг';
+    const p = JSON.parse(raw);
+    const n = p.name != null ? String(p.name).trim() : '';
+    return n || 'друг';
+  } catch (e) {
+    return 'друг';
+  }
+}
+
+function motivationTextForAvg(avg) {
+  const n = profileNameForMotivation();
+  if (avg >= 8) return `Это очень круто! Так держать, ${n}!`;
+  if (avg >= 6) return `Хороший темп! Продолжай в том же духе, ${n}!`;
+  if (avg >= 4) return `Есть куда расти — шаг за шагом, ${n}.`;
+  return `Попробуй чаще выбирать более лёгкие варианты — у тебя получится, ${n}!`;
+}
+
+function updateHistorySummaryCard() {
+  const card = document.getElementById('history-summary-card');
+  if (!card) return;
+  const items = getMealHistory();
+  const scores = items.map((i) => Number(i.score)).filter((n) => Number.isFinite(n));
+  if (!scores.length) {
+    card.style.display = 'none';
+    return;
+  }
+  const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
+  card.style.display = '';
+  const numEl = document.getElementById('history-avg-num');
+  if (numEl) numEl.textContent = avg.toFixed(2);
+  const motiv = document.getElementById('history-avg-motiv');
+  if (motiv) motiv.textContent = motivationTextForAvg(avg);
+}
+
 function renderHistoryList() {
   const listEl = document.getElementById('history-list');
   const emptyEl = document.getElementById('history-empty');
   if (!listEl || !emptyEl) return;
   const items = getMealHistory().slice().reverse();
   listEl.innerHTML = '';
+  updateHistorySummaryCard();
   if (!items.length) {
     emptyEl.style.display = 'block';
     listEl.style.display = 'none';
@@ -728,25 +754,22 @@ function renderHistoryList() {
   listEl.style.display = 'block';
   items.forEach((item) => {
     const v = item.verdict;
-    const pillClass =
-      v === 'green' ? 'pill-green' : v === 'yellow' ? 'pill-yellow' : v === 'red' ? 'pill-red' : 'pill-yellow';
-    const pillText =
-      v === 'green' ? 'Можно' : v === 'yellow' ? 'Осторожно' : v === 'red' ? 'Риск' : '—';
+    const toneClass =
+      v === 'green'
+        ? 'history-item--green'
+        : v === 'yellow'
+          ? 'history-item--yellow'
+          : v === 'red'
+            ? 'history-item--red'
+            : 'history-item--yellow';
     const title = (item.title || 'Без названия').trim() || 'Без названия';
-    let dateStr = '—';
-    try {
-      const dt = new Date(item.at);
-      if (!Number.isNaN(dt.getTime())) {
-        dateStr = dt.toLocaleString('ru-RU', {
-          day: 'numeric',
-          month: 'short',
-          hour: '2-digit',
-          minute: '2-digit'
-        });
-      }
-    } catch (e) {}
+    const dateStr = formatHistoryDateRu(item.at);
+    const sc =
+      item.score != null && !Number.isNaN(Number(item.score))
+        ? formatScoreDisplay(item.score)
+        : '—';
     const row = document.createElement('div');
-    row.className = 'history-item';
+    row.className = 'history-item ' + toneClass;
     if (item.photoBase64) {
       const im = document.createElement('img');
       im.className = 'history-thumb history-thumb-img';
@@ -761,19 +784,19 @@ function renderHistoryList() {
     }
     const info = document.createElement('div');
     info.className = 'history-info';
-    const nameEl = document.createElement('div');
-    nameEl.className = 'history-name';
-    nameEl.textContent = title;
     const dateEl = document.createElement('div');
     dateEl.className = 'history-date';
     dateEl.textContent = dateStr;
-    info.appendChild(nameEl);
+    const nameEl = document.createElement('div');
+    nameEl.className = 'history-name';
+    nameEl.textContent = title;
+    const ratingEl = document.createElement('div');
+    ratingEl.className = 'history-rating';
+    ratingEl.innerHTML = '<span class="history-star">★</span> <span class="history-score">' + sc + '/10</span>';
     info.appendChild(dateEl);
+    info.appendChild(nameEl);
+    info.appendChild(ratingEl);
     row.appendChild(info);
-    const pill = document.createElement('div');
-    pill.className = 'history-pill ' + pillClass;
-    pill.textContent = pillText;
-    row.appendChild(pill);
     listEl.appendChild(row);
   });
 }
@@ -838,71 +861,64 @@ function formatCholDisplay(mmol, isMg) {
   return s.endsWith('.0') ? mmol.toFixed(0) : s;
 }
 
-function syncMainCholCard() {
+function getMmolForCompare(id) {
+  const raw = parseMmolInput(id);
+  if (raw == null) return null;
+  if (isProfileMgDl()) return raw / CHOL_MMOL_TO_MGDL;
+  return raw;
+}
+
+function setCholMiniCell(cellId, numId, unitId, stId, mmol, statusFor) {
+  const cell = document.getElementById(cellId);
+  const numEl = document.getElementById(numId);
+  const unitEl = document.getElementById(unitId);
+  const stEl = document.getElementById(stId);
   const mg = isProfileMgDl();
-  const unit = mg ? 'мг/дл' : 'ммоль/л';
-
-  const totalM = parseMmolInput('v-total');
-  const ldlM = parseMmolInput('v-ldl');
-
-  document.getElementById('main-chol-total-unit').textContent = unit;
-  document.getElementById('main-chol-ldl-unit').textContent = unit;
-
-  document.getElementById('main-chol-total-num').textContent = formatCholDisplay(totalM, mg);
-  document.getElementById('main-chol-ldl-num').textContent = formatCholDisplay(ldlM, mg);
-
-  const totalLbl = document.getElementById('main-chol-total-label');
-  if (totalM == null) {
-    totalLbl.textContent = 'общий — нет данных';
-    totalLbl.className = 'chol-val-label';
-  } else if (totalM <= 5.0) {
-    totalLbl.textContent = 'в пределах нормы';
-    totalLbl.className = 'chol-val-label ok';
-  } else if (totalM <= 6.2) {
-    totalLbl.textContent = '↑ пограничный уровень';
-    totalLbl.className = 'chol-val-label bad';
-  } else {
-    totalLbl.textContent = '↑ высокий уровень';
-    totalLbl.className = 'chol-val-label bad';
+  const displayUnit = mg ? 'мг/дл' : 'ммоль/л';
+  if (!cell || !numEl || !unitEl || !stEl) return;
+  unitEl.textContent = displayUnit;
+  if (mmol == null) {
+    numEl.textContent = '—';
+    stEl.textContent = '';
+    cell.className = 'chol-mini chol-mini--empty';
+    return;
   }
+  numEl.textContent = formatCholDisplay(mmol, mg);
+  const { tone, label } = statusFor(mmol);
+  stEl.textContent = label ? ' · ' + label : '';
+  cell.className = 'chol-mini chol-mini--' + tone;
+}
 
-  const ldlLbl = document.getElementById('main-chol-ldl-label');
-  if (ldlM == null) {
-    ldlLbl.textContent = 'LDL — нет данных';
-    ldlLbl.className = 'chol-val-label';
-  } else if (ldlM <= 3.0) {
-    ldlLbl.textContent = 'LDL в норме';
-    ldlLbl.className = 'chol-val-label ok';
-  } else {
-    ldlLbl.textContent = '↑ LDL повышен';
-    ldlLbl.className = 'chol-val-label bad';
-  }
+function syncMainCholCard() {
+  const totalM = getMmolForCompare('v-total');
+  const ldlM = getMmolForCompare('v-ldl');
+  const hdlM = getMmolForCompare('v-hdl');
+  const trigM = getMmolForCompare('v-trig');
 
-  if (mg) {
-    document.getElementById('main-chol-bar-l').textContent = 'норма <200';
-    document.getElementById('main-chol-bar-m').textContent = 'погранично';
-    document.getElementById('main-chol-bar-r').textContent = 'высокий >240';
-  } else {
-    document.getElementById('main-chol-bar-l').textContent = 'норма <5.0';
-    document.getElementById('main-chol-bar-m').textContent = 'погранично';
-    document.getElementById('main-chol-bar-r').textContent = 'высокий >6.2';
-  }
+  setCholMiniCell('main-chol-cell-total', 'main-chol-total-num', 'main-chol-total-unit', 'main-chol-total-st', totalM, (m) => {
+    if (m <= 5.0) return { tone: 'ok', label: 'норма' };
+    return { tone: 'bad', label: 'повышен' };
+  });
 
-  const marker = document.getElementById('main-chol-bar-marker');
-  if (totalM == null) {
-    marker.style.opacity = '0';
-  } else {
-    const min = 3.5;
-    const max = 7.5;
-    const pct = Math.min(100, Math.max(0, ((totalM - min) / (max - min)) * 100));
-    marker.style.left = pct + '%';
-    marker.style.opacity = '1';
-  }
+  setCholMiniCell('main-chol-cell-ldl', 'main-chol-ldl-num', 'main-chol-ldl-unit', 'main-chol-ldl-st', ldlM, (m) => {
+    if (m <= 3.0) return { tone: 'ok', label: 'норма' };
+    return { tone: 'bad', label: 'повышен' };
+  });
+
+  setCholMiniCell('main-chol-cell-hdl', 'main-chol-hdl-num', 'main-chol-hdl-unit', 'main-chol-hdl-st', hdlM, (m) => {
+    if (m >= 1.0) return { tone: 'ok', label: 'норма' };
+    return { tone: 'bad', label: 'ниже нормы' };
+  });
+
+  setCholMiniCell('main-chol-cell-trig', 'main-chol-trig-num', 'main-chol-trig-unit', 'main-chol-trig-st', trigM, (m) => {
+    if (m <= 1.7) return { tone: 'ok', label: 'норма' };
+    return { tone: 'bad', label: 'повышен' };
+  });
 }
 
 function openFoodCamera() {
   if (!getStoredApiKey()) {
-    showApiKeyModal();
+    goTo('screen-api-key');
     return;
   }
   document.getElementById('food-camera-input').click();
@@ -998,25 +1014,6 @@ function parseModelJson(raw) {
   return JSON.parse(t);
 }
 
-function verdictToBadgeClass(v) {
-  if (v === 'green' || v === 'yellow' || v === 'red' || v === 'error') return v;
-  return 'error';
-}
-
-function verdictToBadgeIcon(v) {
-  if (v === 'green') return '✓';
-  if (v === 'yellow') return '◆';
-  if (v === 'red') return '!';
-  return '…';
-}
-
-function verdictToBadgeSub(v) {
-  if (v === 'green') return 'Отлично для твоего профиля';
-  if (v === 'yellow') return 'На грани — есть куда улучшить (5–6)';
-  if (v === 'red') return 'Сложно для профиля (<5)';
-  return 'Попробуй сфотографировать блюдо';
-}
-
 function formatScoreDisplay(score) {
   if (score == null || score === '' || Number.isNaN(Number(score))) return '—';
   const n = Number(score);
@@ -1105,26 +1102,18 @@ async function analyzeFoodPhoto(dataUrl) {
 function applyResultToUI(data) {
   const v = data.verdict;
   const err = v === 'error';
-  const badge = document.getElementById('result-badge');
-  badge.className = 'result-badge ' + verdictToBadgeClass(v);
-
-  document.getElementById('result-badge-icon').textContent = verdictToBadgeIcon(v);
-  document.getElementById('result-badge-title').textContent = data.title || '—';
-
-  const scoreWrap = document.getElementById('result-score-wrap');
+  const scoreRow = document.getElementById('result-score-row');
   const scoreDisplay = document.getElementById('result-score-display');
+  const dish = document.getElementById('result-dish-title');
+  if (dish) dish.textContent = data.title || '—';
+
   if (err) {
-    scoreWrap.classList.add('hidden');
-    scoreDisplay.textContent = '—';
+    scoreRow?.classList.add('hidden');
+    if (scoreDisplay) scoreDisplay.textContent = '—';
   } else {
-    scoreWrap.classList.remove('hidden');
-    const n = formatScoreDisplay(data.score);
-    scoreDisplay.textContent = n + '/' + '10';
+    scoreRow?.classList.remove('hidden');
+    if (scoreDisplay) scoreDisplay.textContent = formatScoreDisplay(data.score) + '/10';
   }
-
-  document.getElementById('result-badge-sub').textContent = verdictToBadgeSub(v);
-
-  document.getElementById('result-vision-text').textContent = resultFieldText(data.vision, err);
 
   let summaryText = '—';
   if (err) {
@@ -1169,10 +1158,9 @@ document.getElementById('food-camera-input').addEventListener('change', async (e
   };
 
   setResultLoading(true);
-  document.getElementById('result-badge-title').textContent = '…';
-  document.getElementById('result-badge-sub').textContent = 'Загружаем анализ';
+  document.getElementById('result-dish-title').textContent = '…';
+  document.getElementById('result-score-row')?.classList.add('hidden');
   document.getElementById('result-score-display').textContent = '…';
-  document.getElementById('result-vision-text').textContent = '—';
   document.getElementById('result-summary-text').textContent = '—';
   document.getElementById('result-education-text').textContent = '—';
   document.getElementById('result-nuances-text').textContent = '—';
@@ -1201,10 +1189,27 @@ document.getElementById('food-camera-input').addEventListener('change', async (e
 });
 
 function goTo(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+  const target = document.getElementById(id);
+  if (!target) return;
+  document.querySelectorAll('.screen').forEach((s) => s.classList.remove('active'));
+  target.classList.add('active');
   if (id === 'screen-main') syncMainCholCard();
   if (id === 'screen-history') renderHistoryList();
+  if (id === 'screen-api-key') {
+    const inp = document.getElementById('api-key-input');
+    if (inp) {
+      inp.value = getStoredApiKey() || '';
+      setTimeout(() => inp.focus(), 50);
+    }
+    document.getElementById('api-key-error')?.classList.remove('visible');
+  }
+  if (id === 'screen-profile') {
+    const hasSaved = !!localStorage.getItem(LS_USER_PROFILE);
+    const btn = document.getElementById('profile-cta-btn');
+    const skip = document.querySelector('#screen-profile .nav-skip');
+    if (btn) btn.textContent = hasSaved ? 'Сохранить изменения' : 'Продолжить';
+    if (skip) skip.style.display = hasSaved ? 'none' : 'block';
+  }
   syncBottomNavForScreen(id);
 }
 function navTo(id, el) {
@@ -1213,12 +1218,16 @@ function navTo(id, el) {
   el.classList.add('active');
 }
 function setSeg(id, el) {
-  document.getElementById(id).querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).querySelectorAll('.seg-btn').forEach((b) => b.classList.remove('active'));
   el.classList.add('active');
+  if (id === 'seg-units' && document.getElementById('screen-main')?.classList.contains('active')) syncMainCholCard();
 }
 function toggleSwitch(el) { el.classList.toggle('on'); }
 function updateName(val) {
-  document.getElementById('main-name').textContent = val.trim() ? 'Привет, ' + val.trim() + '!' : 'Привет!';
+  const line = document.getElementById('main-greeting-line');
+  if (!line) return;
+  const t = String(val || '').trim();
+  line.textContent = t ? 'Привет, ' + t + '!' : 'Привет!';
 }
 
 function toggleDontKnow() {
@@ -1237,14 +1246,29 @@ function toggleDontKnow() {
 }
 
 document.getElementById('api-key-input')?.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') {
+  if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
     e.preventDefault();
     saveApiKeyFromModal();
   }
 });
 
-initApiKeyGate();
-if (loadProfileFromStorage()) {
-  goTo('screen-main');
+['v-total', 'v-ldl', 'v-hdl', 'v-trig'].forEach((fid) => {
+  document.getElementById(fid)?.addEventListener('input', () => {
+    if (document.getElementById('screen-main')?.classList.contains('active')) syncMainCholCard();
+  });
+});
+
+function bootstrapApp() {
+  if (!getStoredApiKey()) {
+    goTo('screen-api-key');
+    return;
+  }
+  if (loadProfileFromStorage()) {
+    goTo('screen-main');
+  } else {
+    goTo('screen-profile');
+  }
 }
+
+bootstrapApp();
 </script>
