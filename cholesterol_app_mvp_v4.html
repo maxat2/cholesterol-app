@@ -32,8 +32,9 @@
     --line: #E0E0E0;
     --bad-bg: #FFF0F0;
     --ok-bg: #F0FFF4;
-    --history-yellow: #FFFBF0;
-    --card-blue: #EEF2FF;
+    --history-yellow: #FEF0E6;
+    --history-green-card: #F6FEE6;
+    --card-blue: #E7EDFF;
     --dontknow-bg: #EEF2FF;
     --star-green: #22C55E;
     --sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -347,30 +348,198 @@
   .factor-name { font-size: 14px; font-weight: 500; color: var(--accent); flex: 1; }
   .factor-value { font-size: 13px; color: var(--muted); }
 
-  .history-summary {
-    background: var(--card-blue); border-radius: 16px; padding: 16px; margin-bottom: 14px;
-    display: grid; grid-template-columns: 1fr auto; gap: 8px 12px; align-items: start;
+  /* История — по макету Figma (Inter, 351px контент) */
+  #screen-history .content.history-content {
+    padding: 0 12px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
   }
-  .history-summary-label { font-size: 13px; color: var(--accent); }
-  .history-summary-num { font-size: 32px; font-weight: 700; color: var(--accent); line-height: 1; }
-  .history-summary-motiv { grid-column: 1 / -1; font-size: 13px; color: #333; line-height: 1.4; padding-right: 28px; position: relative; }
-  .history-summary-motiv .star-deco { position: absolute; right: 0; bottom: 0; font-size: 18px; }
+  .nav.history-top-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    padding: 12px 16px;
+    min-height: 54px;
+    background: var(--bg);
+    flex-shrink: 0;
+  }
+  .history-top-nav .history-nav-side {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    color: #1C1B1F;
+  }
+  .history-top-nav .history-nav-title {
+    flex: 1;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 24px;
+    color: #1C1B1F;
+    font-family: var(--sans);
+  }
+
+  .history-summary {
+    width: 100%;
+    max-width: 351px;
+    margin: 0 auto;
+    min-height: 132px;
+    background: var(--card-blue);
+    border-radius: 16px;
+    padding: 14px 16px 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 8px;
+    box-sizing: border-box;
+  }
+  .history-summary-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .history-summary-label {
+    max-width: 164px;
+    font-size: 15.24px;
+    font-weight: 400;
+    line-height: 1.25;
+    color: #000000;
+    font-family: var(--sans);
+  }
+  .history-summary-num {
+    font-size: 50.75px;
+    font-weight: 700;
+    line-height: 0.95;
+    color: #000000;
+    font-family: var(--sans);
+    letter-spacing: -0.03em;
+  }
+  .history-summary-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 8px;
+    padding-right: 2px;
+  }
+  .history-summary-motiv {
+    margin: 0;
+    max-width: 220px;
+    font-size: 11px;
+    font-weight: 400;
+    line-height: 1.35;
+    color: #000000;
+    font-family: var(--sans);
+    white-space: pre-line;
+  }
+  .history-summary-star {
+    font-size: 15px;
+    line-height: 1;
+    color: #000000;
+    flex-shrink: 0;
+  }
+
+  #history-list {
+    width: 100%;
+    max-width: 351px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
 
   .history-item {
-    border-radius: 16px; padding: 12px; margin-bottom: 10px;
-    display: flex; align-items: flex-start; gap: 12px;
+    width: 100%;
+    min-height: 132px;
+    border-radius: 16px;
+    padding: 16px 12px;
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    gap: 12px;
+    box-sizing: border-box;
   }
-  .history-item--green { background: var(--ok-bg); }
+  .history-item--green { background: var(--history-green-card); }
   .history-item--yellow { background: var(--history-yellow); }
   .history-item--red { background: var(--bad-bg); }
-  .history-thumb { width: 56px; height: 56px; border-radius: 12px; background: #EEE; flex-shrink: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+  .history-thumb {
+    width: 100px;
+    height: 100px;
+    border-radius: 22.87px;
+    background: #EEE;
+    flex-shrink: 0;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+  }
   .history-thumb-img { width: 100%; height: 100%; object-fit: cover; }
-  .history-info { flex: 1; min-width: 0; }
-  .history-date { font-size: 12px; color: var(--muted2); margin-bottom: 4px; }
-  .history-name { font-size: 15px; font-weight: 700; color: var(--accent); line-height: 1.3; }
+  .history-info {
+    flex: 1;
+    min-width: 0;
+    min-height: 100px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding-top: 0;
+  }
+  .history-date {
+    font-size: 12.2px;
+    font-weight: 400;
+    line-height: 1.2;
+    color: #9B9B9B;
+    font-family: var(--sans);
+    margin-bottom: 6px;
+  }
+  .history-name {
+    font-size: 15.24px;
+    font-weight: 400;
+    line-height: 1.3;
+    color: #000000;
+    font-family: var(--sans);
+    flex: 1;
+    min-height: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .history-rating {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: auto;
+    padding-top: 6px;
+    font-size: 12.2px;
+    font-weight: 400;
+    line-height: 1.2;
+    color: #9B9B9B;
+    font-family: var(--sans);
+  }
+  .history-star {
+    display: inline-block;
+    width: 15px;
+    height: 14px;
+    line-height: 14px;
+    font-size: 13px;
+    text-align: center;
+  }
+  .history-star--g { color: #00AD30; }
+  .history-star--y { color: #FF6C02; }
+  .history-star--b { color: #5B94FF; }
+  .history-star--r { color: #E53935; }
   .history-score-line { font-size: 13px; color: var(--muted); margin-top: 6px; display: flex; align-items: center; gap: 4px; }
-  .history-rating { font-size: 13px; color: var(--muted); margin-top: 6px; display: flex; align-items: center; gap: 4px; }
-  .history-star { color: #F59E0B; }
   .history-empty { text-align: center; padding: 40px 16px; color: var(--muted); font-size: 15px; line-height: 1.5; }
 
   .bottom-nav {
@@ -387,7 +556,15 @@
     .bottom-nav { padding-bottom: 20px; }
   }
   .bnav-item { cursor: pointer; padding: 8px 16px; border: none; background: none; font-family: var(--sans); }
-  .bnav-item .bnav-icon { font-size: 24px; color: #BBBBBB; transition: color .2s; line-height: 1; }
+  .bnav-item .bnav-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #BFBFBF;
+    transition: color 0.2s;
+    line-height: 0;
+  }
+  .bnav-item .bnav-icon .bnav-svg { display: block; width: 24px; height: 24px; }
   .bnav-item.active .bnav-icon { color: var(--accent); }
 
   .purchase-overlay {
@@ -536,13 +713,13 @@
     </div>
     <div class="bottom-nav">
       <button type="button" class="bnav-item" onclick="navTo('screen-main',this)" aria-label="Главная">
-        <span class="bnav-icon">📷</span>
+        <span class="bnav-icon" aria-hidden="true"><svg class="bnav-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3.5 8.5C3.5 9.05 3.95 9.5 4.5 9.5C5.05 9.5 5.5 9.05 5.5 8.5V6.5H7.5C8.05 6.5 8.5 6.05 8.5 5.5C8.5 4.95 8.05 4.5 7.5 4.5H5.5V2.5C5.5 1.95 5.05 1.5 4.5 1.5C3.95 1.5 3.5 1.95 3.5 2.5V4.5H1.5C0.95 4.5 0.5 4.95 0.5 5.5C0.5 6.05 0.95 6.5 1.5 6.5H3.5V8.5Z" fill="currentColor"/><path d="M13.5 17.5C15.1569 17.5 16.5 16.1569 16.5 14.5C16.5 12.8431 15.1569 11.5 13.5 11.5C11.8431 11.5 10.5 12.8431 10.5 14.5C10.5 16.1569 11.8431 17.5 13.5 17.5Z" fill="currentColor"/><path d="M21.5 6.5H18.33L17.09 5.15C16.72 4.74 16.18 4.5 15.62 4.5H9.22C9.39 4.8 9.5 5.13 9.5 5.5C9.5 6.6 8.6 7.5 7.5 7.5H6.5V8.5C6.5 9.6 5.6 10.5 4.5 10.5C4.13 10.5 3.8 10.39 3.5 10.22V20.5C3.5 21.6 4.4 22.5 5.5 22.5H21.5C22.6 22.5 23.5 21.6 23.5 20.5V8.5C23.5 7.4 22.6 6.5 21.5 6.5ZM13.5 19.5C10.74 19.5 8.5 17.26 8.5 14.5C8.5 11.74 10.74 9.5 13.5 9.5C16.26 9.5 18.5 11.74 18.5 14.5C18.5 17.26 16.26 19.5 13.5 19.5Z" fill="currentColor"/></svg></span>
       </button>
       <button type="button" class="bnav-item" onclick="navTo('screen-history',this)" aria-label="История">
-        <span class="bnav-icon">🍽</span>
+        <span class="bnav-icon" aria-hidden="true"><svg class="bnav-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16 6V12C16 13.1 16.9 14 18 14H19V21C19 21.55 19.45 22 20 22C20.55 22 21 21.55 21 21V3.13C21 2.48 20.39 2 19.76 2.15C17.6 2.68 16 4.51 16 6ZM11 9H9V3C9 2.45 8.55 2 8 2C7.45 2 7 2.45 7 3V9H5V3C5 2.45 4.55 2 4 2C3.45 2 3 2.45 3 3V9C3 11.21 4.79 13 7 13V21C7 21.55 7.45 22 8 22C8.55 22 9 21.55 9 21V13C11.21 13 13 11.21 13 9V3C13 2.45 12.55 2 12 2C11.45 2 11 2.45 11 3V9Z" fill="currentColor"/></svg></span>
       </button>
       <button type="button" class="bnav-item active" onclick="navTo('screen-profile',this)" aria-label="Профиль">
-        <span class="bnav-icon">👤</span>
+        <span class="bnav-icon" aria-hidden="true"><svg class="bnav-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11.9892 6C13.0938 6 13.9892 5.10457 13.9892 4C13.9892 2.89543 13.0938 2 11.9892 2C10.8847 2 9.98924 2.89543 9.98924 4C9.98924 5.10457 10.8847 6 11.9892 6Z" fill="currentColor"/><path d="M15.8792 8.11C15.4892 7.72 14.8192 7 13.5192 7C13.3092 7 12.0992 7 10.9792 7C8.51924 6.99 6.46924 5.2 6.05924 2.85C5.97924 2.36 5.56924 2 5.07924 2C4.46924 2 3.98924 2.54 4.07924 3.14C4.51924 5.8 6.45924 7.95 8.98924 8.71V21C8.98924 21.55 9.43924 22 9.98924 22C10.5392 22 10.9892 21.55 10.9892 21V16H12.9892V21C12.9892 21.55 13.4392 22 13.9892 22C14.5392 22 14.9892 21.55 14.9892 21V10.05L18.2292 13.29C18.6192 13.68 19.2492 13.68 19.6392 13.29C20.0292 12.9 20.0292 12.27 19.6392 11.88L15.8792 8.11Z" fill="currentColor"/></svg></span>
       </button>
     </div>
   </div>
@@ -597,13 +774,13 @@
     </div>
     <div class="bottom-nav">
       <button type="button" class="bnav-item active" onclick="navTo('screen-main',this)" aria-label="Главная">
-        <span class="bnav-icon">📷</span>
+        <span class="bnav-icon" aria-hidden="true"><svg class="bnav-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3.5 8.5C3.5 9.05 3.95 9.5 4.5 9.5C5.05 9.5 5.5 9.05 5.5 8.5V6.5H7.5C8.05 6.5 8.5 6.05 8.5 5.5C8.5 4.95 8.05 4.5 7.5 4.5H5.5V2.5C5.5 1.95 5.05 1.5 4.5 1.5C3.95 1.5 3.5 1.95 3.5 2.5V4.5H1.5C0.95 4.5 0.5 4.95 0.5 5.5C0.5 6.05 0.95 6.5 1.5 6.5H3.5V8.5Z" fill="currentColor"/><path d="M13.5 17.5C15.1569 17.5 16.5 16.1569 16.5 14.5C16.5 12.8431 15.1569 11.5 13.5 11.5C11.8431 11.5 10.5 12.8431 10.5 14.5C10.5 16.1569 11.8431 17.5 13.5 17.5Z" fill="currentColor"/><path d="M21.5 6.5H18.33L17.09 5.15C16.72 4.74 16.18 4.5 15.62 4.5H9.22C9.39 4.8 9.5 5.13 9.5 5.5C9.5 6.6 8.6 7.5 7.5 7.5H6.5V8.5C6.5 9.6 5.6 10.5 4.5 10.5C4.13 10.5 3.8 10.39 3.5 10.22V20.5C3.5 21.6 4.4 22.5 5.5 22.5H21.5C22.6 22.5 23.5 21.6 23.5 20.5V8.5C23.5 7.4 22.6 6.5 21.5 6.5ZM13.5 19.5C10.74 19.5 8.5 17.26 8.5 14.5C8.5 11.74 10.74 9.5 13.5 9.5C16.26 9.5 18.5 11.74 18.5 14.5C18.5 17.26 16.26 19.5 13.5 19.5Z" fill="currentColor"/></svg></span>
       </button>
       <button type="button" class="bnav-item" onclick="navTo('screen-history',this)" aria-label="История">
-        <span class="bnav-icon">🍽</span>
+        <span class="bnav-icon" aria-hidden="true"><svg class="bnav-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16 6V12C16 13.1 16.9 14 18 14H19V21C19 21.55 19.45 22 20 22C20.55 22 21 21.55 21 21V3.13C21 2.48 20.39 2 19.76 2.15C17.6 2.68 16 4.51 16 6ZM11 9H9V3C9 2.45 8.55 2 8 2C7.45 2 7 2.45 7 3V9H5V3C5 2.45 4.55 2 4 2C3.45 2 3 2.45 3 3V9C3 11.21 4.79 13 7 13V21C7 21.55 7.45 22 8 22C8.55 22 9 21.55 9 21V13C11.21 13 13 11.21 13 9V3C13 2.45 12.55 2 12 2C11.45 2 11 2.45 11 3V9Z" fill="currentColor"/></svg></span>
       </button>
       <button type="button" class="bnav-item" onclick="navTo('screen-profile',this)" aria-label="Профиль">
-        <span class="bnav-icon">👤</span>
+        <span class="bnav-icon" aria-hidden="true"><svg class="bnav-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11.9892 6C13.0938 6 13.9892 5.10457 13.9892 4C13.9892 2.89543 13.0938 2 11.9892 2C10.8847 2 9.98924 2.89543 9.98924 4C9.98924 5.10457 10.8847 6 11.9892 6Z" fill="currentColor"/><path d="M15.8792 8.11C15.4892 7.72 14.8192 7 13.5192 7C13.3092 7 12.0992 7 10.9792 7C8.51924 6.99 6.46924 5.2 6.05924 2.85C5.97924 2.36 5.56924 2 5.07924 2C4.46924 2 3.98924 2.54 4.07924 3.14C4.51924 5.8 6.45924 7.95 8.98924 8.71V21C8.98924 21.55 9.43924 22 9.98924 22C10.5392 22 10.9892 21.55 10.9892 21V16H12.9892V21C12.9892 21.55 13.4392 22 13.9892 22C14.5392 22 14.9892 21.55 14.9892 21V10.05L18.2292 13.29C18.6192 13.68 19.2492 13.68 19.6392 13.29C20.0292 12.9 20.0292 12.27 19.6392 11.88L15.8792 8.11Z" fill="currentColor"/></svg></span>
       </button>
     </div>
   </div>
@@ -656,29 +833,39 @@
     </div>
     <div class="bottom-nav">
       <button type="button" class="bnav-item" onclick="navTo('screen-main',this)" aria-label="Главная">
-        <span class="bnav-icon">📷</span>
+        <span class="bnav-icon" aria-hidden="true"><svg class="bnav-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3.5 8.5C3.5 9.05 3.95 9.5 4.5 9.5C5.05 9.5 5.5 9.05 5.5 8.5V6.5H7.5C8.05 6.5 8.5 6.05 8.5 5.5C8.5 4.95 8.05 4.5 7.5 4.5H5.5V2.5C5.5 1.95 5.05 1.5 4.5 1.5C3.95 1.5 3.5 1.95 3.5 2.5V4.5H1.5C0.95 4.5 0.5 4.95 0.5 5.5C0.5 6.05 0.95 6.5 1.5 6.5H3.5V8.5Z" fill="currentColor"/><path d="M13.5 17.5C15.1569 17.5 16.5 16.1569 16.5 14.5C16.5 12.8431 15.1569 11.5 13.5 11.5C11.8431 11.5 10.5 12.8431 10.5 14.5C10.5 16.1569 11.8431 17.5 13.5 17.5Z" fill="currentColor"/><path d="M21.5 6.5H18.33L17.09 5.15C16.72 4.74 16.18 4.5 15.62 4.5H9.22C9.39 4.8 9.5 5.13 9.5 5.5C9.5 6.6 8.6 7.5 7.5 7.5H6.5V8.5C6.5 9.6 5.6 10.5 4.5 10.5C4.13 10.5 3.8 10.39 3.5 10.22V20.5C3.5 21.6 4.4 22.5 5.5 22.5H21.5C22.6 22.5 23.5 21.6 23.5 20.5V8.5C23.5 7.4 22.6 6.5 21.5 6.5ZM13.5 19.5C10.74 19.5 8.5 17.26 8.5 14.5C8.5 11.74 10.74 9.5 13.5 9.5C16.26 9.5 18.5 11.74 18.5 14.5C18.5 17.26 16.26 19.5 13.5 19.5Z" fill="currentColor"/></svg></span>
       </button>
       <button type="button" class="bnav-item active" onclick="navTo('screen-history',this)" aria-label="История">
-        <span class="bnav-icon">🍽</span>
+        <span class="bnav-icon" aria-hidden="true"><svg class="bnav-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16 6V12C16 13.1 16.9 14 18 14H19V21C19 21.55 19.45 22 20 22C20.55 22 21 21.55 21 21V3.13C21 2.48 20.39 2 19.76 2.15C17.6 2.68 16 4.51 16 6ZM11 9H9V3C9 2.45 8.55 2 8 2C7.45 2 7 2.45 7 3V9H5V3C5 2.45 4.55 2 4 2C3.45 2 3 2.45 3 3V9C3 11.21 4.79 13 7 13V21C7 21.55 7.45 22 8 22C8.55 22 9 21.55 9 21V13C11.21 13 13 11.21 13 9V3C13 2.45 12.55 2 12 2C11.45 2 11 2.45 11 3V9Z" fill="currentColor"/></svg></span>
       </button>
       <button type="button" class="bnav-item" onclick="navTo('screen-profile',this)" aria-label="Профиль">
-        <span class="bnav-icon">👤</span>
+        <span class="bnav-icon" aria-hidden="true"><svg class="bnav-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11.9892 6C13.0938 6 13.9892 5.10457 13.9892 4C13.9892 2.89543 13.0938 2 11.9892 2C10.8847 2 9.98924 2.89543 9.98924 4C9.98924 5.10457 10.8847 6 11.9892 6Z" fill="currentColor"/><path d="M15.8792 8.11C15.4892 7.72 14.8192 7 13.5192 7C13.3092 7 12.0992 7 10.9792 7C8.51924 6.99 6.46924 5.2 6.05924 2.85C5.97924 2.36 5.56924 2 5.07924 2C4.46924 2 3.98924 2.54 4.07924 3.14C4.51924 5.8 6.45924 7.95 8.98924 8.71V21C8.98924 21.55 9.43924 22 9.98924 22C10.5392 22 10.9892 21.55 10.9892 21V16H12.9892V21C12.9892 21.55 13.4392 22 13.9892 22C14.5392 22 14.9892 21.55 14.9892 21V10.05L18.2292 13.29C18.6192 13.68 19.2492 13.68 19.6392 13.29C20.0292 12.9 20.0292 12.27 19.6392 11.88L15.8792 8.11Z" fill="currentColor"/></svg></span>
       </button>
     </div>
   </div>
 
   <div class="screen" id="screen-history">
-    <div class="nav">
-      <div class="nav-title">История</div>
-      <div class="nav-ico" onclick="showPurchaseModal()">⚙</div>
+    <div class="nav history-top-nav">
+      <button type="button" class="history-nav-side" onclick="goTo('screen-main')" aria-label="Назад" title="Назад">
+        <svg width="10" height="17" viewBox="0 0 10 17" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M8.5 15.5L1.5 8.5L8.5 1.5" stroke="#1C1B1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="history-nav-title">История</div>
+      <button type="button" class="history-nav-side" onclick="showPurchaseModal()" aria-label="Настройки">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M12 15a3 3 0 100-6 3 3 0 000 6z" stroke="#1C1B1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" stroke="#1C1B1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
     </div>
-    <div class="content">
+    <div class="content history-content">
       <div id="history-summary-card" class="history-summary" style="display:none;">
-        <div class="history-summary-label">Средняя оценка питания</div>
-        <div class="history-summary-num" id="history-avg-num">—</div>
-        <div class="history-summary-motiv">
-          <span id="history-avg-motiv">Это очень круто! Так держать!</span>
-          <span class="star-deco">★</span>
+        <div class="history-summary-top">
+          <span class="history-summary-label">Средняя оценка питания</span>
+          <span class="history-summary-num" id="history-avg-num">—</span>
+        </div>
+        <div class="history-summary-bottom">
+          <p class="history-summary-motiv" id="history-avg-motiv">Это очень круто! Так держать!</p>
+          <span class="history-summary-star" aria-hidden="true">★</span>
         </div>
       </div>
       <div class="history-empty" id="history-empty" style="display:none;">Пока нет записей. Сфоткай свою первую еду!</div>
@@ -686,13 +873,13 @@
     </div>
     <div class="bottom-nav">
       <button type="button" class="bnav-item" onclick="navTo('screen-main',this)" aria-label="Главная">
-        <span class="bnav-icon">📷</span>
+        <span class="bnav-icon" aria-hidden="true"><svg class="bnav-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3.5 8.5C3.5 9.05 3.95 9.5 4.5 9.5C5.05 9.5 5.5 9.05 5.5 8.5V6.5H7.5C8.05 6.5 8.5 6.05 8.5 5.5C8.5 4.95 8.05 4.5 7.5 4.5H5.5V2.5C5.5 1.95 5.05 1.5 4.5 1.5C3.95 1.5 3.5 1.95 3.5 2.5V4.5H1.5C0.95 4.5 0.5 4.95 0.5 5.5C0.5 6.05 0.95 6.5 1.5 6.5H3.5V8.5Z" fill="currentColor"/><path d="M13.5 17.5C15.1569 17.5 16.5 16.1569 16.5 14.5C16.5 12.8431 15.1569 11.5 13.5 11.5C11.8431 11.5 10.5 12.8431 10.5 14.5C10.5 16.1569 11.8431 17.5 13.5 17.5Z" fill="currentColor"/><path d="M21.5 6.5H18.33L17.09 5.15C16.72 4.74 16.18 4.5 15.62 4.5H9.22C9.39 4.8 9.5 5.13 9.5 5.5C9.5 6.6 8.6 7.5 7.5 7.5H6.5V8.5C6.5 9.6 5.6 10.5 4.5 10.5C4.13 10.5 3.8 10.39 3.5 10.22V20.5C3.5 21.6 4.4 22.5 5.5 22.5H21.5C22.6 22.5 23.5 21.6 23.5 20.5V8.5C23.5 7.4 22.6 6.5 21.5 6.5ZM13.5 19.5C10.74 19.5 8.5 17.26 8.5 14.5C8.5 11.74 10.74 9.5 13.5 9.5C16.26 9.5 18.5 11.74 18.5 14.5C18.5 17.26 16.26 19.5 13.5 19.5Z" fill="currentColor"/></svg></span>
       </button>
       <button type="button" class="bnav-item active" onclick="navTo('screen-history',this)" aria-label="История">
-        <span class="bnav-icon">🍽</span>
+        <span class="bnav-icon" aria-hidden="true"><svg class="bnav-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16 6V12C16 13.1 16.9 14 18 14H19V21C19 21.55 19.45 22 20 22C20.55 22 21 21.55 21 21V3.13C21 2.48 20.39 2 19.76 2.15C17.6 2.68 16 4.51 16 6ZM11 9H9V3C9 2.45 8.55 2 8 2C7.45 2 7 2.45 7 3V9H5V3C5 2.45 4.55 2 4 2C3.45 2 3 2.45 3 3V9C3 11.21 4.79 13 7 13V21C7 21.55 7.45 22 8 22C8.55 22 9 21.55 9 21V13C11.21 13 13 11.21 13 9V3C13 2.45 12.55 2 12 2C11.45 2 11 2.45 11 3V9Z" fill="currentColor"/></svg></span>
       </button>
       <button type="button" class="bnav-item" onclick="navTo('screen-profile',this)" aria-label="Профиль">
-        <span class="bnav-icon">👤</span>
+        <span class="bnav-icon" aria-hidden="true"><svg class="bnav-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11.9892 6C13.0938 6 13.9892 5.10457 13.9892 4C13.9892 2.89543 13.0938 2 11.9892 2C10.8847 2 9.98924 2.89543 9.98924 4C9.98924 5.10457 10.8847 6 11.9892 6Z" fill="currentColor"/><path d="M15.8792 8.11C15.4892 7.72 14.8192 7 13.5192 7C13.3092 7 12.0992 7 10.9792 7C8.51924 6.99 6.46924 5.2 6.05924 2.85C5.97924 2.36 5.56924 2 5.07924 2C4.46924 2 3.98924 2.54 4.07924 3.14C4.51924 5.8 6.45924 7.95 8.98924 8.71V21C8.98924 21.55 9.43924 22 9.98924 22C10.5392 22 10.9892 21.55 10.9892 21V16H12.9892V21C12.9892 21.55 13.4392 22 13.9892 22C14.5392 22 14.9892 21.55 14.9892 21V10.05L18.2292 13.29C18.6192 13.68 19.2492 13.68 19.6392 13.29C20.0292 12.9 20.0292 12.27 19.6392 11.88L15.8792 8.11Z" fill="currentColor"/></svg></span>
       </button>
     </div>
   </div>
@@ -907,10 +1094,10 @@ function profileNameForMotivation() {
 
 function motivationTextForAvg(avg) {
   const n = profileNameForMotivation();
-  if (avg >= 8) return `Это очень круто! Так держать, ${n}!`;
-  if (avg >= 6) return `Хороший темп! Продолжай в том же духе, ${n}!`;
+  if (avg >= 8) return `Это очень круто!\nТак держать, ${n}!`;
+  if (avg >= 6) return `Хороший темп!\nПродолжай, ${n}!`;
   if (avg >= 4) return `Есть куда расти — шаг за шагом, ${n}.`;
-  return `Попробуй чаще выбирать более лёгкие варианты — у тебя получится, ${n}!`;
+  return `Попробуй чаще выбирать более лёгкие варианты.\nУ тебя получится, ${n}!`;
 }
 
 function updateHistorySummaryCard() {
@@ -927,7 +1114,10 @@ function updateHistorySummaryCard() {
   const numEl = document.getElementById('history-avg-num');
   if (numEl) numEl.textContent = avg.toFixed(2);
   const motiv = document.getElementById('history-avg-motiv');
-  if (motiv) motiv.textContent = motivationTextForAvg(avg);
+  if (motiv) {
+    motiv.textContent = motivationTextForAvg(avg);
+    motiv.style.whiteSpace = 'pre-line';
+  }
 }
 
 function renderHistoryList() {
@@ -943,7 +1133,7 @@ function renderHistoryList() {
     return;
   }
   emptyEl.style.display = 'none';
-  listEl.style.display = 'block';
+  listEl.style.display = '';
   items.forEach((item) => {
     const v = item.verdict;
     const toneClass =
@@ -960,6 +1150,8 @@ function renderHistoryList() {
       item.score != null && !Number.isNaN(Number(item.score))
         ? formatScoreDisplay(item.score)
         : '—';
+    const starClass =
+      v === 'green' ? 'history-star--g' : v === 'red' ? 'history-star--r' : 'history-star--y';
     const row = document.createElement('div');
     row.className = 'history-item ' + toneClass;
     if (item.photoBase64) {
@@ -984,7 +1176,12 @@ function renderHistoryList() {
     nameEl.textContent = title;
     const ratingEl = document.createElement('div');
     ratingEl.className = 'history-rating';
-    ratingEl.innerHTML = '<span class="history-star">★</span> <span class="history-score">' + sc + '/10</span>';
+    ratingEl.innerHTML =
+      '<span class="history-star ' +
+      starClass +
+      '" aria-hidden="true">★</span><span class="history-score-text">' +
+      sc +
+      '/10</span>';
     info.appendChild(dateEl);
     info.appendChild(nameEl);
     info.appendChild(ratingEl);
