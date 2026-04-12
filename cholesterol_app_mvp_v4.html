@@ -1024,6 +1024,40 @@ function mealRowToLocal(row) {
   };
 }
 
+function profileUnitsToDb(unitsLabel) {
+  const u = String(unitsLabel || '').toLowerCase();
+  if (u.includes('мг') || u.includes('mg')) return 'mgdl';
+  return 'mmol';
+}
+
+function profileToSex(profile) {
+  if (profile.sex != null && String(profile.sex).trim() !== '') {
+    return String(profile.sex).trim();
+  }
+  const g = String(profile.gender || '').toLowerCase();
+  if (g.includes('жен')) return 'female';
+  if (g.includes('муж')) return 'male';
+  return null;
+}
+
+function parseIntProfile(v) {
+  const s = String(v ?? '')
+    .trim()
+    .replace(',', '.');
+  if (s === '') return null;
+  const n = parseInt(s, 10);
+  return Number.isFinite(n) ? n : null;
+}
+
+function parseFloatProfile(v) {
+  const s = String(v ?? '')
+    .trim()
+    .replace(',', '.');
+  if (s === '') return null;
+  const n = parseFloat(s);
+  return Number.isFinite(n) ? n : null;
+}
+
 async function upsertUserToSupabase() {
   const raw = localStorage.getItem(LS_USER_PROFILE);
   if (!raw) {
@@ -1043,16 +1077,29 @@ async function upsertUserToSupabase() {
     setStoredUserId(null);
     return null;
   }
+  const totalSrc = profile.total != null ? profile.total : profile.v_total;
+  const ldlSrc = profile.ldl != null ? profile.ldl : profile.v_ldl;
+  const hdlSrc = profile.hdl != null ? profile.hdl : profile.v_hdl;
+  const trigSrc = profile.trig != null ? profile.trig : profile.v_trig;
+  const row = {
+    email,
+    name: String(profile.name ?? '').trim(),
+    age: parseIntProfile(profile.age),
+    sex: profileToSex(profile),
+    height_cm: parseIntProfile(profile.height),
+    weight_kg: parseFloatProfile(profile.weight),
+    statins: profile.statins === true,
+    cholesterol: parseFloatProfile(totalSrc),
+    ldl: parseFloatProfile(ldlSrc),
+    hdl: parseFloatProfile(hdlSrc),
+    triglycerides: parseFloatProfile(trigSrc),
+    units: profileUnitsToDb(profile.units) || 'mmol',
+    profile_json: profile,
+    updated_at: new Date().toISOString()
+  };
   const { data, error } = await supabaseClient
     .from('users')
-    .upsert(
-      {
-        email,
-        profile_json: profile,
-        updated_at: new Date().toISOString()
-      },
-      { onConflict: 'email' }
-    )
+    .upsert(row, { onConflict: 'email' })
     .select('id')
     .single();
   if (error) {
