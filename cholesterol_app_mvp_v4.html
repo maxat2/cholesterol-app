@@ -1599,10 +1599,18 @@ async function refreshMealsCacheFromSupabase() {
     console.warn('[supabase] meals select', error);
     return;
   }
-  const fromServer = (data || []).map(mealRowToLocal);
+  const rows = data || [];
+  console.log('[supabase refresh] loaded', rows.length, 'meals from server');
+  const fromServer = rows.map(mealRowToLocal);
+  const serverIds = new Set(fromServer.map((m) => m.supabaseId).filter((id) => id != null));
   const local = getMealHistory();
+  /** Ещё не отправлены в Supabase — не терять при мерже с сервером */
   const pending = local.filter((m) => !m.supabaseId);
-  const merged = fromServer.concat(pending);
+  /** Уже с id локально, но строки ещё нет в этом ответе (гонка после insert / лаг чтения) */
+  const syncedNotInResponse = local.filter(
+    (m) => m.supabaseId != null && !serverIds.has(m.supabaseId)
+  );
+  const merged = fromServer.concat(syncedNotInResponse).concat(pending);
   merged.sort((a, b) => new Date(a.at).getTime() - new Date(b.at).getTime());
   setMealHistory(merged);
 }
@@ -1919,6 +1927,7 @@ function updateHistorySummaryCard() {
 }
 
 async function renderHistoryList() {
+  console.log('[history] getMealHistory() =', getMealHistory().length, 'items');
   const histContent = document.querySelector('.history-content');
   const skelWrap = document.getElementById('history-skeleton-wrap');
   const uid = getStoredUserId();
