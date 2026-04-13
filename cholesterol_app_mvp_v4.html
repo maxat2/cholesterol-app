@@ -1907,7 +1907,6 @@ async function submitDescribeFood() {
   img.removeAttribute('src');
   img.onload = null;
   img.onerror = null;
-  fillResultPhotoPlaceholder(ph);
   if (ph) ph.style.display = 'flex';
 
   if (loaderText) loaderText.textContent = 'Анализируем описание…';
