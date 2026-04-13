@@ -390,6 +390,7 @@
     opacity: 0;
   }
   .history-content.is-history-loading #history-summary-card,
+  .history-content.is-history-loading #history-describe-btn,
   .history-content.is-history-loading #history-empty,
   .history-content.is-history-loading #history-list {
     visibility: hidden;
@@ -616,6 +617,71 @@
     line-height: 1;
     color: #000000;
     flex-shrink: 0;
+  }
+
+  .history-describe-btn {
+    width: 100%;
+    margin-top: 12px;
+    padding: 14px 16px;
+    border: none;
+    border-radius: 16px;
+    background: var(--card-blue);
+    font-family: var(--sans);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--accent);
+    cursor: pointer;
+    box-sizing: border-box;
+  }
+  .history-describe-btn:active {
+    opacity: 0.92;
+  }
+
+  .describe-food-overlay {
+    display: none;
+    position: absolute;
+    inset: 0;
+    z-index: 300;
+    background: rgba(0, 0, 0, 0.45);
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .describe-food-overlay.visible {
+    display: flex;
+  }
+  .describe-food-sheet {
+    width: 100%;
+    background: var(--bg);
+    border-radius: 24px 24px 0 0;
+    padding: 12px 20px max(28px, env(safe-area-inset-bottom));
+    max-height: 85%;
+    animation: sheetUp 0.28s ease;
+    box-sizing: border-box;
+  }
+  .describe-food-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 14px;
+    font-family: var(--sans);
+  }
+  .describe-food-textarea {
+    width: 100%;
+    min-height: 160px;
+    padding: 14px;
+    margin-bottom: 16px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.45;
+    color: var(--text);
+    resize: vertical;
+    box-sizing: border-box;
+  }
+  .describe-food-textarea:focus {
+    outline: none;
+    border-color: #bbb;
   }
 
   #history-list {
@@ -1025,7 +1091,7 @@
     <div class="result-screen-inner">
       <div id="result-loader" class="result-loader-overlay" style="display:none;">
         <div class="result-loader-spinner"></div>
-        <div class="result-loader-text">Анализируем фото…</div>
+        <div class="result-loader-text" id="result-loader-text">Анализируем фото…</div>
       </div>
       <div class="nav history-top-nav">
         <button type="button" class="history-nav-side" onclick="backFromResult()" aria-label="Назад" title="Назад">
@@ -1113,6 +1179,9 @@
           <span class="history-summary-star" aria-hidden="true">★</span>
         </div>
       </div>
+      <button type="button" class="history-describe-btn" id="history-describe-btn" onclick="openDescribeFoodModal()">
+        Описать еду словами
+      </button>
       <div class="history-empty" id="history-empty" style="display:none;">Пока нет записей. Сфоткай свою первую еду!</div>
       <div class="history-skeleton-wrap" id="history-skeleton-wrap" aria-hidden="true">
         <div class="history-skel-item">
@@ -1149,6 +1218,24 @@
       <button type="button" class="bnav-item" onclick="navTo('screen-profile',this)" aria-label="Профиль">
         <span class="bnav-icon" aria-hidden="true"><svg class="bnav-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11.9892 6C13.0938 6 13.9892 5.10457 13.9892 4C13.9892 2.89543 13.0938 2 11.9892 2C10.8847 2 9.98924 2.89543 9.98924 4C9.98924 5.10457 10.8847 6 11.9892 6Z" fill="currentColor"/><path d="M15.8792 8.11C15.4892 7.72 14.8192 7 13.5192 7C13.3092 7 12.0992 7 10.9792 7C8.51924 6.99 6.46924 5.2 6.05924 2.85C5.97924 2.36 5.56924 2 5.07924 2C4.46924 2 3.98924 2.54 4.07924 3.14C4.51924 5.8 6.45924 7.95 8.98924 8.71V21C8.98924 21.55 9.43924 22 9.98924 22C10.5392 22 10.9892 21.55 10.9892 21V16H12.9892V21C12.9892 21.55 13.4392 22 13.9892 22C14.5392 22 14.9892 21.55 14.9892 21V10.05L18.2292 13.29C18.6192 13.68 19.2492 13.68 19.6392 13.29C20.0292 12.9 20.0292 12.27 19.6392 11.88L15.8792 8.11Z" fill="currentColor"/></svg></span>
       </button>
+    </div>
+  </div>
+
+  <div
+    class="describe-food-overlay"
+    id="describe-food-overlay"
+    onclick="if(event.target===this)dismissDescribeFoodModal()"
+  >
+    <div class="describe-food-sheet" onclick="event.stopPropagation()">
+      <div class="purchase-grab"></div>
+      <div class="describe-food-title">Описание еды</div>
+      <textarea
+        id="describe-food-text"
+        class="describe-food-textarea"
+        placeholder="Опишите то что сегодня ели, желательно подробно, чтобы точность ответа была лучше"
+        rows="6"
+      ></textarea>
+      <button type="button" class="btn-primary" id="describe-food-submit" onclick="submitDescribeFood()">Отправить</button>
     </div>
   </div>
 
@@ -1698,6 +1785,8 @@ async function refreshMealsCacheFromSupabase() {
 
 let lastMealPhotoDataUrl = null;
 let lastMealAnalysisData = null;
+/** Запись из потока «описание словами» (без фото). */
+let lastMealTextOnly = false;
 /** Куда вернуться с экрана результата: свежий анализ → главная, просмотр из истории → история */
 let resultBackScreen = 'screen-main';
 /** fresh — можно сохранить в историю; history — только просмотр */
@@ -1716,6 +1805,7 @@ function openHistoryMealDetail(item) {
   resultBackScreen = 'screen-history';
   resultViewSource = 'history';
   lastMealPhotoDataUrl = item.photoBase64 || item.photo_url || null;
+  lastMealTextOnly = !!item.textOnly;
   lastMealAnalysisData = {
     verdict: verdict,
     score: item.score,
@@ -1733,17 +1823,27 @@ function openHistoryMealDetail(item) {
   }
   const img = document.getElementById('result-photo-img');
   const ph = document.getElementById('result-photo-placeholder');
-  const detailSrc = item.photoBase64 || item.photo_url || '';
+  const detailSrc = item.textOnly ? '' : item.photoBase64 || item.photo_url || '';
+  img.onerror = null;
   if (detailSrc) {
     img.src = detailSrc;
     const show = () => {
       img.style.display = 'block';
       if (ph) ph.style.display = 'none';
     };
+    const onFail = () => {
+      img.style.display = 'none';
+      img.removeAttribute('src');
+      fillResultPhotoPlaceholder(ph);
+      if (ph) ph.style.display = 'flex';
+    };
+    img.onerror = onFail;
     if (img.complete && img.naturalWidth) show();
     else img.onload = show;
   } else {
     img.style.display = 'none';
+    img.removeAttribute('src');
+    fillResultPhotoPlaceholder(ph);
     if (ph) ph.style.display = 'flex';
   }
   applyResultToUI(lastMealAnalysisData);
@@ -1758,6 +1858,91 @@ function showPurchaseModal() {
 
 function dismissPurchaseModal() {
   document.getElementById('purchase-overlay')?.classList.remove('visible');
+}
+
+function openDescribeFoodModal() {
+  document.getElementById('describe-food-overlay')?.classList.add('visible');
+}
+
+function dismissDescribeFoodModal() {
+  document.getElementById('describe-food-overlay')?.classList.remove('visible');
+}
+
+async function submitDescribeFood() {
+  const ta = document.getElementById('describe-food-text');
+  const userText = (ta?.value || '').trim();
+  if (!userText) return;
+  if (!openaiApiKey) {
+    document.getElementById('app-init-error')?.classList.add('visible');
+    return;
+  }
+  dismissDescribeFoodModal();
+  if (ta) ta.value = '';
+  lastMealPhotoDataUrl = null;
+  lastMealTextOnly = true;
+  lastMealAnalysisData = null;
+  resultBackScreen = 'screen-history';
+  resultViewSource = 'fresh';
+  updateResultActionButtons();
+
+  goTo('screen-result');
+
+  const img = document.getElementById('result-photo-img');
+  const ph = document.getElementById('result-photo-placeholder');
+  const dishTitle = document.getElementById('result-dish-title');
+  const scoreRow = document.getElementById('result-score-row');
+  const scoreDisplay = document.getElementById('result-score-display');
+  const summaryEl = document.getElementById('result-summary-text');
+  const educationEl = document.getElementById('result-education-text');
+  const nuancesEl = document.getElementById('result-nuances-text');
+  const upgradeEl = document.getElementById('result-upgrade-text');
+  const factorsList = document.getElementById('result-factors-list');
+  const loaderText = document.getElementById('result-loader-text');
+
+  if (lastFoodObjectUrl) {
+    URL.revokeObjectURL(lastFoodObjectUrl);
+    lastFoodObjectUrl = null;
+  }
+  img.style.display = 'none';
+  img.removeAttribute('src');
+  img.onload = null;
+  img.onerror = null;
+  fillResultPhotoPlaceholder(ph);
+  if (ph) ph.style.display = 'flex';
+
+  if (loaderText) loaderText.textContent = 'Анализируем описание…';
+
+  if (dishTitle) dishTitle.textContent = '…';
+  scoreRow?.classList.add('hidden');
+  if (scoreDisplay) scoreDisplay.textContent = '…';
+  if (summaryEl) summaryEl.textContent = '—';
+  if (educationEl) educationEl.textContent = '—';
+  if (nuancesEl) nuancesEl.textContent = '—';
+  if (upgradeEl) upgradeEl.textContent = '—';
+  if (factorsList) factorsList.innerHTML = '';
+
+  setResultLoading(true);
+  try {
+    const data = await analyzeFoodFromText(userText);
+    lastMealAnalysisData = data;
+    applyResultToUI(data);
+  } catch (err) {
+    lastMealAnalysisData = { verdict: 'error' };
+    applyResultToUI({
+      verdict: 'error',
+      title: 'Ошибка',
+      summary: String(err.message || err),
+      vision: '',
+      education: '',
+      nuances: '',
+      upgrade: '',
+      factors: []
+    });
+  } finally {
+    setResultLoading(false);
+    if (loaderText) loaderText.textContent = 'Анализируем фото…';
+    updateResultActionButtons();
+  }
 }
 
 function profileIsCompleteData(p) {
@@ -2115,7 +2300,7 @@ async function renderHistoryList() {
     row.className = 'history-item ' + toneClass;
     const thumbWrap = document.createElement('div');
     thumbWrap.className = 'history-thumb';
-    const imgUrl = item.photoBase64 || item.photo_url || '';
+    const imgUrl = item.textOnly ? '' : item.photoBase64 || item.photo_url || '';
     if (imgUrl) {
       thumbWrap.classList.add('is-loading');
       const im = document.createElement('img');
@@ -2187,7 +2372,11 @@ async function renderHistoryList() {
 
 async function saveMealToHistoryAndGoMain() {
   if (resultViewSource === 'history') return;
-  if (!lastMealPhotoDataUrl || !lastMealAnalysisData) {
+  if (!lastMealAnalysisData) {
+    goTo('screen-main');
+    return;
+  }
+  if (!lastMealTextOnly && !lastMealPhotoDataUrl) {
     goTo('screen-main');
     return;
   }
@@ -2204,7 +2393,7 @@ async function saveMealToHistoryAndGoMain() {
   const atIso = new Date().toISOString();
 
   const mealLocal = {
-    photoBase64: lastMealPhotoDataUrl,
+    textOnly: !!lastMealTextOnly,
     verdict: verdict,
     score: d.score,
     title: d.title != null ? String(d.title) : '',
@@ -2216,6 +2405,9 @@ async function saveMealToHistoryAndGoMain() {
     factors: Array.isArray(d.factors) ? d.factors : [],
     at: atIso
   };
+  if (!lastMealTextOnly && lastMealPhotoDataUrl) {
+    mealLocal.photoBase64 = lastMealPhotoDataUrl;
+  }
 
   const arr = getMealHistory();
   arr.push(mealLocal);
@@ -2224,39 +2416,73 @@ async function saveMealToHistoryAndGoMain() {
   const uid = getStoredUserId();
   if (uid) {
     try {
-      const compressed = await compressPhoto(lastMealPhotoDataUrl);
-      const fileName = `${uid}/${Date.now()}_${Math.random().toString(36).slice(2, 12)}.jpg`;
-      const publicUrl = await uploadPhotoToStorage(compressed, fileName);
+      if (lastMealTextOnly) {
+        const { data, error } = await supabaseClient
+          .from('meals')
+          .insert({
+            user_id: uid,
+            photo_url: '',
+            verdict: verdict,
+            score: d.score,
+            title: d.title != null ? String(d.title) : '',
+            vision: d.vision != null ? String(d.vision) : '',
+            summary: d.summary != null ? String(d.summary) : '',
+            education: d.education != null ? String(d.education) : '',
+            nuances: d.nuances != null ? String(d.nuances) : '',
+            upgrade: d.upgrade != null ? String(d.upgrade) : '',
+            factors: Array.isArray(d.factors) ? d.factors : [],
+            created_at: atIso
+          })
+          .select('id')
+          .single();
 
-      const { data, error } = await supabaseClient
-        .from('meals')
-        .insert({
-          user_id: uid,
-          photo_url: publicUrl,
-          verdict: verdict,
-          score: d.score,
-          title: d.title != null ? String(d.title) : '',
-          vision: d.vision != null ? String(d.vision) : '',
-          summary: d.summary != null ? String(d.summary) : '',
-          education: d.education != null ? String(d.education) : '',
-          nuances: d.nuances != null ? String(d.nuances) : '',
-          upgrade: d.upgrade != null ? String(d.upgrade) : '',
-          factors: Array.isArray(d.factors) ? d.factors : [],
-          created_at: atIso
-        })
-        .select('id')
-        .single();
+        if (error) {
+          console.warn('[supabase] meals insert (text)', error);
+        } else if (data && data.id) {
+          const next = getMealHistory();
+          const idx = next.findIndex((m) => m.at === atIso && !m.supabaseId);
+          if (idx !== -1) {
+            const merged = { ...next[idx], supabaseId: data.id, photo_url: '' };
+            delete merged.photoBase64;
+            next[idx] = merged;
+            setMealHistory(next);
+          }
+        }
+      } else {
+        const compressed = await compressPhoto(lastMealPhotoDataUrl);
+        const fileName = `${uid}/${Date.now()}_${Math.random().toString(36).slice(2, 12)}.jpg`;
+        const publicUrl = await uploadPhotoToStorage(compressed, fileName);
 
-      if (error) {
-        console.warn('[supabase] meals insert', error);
-      } else if (data && data.id) {
-        const next = getMealHistory();
-        const idx = next.findIndex((m) => m.at === atIso && !m.supabaseId);
-        if (idx !== -1) {
-          const merged = { ...next[idx], supabaseId: data.id, photo_url: publicUrl };
-          delete merged.photoBase64;
-          next[idx] = merged;
-          setMealHistory(next);
+        const { data, error } = await supabaseClient
+          .from('meals')
+          .insert({
+            user_id: uid,
+            photo_url: publicUrl,
+            verdict: verdict,
+            score: d.score,
+            title: d.title != null ? String(d.title) : '',
+            vision: d.vision != null ? String(d.vision) : '',
+            summary: d.summary != null ? String(d.summary) : '',
+            education: d.education != null ? String(d.education) : '',
+            nuances: d.nuances != null ? String(d.nuances) : '',
+            upgrade: d.upgrade != null ? String(d.upgrade) : '',
+            factors: Array.isArray(d.factors) ? d.factors : [],
+            created_at: atIso
+          })
+          .select('id')
+          .single();
+
+        if (error) {
+          console.warn('[supabase] meals insert', error);
+        } else if (data && data.id) {
+          const next = getMealHistory();
+          const idx = next.findIndex((m) => m.at === atIso && !m.supabaseId);
+          if (idx !== -1) {
+            const merged = { ...next[idx], supabaseId: data.id, photo_url: publicUrl };
+            delete merged.photoBase64;
+            next[idx] = merged;
+            setMealHistory(next);
+          }
         }
       }
     } catch (e) {
@@ -2670,6 +2896,44 @@ async function analyzeFoodPhoto(dataUrl) {
   }
 }
 
+async function analyzeFoodFromText(userText) {
+  if (!openaiApiKey) {
+    throw new Error('Не удалось загрузить настройки приложения');
+  }
+  const text =
+    buildVisionPrompt() + '\n\nПользователь описал еду словами (фото нет):\n' + userText;
+  const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: 'Bearer ' + openaiApiKey
+    },
+    body: JSON.stringify({
+      model: 'gpt-4o',
+      response_format: { type: 'json_object' },
+      max_tokens: 2500,
+      messages: [
+        {
+          role: 'user',
+          content: [{ type: 'text', text: text }]
+        }
+      ]
+    })
+  });
+
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const msg = body.error?.message || res.statusText || 'Ошибка API';
+    throw new Error(msg);
+  }
+  const raw = body.choices?.[0]?.message?.content;
+  try {
+    return parseModelJson(raw);
+  } catch (e) {
+    throw new Error('Не удалось разобрать ответ модели: ' + (e.message || e));
+  }
+}
+
 function applyResultToUI(data) {
   const v = data.verdict;
   const err = v === 'error';
@@ -2716,6 +2980,7 @@ document.getElementById('food-camera-input').addEventListener('change', async (e
 
   const dataUrl = await fileToDataUrl(file);
   lastMealPhotoDataUrl = dataUrl;
+  lastMealTextOnly = false;
   lastMealAnalysisData = null;
   resultBackScreen = 'screen-main';
   resultViewSource = 'fresh';
@@ -2733,6 +2998,8 @@ document.getElementById('food-camera-input').addEventListener('change', async (e
   const nuancesEl = document.getElementById('result-nuances-text');
   const upgradeEl = document.getElementById('result-upgrade-text');
   const factorsList = document.getElementById('result-factors-list');
+  const loaderText = document.getElementById('result-loader-text');
+  if (loaderText) loaderText.textContent = 'Анализируем фото…';
   if (lastFoodObjectUrl) {
     URL.revokeObjectURL(lastFoodObjectUrl);
     lastFoodObjectUrl = null;
@@ -2741,7 +3008,7 @@ document.getElementById('food-camera-input').addEventListener('change', async (e
   img.src = lastFoodObjectUrl;
   img.onload = () => {
     img.style.display = 'block';
-    ph.style.display = 'none';
+    if (ph) ph.style.display = 'none';
   };
 
   setResultLoading(true);
