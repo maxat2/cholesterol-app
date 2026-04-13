@@ -1245,6 +1245,7 @@ function mealRowToLocal(row) {
   }
   return {
     supabaseId: row.id,
+    photo_url: row.photo_url != null ? String(row.photo_url) : '',
     verdict: row.verdict,
     score: row.score,
     title: row.title != null ? String(row.title) : '',
@@ -1639,7 +1640,7 @@ function openHistoryMealDetail(item) {
   if (verdict === 'error') return;
   resultBackScreen = 'screen-history';
   resultViewSource = 'history';
-  lastMealPhotoDataUrl = item.photoBase64 || null;
+  lastMealPhotoDataUrl = item.photoBase64 || item.photo_url || null;
   lastMealAnalysisData = {
     verdict: verdict,
     score: item.score,
@@ -1657,26 +1658,15 @@ function openHistoryMealDetail(item) {
   }
   const img = document.getElementById('result-photo-img');
   const ph = document.getElementById('result-photo-placeholder');
-  if (item.photoBase64) {
-    img.src = item.photoBase64;
-    img.onload = () => {
+  const detailSrc = item.photoBase64 || item.photo_url || '';
+  if (detailSrc) {
+    img.src = detailSrc;
+    const show = () => {
       img.style.display = 'block';
       if (ph) ph.style.display = 'none';
     };
-  } else if (item.supabaseId) {
-    img.style.display = 'none';
-    if (ph) ph.style.display = 'flex';
-    void (async () => {
-      await loadMealPhoto(item.supabaseId, img);
-      if (!img.src) return;
-      lastMealPhotoDataUrl = img.src;
-      const show = () => {
-        img.style.display = 'block';
-        if (ph) ph.style.display = 'none';
-      };
-      if (img.complete) show();
-      else img.onload = show;
-    })();
+    if (img.complete && img.naturalWidth) show();
+    else img.onload = show;
   } else {
     img.style.display = 'none';
     if (ph) ph.style.display = 'flex';
@@ -1868,7 +1858,7 @@ function getMealHistory() {
 function setMealHistory(arr) {
   const slim = arr.map((m) => {
     if (m.supabaseId) {
-      const { photoBase64, photo_url, ...rest } = m;
+      const { photoBase64, ...rest } = m;
       return rest;
     }
     return m;
@@ -1882,74 +1872,6 @@ function setMealHistory(arr) {
       localStorage.setItem(LS_MEAL_HISTORY, JSON.stringify(trimmed));
     } catch (e2) {
       console.warn('[localStorage] still failed after trim', e2);
-    }
-  }
-}
-
-async function loadMealPhoto(supabaseId, imgElement) {
-  if (!supabaseId || !imgElement) return;
-  const thumb = imgElement.parentElement;
-  const useThumbSkel = thumb && thumb.classList.contains('history-thumb');
-  if (useThumbSkel) {
-    thumb.classList.add('is-loading');
-    thumb.classList.remove('history-thumb--no-photo');
-    imgElement.style.opacity = '0';
-  }
-  try {
-    const { data, error } = await supabaseClient
-      .from('meals')
-      .select('photo_url')
-      .eq('id', supabaseId)
-      .single();
-    if (error) {
-      console.warn('[meals] photo fetch', error);
-      if (useThumbSkel) {
-        thumb.classList.remove('is-loading');
-        imgElement.remove();
-        thumb.classList.add('history-thumb--no-photo');
-        thumb.textContent = '🍽';
-      }
-      return;
-    }
-    if (data && data.photo_url) {
-      let doneOnce = false;
-      const onDone = () => {
-        if (doneOnce) return;
-        doneOnce = true;
-        if (useThumbSkel) {
-          thumb.classList.remove('is-loading');
-          imgElement.style.opacity = '1';
-        }
-      };
-      const onFail = () => {
-        if (doneOnce) return;
-        doneOnce = true;
-        if (useThumbSkel) {
-          thumb.classList.remove('is-loading');
-          imgElement.remove();
-          thumb.classList.add('history-thumb--no-photo');
-          thumb.textContent = '🍽';
-        }
-      };
-      imgElement.onload = onDone;
-      imgElement.onerror = onFail;
-      imgElement.src = data.photo_url;
-      if (imgElement.complete && imgElement.naturalWidth) onDone();
-    } else {
-      if (useThumbSkel) {
-        thumb.classList.remove('is-loading');
-        imgElement.remove();
-        thumb.classList.add('history-thumb--no-photo');
-        thumb.textContent = '🍽';
-      }
-    }
-  } catch (e) {
-    console.warn('[meals] loadMealPhoto', e);
-    if (useThumbSkel) {
-      thumb.classList.remove('is-loading');
-      if (imgElement.parentElement === thumb) imgElement.remove();
-      thumb.classList.add('history-thumb--no-photo');
-      thumb.textContent = '🍽';
     }
   }
 }
@@ -2101,32 +2023,34 @@ async function renderHistoryList() {
     row.className = 'history-item ' + toneClass;
     const thumbWrap = document.createElement('div');
     thumbWrap.className = 'history-thumb';
-    if (item.photoBase64) {
-      const im = document.createElement('img');
-      im.className = 'history-thumb-img';
-      im.alt = '';
-      im.src = item.photoBase64;
-      im.decoding = 'async';
-      thumbWrap.appendChild(im);
-    } else if (item.supabaseId) {
+    const imgUrl = item.photoBase64 || item.photo_url || '';
+    if (imgUrl) {
       thumbWrap.classList.add('is-loading');
       const im = document.createElement('img');
       im.className = 'history-thumb-img';
       im.alt = '';
+      im.decoding = 'async';
       im.style.opacity = '0';
       thumbWrap.appendChild(im);
-      const sid = item.supabaseId;
-      const io = new IntersectionObserver(
-        (entries, observer) => {
-          for (const ent of entries) {
-            if (!ent.isIntersecting) continue;
-            observer.unobserve(thumbWrap);
-            void loadMealPhoto(sid, im);
-          }
-        },
-        { root: null, rootMargin: '120px', threshold: 0.01 }
-      );
-      io.observe(thumbWrap);
+      let doneOnce = false;
+      const onOk = () => {
+        if (doneOnce) return;
+        doneOnce = true;
+        thumbWrap.classList.remove('is-loading');
+        im.style.opacity = '1';
+      };
+      const onBad = () => {
+        if (doneOnce) return;
+        doneOnce = true;
+        thumbWrap.classList.remove('is-loading');
+        im.remove();
+        thumbWrap.classList.add('history-thumb--no-photo');
+        thumbWrap.textContent = '🍽';
+      };
+      im.onload = onOk;
+      im.onerror = onBad;
+      im.src = imgUrl;
+      if (im.complete && im.naturalWidth) onOk();
     } else {
       thumbWrap.classList.add('history-thumb--no-photo');
       thumbWrap.textContent = '🍽';
@@ -2190,54 +2114,74 @@ async function saveMealToHistoryAndGoMain() {
     return;
   }
   const atIso = new Date().toISOString();
-  const mealLocal = {
-    photoBase64: lastMealPhotoDataUrl,
-    verdict: verdict,
-    score: d.score,
-    title: d.title != null ? String(d.title) : '',
-    vision: d.vision != null ? String(d.vision) : '',
-    summary: d.summary != null ? String(d.summary) : '',
-    education: d.education != null ? String(d.education) : '',
-    nuances: d.nuances != null ? String(d.nuances) : '',
-    upgrade: d.upgrade != null ? String(d.upgrade) : '',
-    factors: Array.isArray(d.factors) ? d.factors : [],
-    at: atIso
-  };
-  const arr = getMealHistory();
-  arr.push(mealLocal);
-  setMealHistory(arr);
-
   const uid = getStoredUserId();
+
   if (uid) {
     try {
+      const compressed = await compressPhoto(lastMealPhotoDataUrl);
+      const fileName = `${uid}/${Date.now()}_${Math.random().toString(36).slice(2, 12)}.jpg`;
+      const publicUrl = await uploadPhotoToStorage(compressed, fileName);
+
       const { data, error } = await supabaseClient
         .from('meals')
         .insert({
           user_id: uid,
-          photo_url: mealLocal.photoBase64,
-          verdict: mealLocal.verdict,
-          score: mealLocal.score,
-          title: mealLocal.title,
-          vision: mealLocal.vision,
-          summary: mealLocal.summary,
-          education: mealLocal.education,
-          nuances: mealLocal.nuances,
-          upgrade: mealLocal.upgrade,
-          factors: mealLocal.factors,
+          photo_url: publicUrl,
+          verdict: verdict,
+          score: d.score,
+          title: d.title != null ? String(d.title) : '',
+          vision: d.vision != null ? String(d.vision) : '',
+          summary: d.summary != null ? String(d.summary) : '',
+          education: d.education != null ? String(d.education) : '',
+          nuances: d.nuances != null ? String(d.nuances) : '',
+          upgrade: d.upgrade != null ? String(d.upgrade) : '',
+          factors: Array.isArray(d.factors) ? d.factors : [],
           created_at: atIso
         })
         .select('id')
         .single();
+
       if (error) {
         console.warn('[supabase] meals insert', error);
       } else if (data && data.id) {
-        mealLocal.supabaseId = data.id;
-        arr[arr.length - 1] = mealLocal;
+        const mealLocal = {
+          supabaseId: data.id,
+          photo_url: publicUrl,
+          verdict: verdict,
+          score: d.score,
+          title: d.title != null ? String(d.title) : '',
+          vision: d.vision != null ? String(d.vision) : '',
+          summary: d.summary != null ? String(d.summary) : '',
+          education: d.education != null ? String(d.education) : '',
+          nuances: d.nuances != null ? String(d.nuances) : '',
+          upgrade: d.upgrade != null ? String(d.upgrade) : '',
+          factors: Array.isArray(d.factors) ? d.factors : [],
+          at: atIso
+        };
+        const arr = getMealHistory();
+        arr.push(mealLocal);
         setMealHistory(arr);
       }
     } catch (e) {
-      console.warn(e);
+      console.warn('[save meal] compress/upload/insert', e);
     }
+  } else {
+    const mealLocal = {
+      photoBase64: lastMealPhotoDataUrl,
+      verdict: verdict,
+      score: d.score,
+      title: d.title != null ? String(d.title) : '',
+      vision: d.vision != null ? String(d.vision) : '',
+      summary: d.summary != null ? String(d.summary) : '',
+      education: d.education != null ? String(d.education) : '',
+      nuances: d.nuances != null ? String(d.nuances) : '',
+      upgrade: d.upgrade != null ? String(d.upgrade) : '',
+      factors: Array.isArray(d.factors) ? d.factors : [],
+      at: atIso
+    };
+    const arr = getMealHistory();
+    arr.push(mealLocal);
+    setMealHistory(arr);
   }
 
   goTo('screen-main');
@@ -2507,6 +2451,48 @@ function fileToDataUrl(file) {
     r.onerror = reject;
     r.readAsDataURL(file);
   });
+}
+
+async function compressPhoto(dataUrl, maxSize = 800, quality = 0.7) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      let w = img.width;
+      let h = img.height;
+      if (w > maxSize || h > maxSize) {
+        if (w > h) {
+          h = (h * maxSize) / w;
+          w = maxSize;
+        } else {
+          w = (w * maxSize) / h;
+          h = maxSize;
+        }
+      }
+      canvas.width = w;
+      canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.onerror = () => reject(new Error('compressPhoto: image load failed'));
+    img.src = dataUrl;
+  });
+}
+
+async function uploadPhotoToStorage(base64DataUrl, fileName) {
+  const res = await fetch(base64DataUrl);
+  const blob = await res.blob();
+
+  const { error } = await supabaseClient.storage.from('meal-photos').upload(fileName, blob, {
+    contentType: 'image/jpeg',
+    upsert: true
+  });
+
+  if (error) throw error;
+
+  const { data } = supabaseClient.storage.from('meal-photos').getPublicUrl(fileName);
+
+  return data.publicUrl;
 }
 
 function parseModelJson(raw) {
