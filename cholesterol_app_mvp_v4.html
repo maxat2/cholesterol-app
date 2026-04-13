@@ -451,7 +451,22 @@
     position: relative;
     border-radius: var(--chol-card-radius);
   }
-  .result-photo-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 56px; }
+  .result-photo-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: min(32px, 8%);
+    box-sizing: border-box;
+  }
+  .result-photo-placeholder-img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+  }
   .result-photo-img { width: 100%; height: 100%; object-fit: cover; display: none; }
   .result-gpt-line {
     display: flex;
@@ -658,7 +673,27 @@
     object-position: center;
   }
   .history-thumb.history-thumb--no-photo {
-    background: #ddd;
+    background: none;
+  }
+  .history-thumb-placeholder-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    padding: 0;
+    box-sizing: border-box;
+    display: block;
+  }
+  .history-thumb-placeholder-svg {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+    display: block;
+    box-sizing: border-box;
+    flex-shrink: 0;
+    align-self: stretch;
+    min-width: 0;
+    min-height: 0;
   }
   .history-thumb.is-loading {
     background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
@@ -1005,7 +1040,9 @@
         </button>
       </div>
       <div class="result-photo" id="result-photo-wrap">
-        <div class="result-photo-placeholder" id="result-photo-placeholder">🥗</div>
+        <div class="result-photo-placeholder" id="result-photo-placeholder" aria-hidden="true">
+          <img class="result-photo-placeholder-img" src="no_image_big.svg" alt="" />
+        </div>
         <img class="result-photo-img" id="result-photo-img" alt="" />
       </div>
       <div class="result-gpt-line">ⓘ Ответ подготовлен на основе GPT-4o</div>
@@ -1216,6 +1253,25 @@ async function loadOpenAiKeyFromSupabase() {
 const LS_USER_PROFILE = 'cholesterol_app_user_profile';
 const LS_MEAL_HISTORY = 'meal_history';
 const LS_SUPABASE_USER_ID = 'cholesterol_app_supabase_user_id';
+const ASSET_NO_IMAGE_BIG = 'no_image_big.svg';
+
+const HISTORY_THUMB_PLACEHOLDER_SVG_INNER =
+  '<g><path d="M100.295 77.796L2.75488 79.3201L3.2629 93.5447L11.3912 118.438L17.4875 123.01L32.7281 128.09L35.2683 140.283L64.7335 140.791L66.7656 140.283L67.7816 128.598L84.0383 123.01L93.6907 113.358L98.2629 101.165L100.295 77.796Z" fill="#BAA4A4" fill-opacity="0.4"/><path d="M44.9211 41.7265L43.3971 40.2025H41.365L30.6965 43.7586L29.6805 42.7426L29.1725 38.1704L26.1243 34.1062L17.996 36.6463L15.4559 39.1864L9.35964 48.3308L2.75536 41.2185L0.723278 41.7265L-5.37298 48.8388L-7.91309 53.919V56.4591L-3.34089 65.6035L3.26339 73.7319L32.7286 73.2238L42.381 62.5554L45.9372 56.9672L47.9693 50.3629V46.8067L44.9211 41.7265Z" fill="#BAA4A4" fill-opacity="0.4"/><path d="M97.7554 -5.01147L86.579 -0.439282L81.4987 5.14895L74.3864 14.8014L71.8463 20.8976L71.3383 25.4698L70.8303 25.9778V30.042L70.3223 30.55V40.2024L73.3704 43.7586L77.9426 42.2345L83.0228 38.6784L93.6913 28.0099L97.7554 22.9297L101.82 12.2613L101.312 2.60885L97.7554 -5.01147Z" fill="#BAA4A4" fill-opacity="0.4"/><path d="M105.375 37.1544L104.359 36.6464L100.295 38.1704H98.2625L89.6262 41.7266H88.1021L85.562 43.2506L68.7973 61.0314L68.2893 62.0474L67.7812 73.7319L87.0861 73.2239L92.6743 71.6998L97.7545 68.6517L100.295 64.0795L103.851 53.4111L105.375 37.1544Z" fill="#BAA4A4" fill-opacity="0.4"/><path d="M82.5141 -16.1879L78.45 -12.6317L57.1131 12.7694L47.4606 13.2774L36.2842 24.4538L37.8082 26.994H39.3323L44.9205 22.9298L45.4286 23.9458L40.8564 28.518L41.8724 31.0581H43.3965L48.9847 26.994L49.4927 28.01L44.9205 33.0902L46.4446 34.6143L54.0649 29.026L54.5729 30.0421L49.4927 37.1544L52.5409 39.6945L55.081 37.1544L61.1772 28.01L61.6852 16.8335L86.0703 -12.1237L82.5141 -16.1879Z" fill="#BAA4A4" fill-opacity="0.4"/><path d="M-4.86503 13.2773L-5.37305 13.7854V16.3255L-4.86503 16.8335V19.8816L-4.357 20.3896L-3.84898 22.4217L-2.83294 23.4378L-1.8169 25.4699L-0.292833 26.9939V27.5019L2.75529 31.0581H3.26332L7.32749 34.1062L9.35957 34.6142L13.9318 30.0421V29.026L14.4398 28.518V27.5019L15.4558 25.4699V18.8656L14.9478 18.3576V16.8335L14.4398 15.8175L11.3917 13.7854L10.3756 14.2934L9.86759 16.3255L9.35957 16.8335L8.85155 22.9298L8.34353 23.4378L6.81947 22.4217V21.9137L0.215188 14.8014L-0.292833 13.7854L-1.30888 13.2773H-4.86503Z" fill="#BAA4A4" fill-opacity="0.4"/><path d="M50.0015 59.5073L47.4614 62.0474V62.5554L46.9533 63.0634V64.5875L46.4453 65.0955V68.1436L46.9533 68.6516V70.6837L47.4614 71.1917H47.9694L48.4774 71.6998H49.4934L50.5095 72.7158H51.5255L52.0335 73.2238H54.0656L54.5737 72.7158H56.6057L57.1138 72.2078H58.1298L58.6378 71.6998H59.6539L61.1779 70.1757V69.6677L61.686 69.1597V68.1436L62.194 67.6356V65.6035L61.686 65.0955V63.5714L61.1779 63.0634V62.0474L60.6699 61.5393V61.0313L58.6378 58.9992H57.6218L57.1138 58.4912H52.0335L51.5255 58.9992H51.0175L50.5095 59.5073H50.0015Z" fill="#BAA4A4" fill-opacity="0.4"/><path d="M59.1456 40.2025L58.6376 40.7105H58.1296L54.5735 44.2667V44.7747L54.0654 45.2827V46.2988L54.5735 46.8068V48.3309L55.0815 48.8389V49.8549L57.6216 52.395H58.1296L59.1456 53.4111H59.6537L60.6697 54.4271H61.1777L61.6858 54.9351H62.1938L62.7018 54.4271H63.2098L63.7178 53.9191H64.2259L64.7339 53.4111H65.2419L66.2579 52.395H66.766L69.3061 49.8549V48.3309L69.8141 47.8228V47.3148L69.3061 46.8068V45.7908L68.7981 45.2827V44.7747L65.2419 41.2186H64.7339L63.7178 40.2025H59.1456Z" fill="#BAA4A4" fill-opacity="0.4"/><path d="M23.5841 16.8335L23.076 17.3415V17.8495L22.06 18.8655V19.8816L21.552 20.3896V21.4057L21.0439 21.9137V25.4698L23.5841 28.0099H24.0921L25.1081 29.026H26.1242L26.6322 29.534H30.6964L32.2204 28.0099V26.9939L32.7284 26.4859V24.9618L33.2365 24.4538V21.9137L32.7284 21.4057V20.3896L32.2204 19.8816V19.3736L31.7124 18.8655V18.3575L31.2044 17.8495V17.3415L30.6964 16.8335H30.1883L29.6803 16.3254H24.6001L24.0921 16.8335H23.5841Z" fill="#BAA4A4" fill-opacity="0.4"/></g>';
+
+function fillHistoryThumbPlaceholder(wrap) {
+  wrap.classList.remove('is-loading');
+  wrap.classList.add('history-thumb--no-photo');
+  const cid = 'hp-' + Math.random().toString(36).slice(2, 11);
+  wrap.innerHTML =
+    '<svg class="history-thumb-placeholder-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" preserveAspectRatio="xMidYMid slice" style="width:100%;height:100%;">' +
+    '<defs><clipPath id="' +
+    cid +
+    '"><rect width="100" height="100" fill="white"/></clipPath></defs><g clip-path="url(#' +
+    cid +
+    ')">' +
+    HISTORY_THUMB_PLACEHOLDER_SVG_INNER +
+    '</g></svg>';
+}
 
 function getStoredUserId() {
   try {
@@ -1383,16 +1439,23 @@ function dbUnitsToLabel(units) {
 function applySupabaseUserRowToForm(row) {
   if (!row) return;
   const emailEl = document.getElementById('input-email');
-  if (emailEl && row.email != null) emailEl.value = String(row.email).trim();
   const nameEl = document.getElementById('input-name');
+  const ageEl = document.getElementById('input-age');
+  const heightEl = document.getElementById('input-height');
+  const weightEl = document.getElementById('input-weight');
+  const vTotal = document.getElementById('v-total');
+  const vLdl = document.getElementById('v-ldl');
+  const vHdl = document.getElementById('v-hdl');
+  const vTrig = document.getElementById('v-trig');
+  if (emailEl && row.email != null) emailEl.value = String(row.email).trim();
   if (nameEl) nameEl.value = row.name != null ? String(row.name) : '';
-  if (row.age != null) document.getElementById('input-age').value = formatNumberForProfileInput(row.age);
-  if (row.height_cm != null) document.getElementById('input-height').value = formatNumberForProfileInput(row.height_cm);
-  if (row.weight_kg != null) document.getElementById('input-weight').value = formatNumberForProfileInput(row.weight_kg);
-  if (row.cholesterol != null) document.getElementById('v-total').value = formatLipidInputFromNumber(row.cholesterol);
-  if (row.ldl != null) document.getElementById('v-ldl').value = formatLipidInputFromNumber(row.ldl);
-  if (row.hdl != null) document.getElementById('v-hdl').value = formatLipidInputFromNumber(row.hdl);
-  if (row.triglycerides != null) document.getElementById('v-trig').value = formatLipidInputFromNumber(row.triglycerides);
+  if (row.age != null && ageEl) ageEl.value = formatNumberForProfileInput(row.age);
+  if (row.height_cm != null && heightEl) heightEl.value = formatNumberForProfileInput(row.height_cm);
+  if (row.weight_kg != null && weightEl) weightEl.value = formatNumberForProfileInput(row.weight_kg);
+  if (row.cholesterol != null && vTotal) vTotal.value = formatLipidInputFromNumber(row.cholesterol);
+  if (row.ldl != null && vLdl) vLdl.value = formatLipidInputFromNumber(row.ldl);
+  if (row.hdl != null && vHdl) vHdl.value = formatLipidInputFromNumber(row.hdl);
+  if (row.triglycerides != null && vTrig) vTrig.value = formatLipidInputFromNumber(row.triglycerides);
   setSegActiveByLabel('seg-gender', dbSexToGenderLabel(row.sex));
   setSegActiveByLabel('seg-units', dbUnitsToLabel(row.units));
   const st = document.getElementById('toggle-statins');
@@ -1413,20 +1476,30 @@ let profileEditBaseline = null;
 function getProfileFormSnapshot() {
   const genderEl = document.querySelector('#seg-gender .seg-btn.active');
   const unitsEl = document.querySelector('#seg-units .seg-btn.active');
+  const emailEl = document.getElementById('input-email');
+  const nameEl = document.getElementById('input-name');
+  const vTotal = document.getElementById('v-total');
+  const vLdl = document.getElementById('v-ldl');
+  const vHdl = document.getElementById('v-hdl');
+  const vTrig = document.getElementById('v-trig');
+  const ageEl = document.getElementById('input-age');
+  const heightEl = document.getElementById('input-height');
+  const weightEl = document.getElementById('input-weight');
+  const statinsEl = document.getElementById('toggle-statins');
   return JSON.stringify({
-    email: (document.getElementById('input-email')?.value ?? '').trim(),
-    name: (document.getElementById('input-name')?.value ?? '').trim(),
-    v_total: document.getElementById('v-total')?.value ?? '',
-    v_ldl: document.getElementById('v-ldl')?.value ?? '',
-    v_hdl: document.getElementById('v-hdl')?.value ?? '',
-    v_trig: document.getElementById('v-trig')?.value ?? '',
+    email: (emailEl?.value ?? '').trim(),
+    name: (nameEl?.value ?? '').trim(),
+    v_total: vTotal?.value ?? '',
+    v_ldl: vLdl?.value ?? '',
+    v_hdl: vHdl?.value ?? '',
+    v_trig: vTrig?.value ?? '',
     dontKnowOn: !!dontKnowOn,
     gender: genderEl ? genderEl.textContent.trim() : 'Мужской',
     units: unitsEl ? unitsEl.textContent.trim() : 'ммоль/л',
-    age: document.getElementById('input-age')?.value ?? '',
-    height: document.getElementById('input-height')?.value ?? '',
-    weight: document.getElementById('input-weight')?.value ?? '',
-    statins: document.getElementById('toggle-statins')?.classList.contains('on') ?? false
+    age: ageEl?.value ?? '',
+    height: heightEl?.value ?? '',
+    weight: weightEl?.value ?? '',
+    statins: statinsEl?.classList.contains('on') ?? false
   });
 }
 
@@ -1455,7 +1528,8 @@ function refreshProfileEditBaselineAfterAutofill() {
 
 async function tryAutofillProfileFromSupabaseEmail() {
   const emailEl = document.getElementById('input-email');
-  if (!emailEl || !document.getElementById('screen-profile')?.classList.contains('active')) return;
+  const screenProfile = document.getElementById('screen-profile');
+  if (!emailEl || !screenProfile?.classList.contains('active')) return;
   const email = String(emailEl.value || '')
     .trim()
     .toLowerCase();
@@ -1495,8 +1569,9 @@ async function tryAutofillProfileFromSupabaseEmail() {
 
 function syncProfileCtaButton() {
   const btn = document.getElementById('profile-cta-btn');
+  const screenProfile = document.getElementById('screen-profile');
   if (!btn) return;
-  if (!document.getElementById('screen-profile')?.classList.contains('active')) return;
+  if (!screenProfile?.classList.contains('active')) return;
 
   if (profileScreenMode === 'onboarding') {
     btn.classList.remove('profile-cta--hidden');
@@ -1708,20 +1783,30 @@ function profileCompleteFromStorage() {
 function saveProfileToStorage() {
   const genderEl = document.querySelector('#seg-gender .seg-btn.active');
   const unitsEl = document.querySelector('#seg-units .seg-btn.active');
+  const emailEl = document.getElementById('input-email');
+  const nameEl = document.getElementById('input-name');
+  const vTotal = document.getElementById('v-total');
+  const vLdl = document.getElementById('v-ldl');
+  const vHdl = document.getElementById('v-hdl');
+  const vTrig = document.getElementById('v-trig');
+  const ageEl = document.getElementById('input-age');
+  const heightEl = document.getElementById('input-height');
+  const weightEl = document.getElementById('input-weight');
+  const statinsEl = document.getElementById('toggle-statins');
   const profile = {
-    email: document.getElementById('input-email')?.value ?? '',
-    name: document.getElementById('input-name')?.value ?? '',
-    v_total: document.getElementById('v-total')?.value ?? '',
-    v_ldl: document.getElementById('v-ldl')?.value ?? '',
-    v_hdl: document.getElementById('v-hdl')?.value ?? '',
-    v_trig: document.getElementById('v-trig')?.value ?? '',
+    email: emailEl?.value ?? '',
+    name: nameEl?.value ?? '',
+    v_total: vTotal?.value ?? '',
+    v_ldl: vLdl?.value ?? '',
+    v_hdl: vHdl?.value ?? '',
+    v_trig: vTrig?.value ?? '',
     dontKnowOn: !!dontKnowOn,
     gender: genderEl ? genderEl.textContent.trim() : 'Мужской',
     units: unitsEl ? unitsEl.textContent.trim() : 'ммоль/л',
-    age: document.getElementById('input-age')?.value ?? '',
-    height: document.getElementById('input-height')?.value ?? '',
-    weight: document.getElementById('input-weight')?.value ?? '',
-    statins: document.getElementById('toggle-statins')?.classList.contains('on') ?? false
+    age: ageEl?.value ?? '',
+    height: heightEl?.value ?? '',
+    weight: weightEl?.value ?? '',
+    statins: statinsEl?.classList.contains('on') ?? false
   };
   try {
     localStorage.setItem(LS_USER_PROFILE, JSON.stringify(profile));
@@ -1751,16 +1836,23 @@ function loadProfileFromStorage() {
     if (!raw) return false;
     const p = JSON.parse(raw);
     const emailEl = document.getElementById('input-email');
-    if (emailEl && p.email != null) emailEl.value = p.email;
     const nameEl = document.getElementById('input-name');
+    const vTotal = document.getElementById('v-total');
+    const vLdl = document.getElementById('v-ldl');
+    const vHdl = document.getElementById('v-hdl');
+    const vTrig = document.getElementById('v-trig');
+    const ageEl = document.getElementById('input-age');
+    const heightEl = document.getElementById('input-height');
+    const weightEl = document.getElementById('input-weight');
+    if (emailEl && p.email != null) emailEl.value = p.email;
     if (nameEl && p.name != null) nameEl.value = p.name;
-    if (p.v_total != null) document.getElementById('v-total').value = p.v_total;
-    if (p.v_ldl != null) document.getElementById('v-ldl').value = p.v_ldl;
-    if (p.v_hdl != null) document.getElementById('v-hdl').value = p.v_hdl;
-    if (p.v_trig != null) document.getElementById('v-trig').value = p.v_trig;
-    if (p.age != null) document.getElementById('input-age').value = p.age;
-    if (p.height != null) document.getElementById('input-height').value = p.height;
-    if (p.weight != null) document.getElementById('input-weight').value = p.weight;
+    if (p.v_total != null && vTotal) vTotal.value = p.v_total;
+    if (p.v_ldl != null && vLdl) vLdl.value = p.v_ldl;
+    if (p.v_hdl != null && vHdl) vHdl.value = p.v_hdl;
+    if (p.v_trig != null && vTrig) vTrig.value = p.v_trig;
+    if (p.age != null && ageEl) ageEl.value = p.age;
+    if (p.height != null && heightEl) heightEl.value = p.height;
+    if (p.weight != null && weightEl) weightEl.value = p.weight;
     dontKnowOn = !!p.dontKnowOn;
     applyDontKnowVisual();
     setSegActiveByLabel('seg-gender', p.gender || 'Мужской');
@@ -2042,18 +2134,14 @@ async function renderHistoryList() {
       const onBad = () => {
         if (doneOnce) return;
         doneOnce = true;
-        thumbWrap.classList.remove('is-loading');
-        im.remove();
-        thumbWrap.classList.add('history-thumb--no-photo');
-        thumbWrap.textContent = '🍽';
+        fillHistoryThumbPlaceholder(thumbWrap);
       };
       im.onload = onOk;
       im.onerror = onBad;
       im.src = imgUrl;
       if (im.complete && im.naturalWidth) onOk();
     } else {
-      thumbWrap.classList.add('history-thumb--no-photo');
-      thumbWrap.textContent = '🍽';
+      fillHistoryThumbPlaceholder(thumbWrap);
     }
     row.appendChild(thumbWrap);
     const info = document.createElement('div');
@@ -2114,8 +2202,26 @@ async function saveMealToHistoryAndGoMain() {
     return;
   }
   const atIso = new Date().toISOString();
-  const uid = getStoredUserId();
 
+  const mealLocal = {
+    photoBase64: lastMealPhotoDataUrl,
+    verdict: verdict,
+    score: d.score,
+    title: d.title != null ? String(d.title) : '',
+    vision: d.vision != null ? String(d.vision) : '',
+    summary: d.summary != null ? String(d.summary) : '',
+    education: d.education != null ? String(d.education) : '',
+    nuances: d.nuances != null ? String(d.nuances) : '',
+    upgrade: d.upgrade != null ? String(d.upgrade) : '',
+    factors: Array.isArray(d.factors) ? d.factors : [],
+    at: atIso
+  };
+
+  const arr = getMealHistory();
+  arr.push(mealLocal);
+  setMealHistory(arr);
+
+  const uid = getStoredUserId();
   if (uid) {
     try {
       const compressed = await compressPhoto(lastMealPhotoDataUrl);
@@ -2144,44 +2250,18 @@ async function saveMealToHistoryAndGoMain() {
       if (error) {
         console.warn('[supabase] meals insert', error);
       } else if (data && data.id) {
-        const mealLocal = {
-          supabaseId: data.id,
-          photo_url: publicUrl,
-          verdict: verdict,
-          score: d.score,
-          title: d.title != null ? String(d.title) : '',
-          vision: d.vision != null ? String(d.vision) : '',
-          summary: d.summary != null ? String(d.summary) : '',
-          education: d.education != null ? String(d.education) : '',
-          nuances: d.nuances != null ? String(d.nuances) : '',
-          upgrade: d.upgrade != null ? String(d.upgrade) : '',
-          factors: Array.isArray(d.factors) ? d.factors : [],
-          at: atIso
-        };
-        const arr = getMealHistory();
-        arr.push(mealLocal);
-        setMealHistory(arr);
+        const next = getMealHistory();
+        const idx = next.findIndex((m) => m.at === atIso && !m.supabaseId);
+        if (idx !== -1) {
+          const merged = { ...next[idx], supabaseId: data.id, photo_url: publicUrl };
+          delete merged.photoBase64;
+          next[idx] = merged;
+          setMealHistory(next);
+        }
       }
     } catch (e) {
       console.warn('[save meal] compress/upload/insert', e);
     }
-  } else {
-    const mealLocal = {
-      photoBase64: lastMealPhotoDataUrl,
-      verdict: verdict,
-      score: d.score,
-      title: d.title != null ? String(d.title) : '',
-      vision: d.vision != null ? String(d.vision) : '',
-      summary: d.summary != null ? String(d.summary) : '',
-      education: d.education != null ? String(d.education) : '',
-      nuances: d.nuances != null ? String(d.nuances) : '',
-      upgrade: d.upgrade != null ? String(d.upgrade) : '',
-      factors: Array.isArray(d.factors) ? d.factors : [],
-      at: atIso
-    };
-    const arr = getMealHistory();
-    arr.push(mealLocal);
-    setMealHistory(arr);
   }
 
   goTo('screen-main');
@@ -2370,11 +2450,13 @@ function syncMainCholCard() {
 }
 
 function openFoodCamera() {
+  const appInitErr = document.getElementById('app-init-error');
+  const camInput = document.getElementById('food-camera-input');
   if (!openaiApiKey) {
-    document.getElementById('app-init-error')?.classList.add('visible');
+    appInitErr?.classList.add('visible');
     return;
   }
-  document.getElementById('food-camera-input').click();
+  camInput?.click();
 }
 
 function getProfileForPrompt() {
@@ -2515,8 +2597,8 @@ function resultFieldText(val, isError) {
   return s === '' ? '—' : s;
 }
 
-function renderFactors(factors) {
-  const wrap = document.getElementById('result-factors-list');
+function renderFactors(factors, wrap) {
+  if (!wrap) return;
   wrap.innerHTML = '';
   const list = Array.isArray(factors) ? factors.slice(0, 4) : [];
   const impactClass = { ok: 'ok', mid: 'mid', bad: 'bad' };
@@ -2594,6 +2676,11 @@ function applyResultToUI(data) {
   const scoreRow = document.getElementById('result-score-row');
   const scoreDisplay = document.getElementById('result-score-display');
   const dish = document.getElementById('result-dish-title');
+  const summaryEl = document.getElementById('result-summary-text');
+  const educationEl = document.getElementById('result-education-text');
+  const nuancesEl = document.getElementById('result-nuances-text');
+  const upgradeEl = document.getElementById('result-upgrade-text');
+  const factorsWrap = document.getElementById('result-factors-list');
   if (dish) dish.textContent = data.title || '—';
 
   if (err) {
@@ -2613,13 +2700,13 @@ function applyResultToUI(data) {
     const fromReason = data.reason != null ? String(data.reason).trim() : '';
     summaryText = fromSummary !== '' ? fromSummary : (fromReason !== '' ? fromReason : '—');
   }
-  document.getElementById('result-summary-text').textContent = summaryText;
+  if (summaryEl) summaryEl.textContent = summaryText;
 
-  document.getElementById('result-education-text').textContent = resultFieldText(data.education, err);
-  document.getElementById('result-nuances-text').textContent = resultFieldText(data.nuances, err);
-  document.getElementById('result-upgrade-text').textContent = resultFieldText(data.upgrade, err);
+  if (educationEl) educationEl.textContent = resultFieldText(data.education, err);
+  if (nuancesEl) nuancesEl.textContent = resultFieldText(data.nuances, err);
+  if (upgradeEl) upgradeEl.textContent = resultFieldText(data.upgrade, err);
 
-  renderFactors(data.factors);
+  renderFactors(data.factors, factorsWrap);
 }
 
 document.getElementById('food-camera-input').addEventListener('change', async (e) => {
@@ -2638,6 +2725,14 @@ document.getElementById('food-camera-input').addEventListener('change', async (e
 
   const img = document.getElementById('result-photo-img');
   const ph = document.getElementById('result-photo-placeholder');
+  const dishTitle = document.getElementById('result-dish-title');
+  const scoreRow = document.getElementById('result-score-row');
+  const scoreDisplay = document.getElementById('result-score-display');
+  const summaryEl = document.getElementById('result-summary-text');
+  const educationEl = document.getElementById('result-education-text');
+  const nuancesEl = document.getElementById('result-nuances-text');
+  const upgradeEl = document.getElementById('result-upgrade-text');
+  const factorsList = document.getElementById('result-factors-list');
   if (lastFoodObjectUrl) {
     URL.revokeObjectURL(lastFoodObjectUrl);
     lastFoodObjectUrl = null;
@@ -2650,14 +2745,14 @@ document.getElementById('food-camera-input').addEventListener('change', async (e
   };
 
   setResultLoading(true);
-  document.getElementById('result-dish-title').textContent = '…';
-  document.getElementById('result-score-row')?.classList.add('hidden');
-  document.getElementById('result-score-display').textContent = '…';
-  document.getElementById('result-summary-text').textContent = '—';
-  document.getElementById('result-education-text').textContent = '—';
-  document.getElementById('result-nuances-text').textContent = '—';
-  document.getElementById('result-upgrade-text').textContent = '—';
-  document.getElementById('result-factors-list').innerHTML = '';
+  if (dishTitle) dishTitle.textContent = '…';
+  scoreRow?.classList.add('hidden');
+  if (scoreDisplay) scoreDisplay.textContent = '…';
+  if (summaryEl) summaryEl.textContent = '—';
+  if (educationEl) educationEl.textContent = '—';
+  if (nuancesEl) nuancesEl.textContent = '—';
+  if (upgradeEl) upgradeEl.textContent = '—';
+  if (factorsList) factorsList.innerHTML = '';
 
   try {
     const data = await analyzeFoodPhoto(dataUrl);
@@ -2738,71 +2833,72 @@ function navTo(id, el) {
   });
 }
 function setSeg(id, el) {
-  document.getElementById(id).querySelectorAll('.seg-btn').forEach((b) => b.classList.remove('active'));
+  const container = document.getElementById(id);
+  const screenMain = document.getElementById('screen-main');
+  const screenProfile = document.getElementById('screen-profile');
+  if (!container) return;
+  container.querySelectorAll('.seg-btn').forEach((b) => b.classList.remove('active'));
   el.classList.add('active');
-  if (id === 'seg-units' && document.getElementById('screen-main')?.classList.contains('active')) syncMainCholCard();
-  if (
-    profileScreenMode === 'edit' &&
-    document.getElementById('screen-profile')?.classList.contains('active')
-  ) {
+  if (id === 'seg-units' && screenMain?.classList.contains('active')) syncMainCholCard();
+  if (profileScreenMode === 'edit' && screenProfile?.classList.contains('active')) {
     syncProfileCtaButton();
   }
 }
 function toggleSwitch(el) {
+  const screenProfile = document.getElementById('screen-profile');
   el.classList.toggle('on');
-  if (
-    profileScreenMode === 'edit' &&
-    document.getElementById('screen-profile')?.classList.contains('active')
-  ) {
+  if (profileScreenMode === 'edit' && screenProfile?.classList.contains('active')) {
     syncProfileCtaButton();
   }
 }
 function updateName(val) {
   const line = document.getElementById('main-greeting-line');
+  const screenProfile = document.getElementById('screen-profile');
   if (!line) return;
   const t = String(val || '').trim();
   line.textContent = t ? 'Привет, ' + t + '!' : 'Привет!';
-  if (
-    profileScreenMode === 'edit' &&
-    document.getElementById('screen-profile')?.classList.contains('active')
-  ) {
+  if (profileScreenMode === 'edit' && screenProfile?.classList.contains('active')) {
     syncProfileCtaButton();
   }
 }
 
 function toggleDontKnow() {
   dontKnowOn = !dontKnowOn;
-  const fields = ['f-total', 'f-ldl', 'f-hdl', 'f-trig'];
+  const vTotal = document.getElementById('v-total');
+  const vLdl = document.getElementById('v-ldl');
+  const vHdl = document.getElementById('v-hdl');
+  const vTrig = document.getElementById('v-trig');
+  const screenMain = document.getElementById('screen-main');
+  const screenProfile = document.getElementById('screen-profile');
   if (dontKnowOn) {
-    document.getElementById('v-total').value = AVG.total.toFixed(2);
-    document.getElementById('v-ldl').value = AVG.ldl.toFixed(2);
-    document.getElementById('v-hdl').value = AVG.hdl.toFixed(2);
-    document.getElementById('v-trig').value = AVG.trig.toFixed(2);
+    if (vTotal) vTotal.value = AVG.total.toFixed(2);
+    if (vLdl) vLdl.value = AVG.ldl.toFixed(2);
+    if (vHdl) vHdl.value = AVG.hdl.toFixed(2);
+    if (vTrig) vTrig.value = AVG.trig.toFixed(2);
   } else {
-    ['v-total', 'v-ldl', 'v-hdl', 'v-trig'].forEach((id) => (document.getElementById(id).value = ''));
+    if (vTotal) vTotal.value = '';
+    if (vLdl) vLdl.value = '';
+    if (vHdl) vHdl.value = '';
+    if (vTrig) vTrig.value = '';
   }
   applyDontKnowVisual();
-  if (document.getElementById('screen-main')?.classList.contains('active')) syncMainCholCard();
-  if (
-    profileScreenMode === 'edit' &&
-    document.getElementById('screen-profile')?.classList.contains('active')
-  ) {
+  if (screenMain?.classList.contains('active')) syncMainCholCard();
+  if (profileScreenMode === 'edit' && screenProfile?.classList.contains('active')) {
     syncProfileCtaButton();
   }
 }
 
 function syncProfileCtaIfEditOpen() {
-  if (
-    profileScreenMode === 'edit' &&
-    document.getElementById('screen-profile')?.classList.contains('active')
-  ) {
+  const screenProfile = document.getElementById('screen-profile');
+  if (profileScreenMode === 'edit' && screenProfile?.classList.contains('active')) {
     syncProfileCtaButton();
   }
 }
 
 ['v-total', 'v-ldl', 'v-hdl', 'v-trig'].forEach((fid) => {
   document.getElementById(fid)?.addEventListener('input', () => {
-    if (document.getElementById('screen-main')?.classList.contains('active')) syncMainCholCard();
+    const screenMain = document.getElementById('screen-main');
+    if (screenMain?.classList.contains('active')) syncMainCholCard();
     syncProfileCtaIfEditOpen();
   });
 });
@@ -2811,8 +2907,10 @@ function syncProfileCtaIfEditOpen() {
 });
 
 document.getElementById('input-email')?.addEventListener('input', () => {
-  document.getElementById('field-wrap-email')?.classList.remove('field--error');
-  document.getElementById('profile-validate-error')?.classList.remove('visible');
+  const wrapE = document.getElementById('field-wrap-email');
+  const errEl = document.getElementById('profile-validate-error');
+  wrapE?.classList.remove('field--error');
+  errEl?.classList.remove('visible');
   clearTimeout(emailAutofillTimer);
   emailAutofillTimer = setTimeout(() => void tryAutofillProfileFromSupabaseEmail(), 500);
   syncProfileCtaIfEditOpen();
@@ -2821,16 +2919,19 @@ document.getElementById('input-email')?.addEventListener('blur', () => {
   void tryAutofillProfileFromSupabaseEmail();
 });
 document.getElementById('input-name')?.addEventListener('input', () => {
-  document.getElementById('field-wrap-name')?.classList.remove('field--error');
-  document.getElementById('profile-validate-error')?.classList.remove('visible');
+  const wrapN = document.getElementById('field-wrap-name');
+  const errEl = document.getElementById('profile-validate-error');
+  wrapN?.classList.remove('field--error');
+  errEl?.classList.remove('visible');
   syncProfileCtaIfEditOpen();
 });
 
 async function bootstrapApp() {
-  document.getElementById('app-init-error')?.classList.remove('visible');
+  const appInitErr = document.getElementById('app-init-error');
+  appInitErr?.classList.remove('visible');
   const ok = await loadOpenAiKeyFromSupabase();
   if (!ok) {
-    document.getElementById('app-init-error')?.classList.add('visible');
+    appInitErr?.classList.add('visible');
     return;
   }
   if (loadProfileFromStorage()) {
