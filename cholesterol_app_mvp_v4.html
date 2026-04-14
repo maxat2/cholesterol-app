@@ -1253,7 +1253,7 @@
         </div>
       </div>
       <div class="result-actions" id="result-actions">
-        <button type="button" class="btn-primary" id="result-btn-save-history" onclick="saveMealToHistoryAndGoMain()">Сохранить в историю</button>
+        <button type="button" class="btn-primary" id="result-btn-save-history" onclick="this.disabled=true;saveMealToHistoryAndGoMain()">Сохранить в историю</button>
         <button type="button" class="btn-secondary" onclick="backFromResult()">← Назад</button>
       </div>
     </div>
@@ -2492,6 +2492,9 @@ async function renderHistoryList() {
 }
 
 async function saveMealToHistoryAndGoMain() {
+  if (saveMealToHistoryAndGoMain._running) return;
+  saveMealToHistoryAndGoMain._running = true;
+  try {
   if (resultViewSource === 'history') return;
   if (!lastMealAnalysisData) {
     goTo('screen-main');
@@ -2608,10 +2611,15 @@ async function saveMealToHistoryAndGoMain() {
       }
     } catch (e) {
       console.warn('[save meal] compress/upload/insert', e);
+      const saveBtn = document.getElementById('result-btn-save-history');
+      if (saveBtn) saveBtn.disabled = false;
     }
   }
 
   goTo('screen-main');
+  } finally {
+    saveMealToHistoryAndGoMain._running = false;
+  }
 }
 
 function backFromResult() {
