@@ -2845,7 +2845,7 @@ function getProfileForPrompt() {
 
 function buildVisionPrompt() {
   const p = getProfileForPrompt();
-  return `Ты персональный нутриционист. Анализируй фото еды в контексте липидного профиля пользователя.
+  const out = `Ты персональный нутриционист. Анализируй фото еды в контексте липидного профиля пользователя.
 
 ПРОФИЛЬ:
 - Общий холестерин: ${p.total} ммоль/л (цель: снизить до <5.0)
@@ -2880,6 +2880,8 @@ function buildVisionPrompt() {
 verdict соответствует score: green=7+, yellow=5-6, red=<5
 factors максимум 4 пункта — только самые важные
 Если не еда: verdict "error", title "Это не еда", остальные поля пустые строки или пустой массив для factors`;
+  console.log('[prompt]', out);
+  return out;
 }
 
 function fileToDataUrl(file) {
