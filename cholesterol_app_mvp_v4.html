@@ -1911,6 +1911,7 @@ function updateResultActionButtons() {
   const saveBtn = document.getElementById('result-btn-save-history');
   if (!saveBtn) return;
   saveBtn.style.display = resultViewSource === 'fresh' ? '' : 'none';
+  if (resultViewSource === 'fresh') saveBtn.disabled = false;
 }
 
 function openHistoryMealDetail(item) {
@@ -2984,6 +2985,8 @@ function setResultLoading(show) {
 }
 
 async function analyzeFoodPhoto(dataUrl) {
+  const saveBtn = document.getElementById('result-btn-save-history');
+  if (saveBtn) saveBtn.disabled = false;
   if (!openaiApiKey) {
     throw new Error('Не удалось загрузить настройки приложения');
   }
@@ -3026,6 +3029,8 @@ async function analyzeFoodPhoto(dataUrl) {
 }
 
 async function analyzeFoodFromText(userText) {
+  const saveBtn = document.getElementById('result-btn-save-history');
+  if (saveBtn) saveBtn.disabled = false;
   if (!openaiApiKey) {
     throw new Error('Не удалось загрузить настройки приложения');
   }
