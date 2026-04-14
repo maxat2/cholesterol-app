@@ -243,6 +243,21 @@
     -webkit-overflow-scrolling: touch;
   }
   .main-header { display: flex; flex-direction: column; gap: 8px; }
+  .main-header--hero {
+    align-items: center;
+    text-align: center;
+    margin-top: 20px;
+  }
+  .main-header--hero .main-greeting {
+    width: 100%;
+    text-align: center;
+  }
+  .main-header--hero .main-lead {
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    max-width: 36em;
+  }
   .main-greeting {
     font-size: var(--main-greeting-size);
     font-weight: 700;
@@ -256,6 +271,42 @@
     color: var(--main-lead-color);
     line-height: 1.5;
     max-width: 36em;
+  }
+  #main-hero-animation {
+    max-width: 244px;
+    width: 100%;
+    margin: -24px auto 30px;
+
+    flex-shrink: 0;
+  }
+  #screen-main .btn-camera-wide {
+    margin-top: -10px;
+  }
+  #main-edu-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+  }
+  .edu-card {
+    background: #eef2ff;
+    border-radius: 16px;
+    padding: 16px;
+    box-sizing: border-box;
+  }
+  .edu-card-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 8px;
+    line-height: 1.3;
+  }
+  .edu-card-text {
+    font-size: 14px;
+    font-weight: 400;
+    color: #333;
+    line-height: 1.5;
+    margin: 0;
   }
   .btn-camera-wide {
     background: var(--accent);
@@ -871,6 +922,28 @@
   .purchase-text { font-size: 15px; color: #333; line-height: 1.5; text-align: center; margin-bottom: 20px; }
   .units-mini { margin: 8px 0 4px; font-size: 12px; color: var(--muted2); }
 
+  .profile-lipids-link-wrap {
+    margin-top: 28px;
+    padding-bottom: 4px;
+    text-align: center;
+  }
+  .profile-lipids-link {
+    background: none;
+    border: none;
+    padding: 10px 12px;
+    margin: 0;
+    font-family: var(--sans);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+  }
+  #screen-profile.mode-edit .profile-lipids-link-wrap {
+    display: none;
+  }
+
 </style>
 </head>
 <body>
@@ -1000,6 +1073,9 @@
 
       <div class="inline-error" id="profile-validate-error" role="alert">Укажите e-mail и имя.</div>
       <button type="button" class="btn-primary" id="profile-cta-btn" onclick="saveProfileAndStart()">Продолжить</button>
+      <div class="profile-lipids-link-wrap">
+        <button type="button" class="profile-lipids-link" onclick="goTo('screen-lipids')">Липидный профиль</button>
+      </div>
     </div>
     <div class="bottom-nav">
       <button type="button" class="bnav-item" onclick="navTo('screen-main',this)" aria-label="Главная">
@@ -1016,9 +1092,12 @@
 
   <div class="screen" id="screen-main">
     <div class="main-wrap">
-      <div class="main-header">
+      <div class="main-header main-header--hero">
         <div class="main-greeting" id="main-greeting-line">Привет!</div>
         <p class="main-lead">Что ешь сегодня? Сфотографируй еду — узнай подходит ли она тебе.</p>
+      </div>
+      <div id="main-hero-animation">
+        <img src="main_animation.svg" id="main-anim-img" alt="" style="width:100%;height:auto;display:block;" />
       </div>
       <button type="button" class="btn-camera-wide" onclick="openFoodCamera()" aria-label="Сделать фото еды">
         <svg class="cam-svg" width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -1027,7 +1106,43 @@
         </svg>
         Фото
       </button>
+      <div id="main-edu-cards">
+        <div class="edu-card">
+          <div class="edu-card-title">Холестерин — это не плохо</div>
+          <div class="edu-card-text">
+            Холестерин — жизненно важное вещество: он участвует в построении клеточных мембран, синтезе гормонов и витамина D. Большую часть организм производит сам, поэтому задача не «убрать его», а держать баланс.
+          </div>
+        </div>
+        <div class="edu-card">
+          <div class="edu-card-title">Какое значение важнее?</div>
+          <div class="edu-card-text">
+            Общий холестерин — это сумма разных фракций. Ключевую роль играет соотношение ЛПНП (атерогенных частиц) и ЛПВП (защитных), а также их концентрация в крови.
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="bottom-nav">
+      <button type="button" class="bnav-item active" onclick="navTo('screen-main',this)" aria-label="Главная">
+        <span class="bnav-icon" aria-hidden="true"><svg class="bnav-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3.5 8.5C3.5 9.05 3.95 9.5 4.5 9.5C5.05 9.5 5.5 9.05 5.5 8.5V6.5H7.5C8.05 6.5 8.5 6.05 8.5 5.5C8.5 4.95 8.05 4.5 7.5 4.5H5.5V2.5C5.5 1.95 5.05 1.5 4.5 1.5C3.95 1.5 3.5 1.95 3.5 2.5V4.5H1.5C0.95 4.5 0.5 4.95 0.5 5.5C0.5 6.05 0.95 6.5 1.5 6.5H3.5V8.5Z" fill="currentColor"/><path d="M13.5 17.5C15.1569 17.5 16.5 16.1569 16.5 14.5C16.5 12.8431 15.1569 11.5 13.5 11.5C11.8431 11.5 10.5 12.8431 10.5 14.5C10.5 16.1569 11.8431 17.5 13.5 17.5Z" fill="currentColor"/><path d="M21.5 6.5H18.33L17.09 5.15C16.72 4.74 16.18 4.5 15.62 4.5H9.22C9.39 4.8 9.5 5.13 9.5 5.5C9.5 6.6 8.6 7.5 7.5 7.5H6.5V8.5C6.5 9.6 5.6 10.5 4.5 10.5C4.13 10.5 3.8 10.39 3.5 10.22V20.5C3.5 21.6 4.4 22.5 5.5 22.5H21.5C22.6 22.5 23.5 21.6 23.5 20.5V8.5C23.5 7.4 22.6 6.5 21.5 6.5ZM13.5 19.5C10.74 19.5 8.5 17.26 8.5 14.5C8.5 11.74 10.74 9.5 13.5 9.5C16.26 9.5 18.5 11.74 18.5 14.5C18.5 17.26 16.26 19.5 13.5 19.5Z" fill="currentColor"/></svg></span>
+      </button>
+      <button type="button" class="bnav-item" onclick="navTo('screen-history',this)" aria-label="История">
+        <span class="bnav-icon" aria-hidden="true"><svg class="bnav-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16 6V12C16 13.1 16.9 14 18 14H19V21C19 21.55 19.45 22 20 22C20.55 22 21 21.55 21 21V3.13C21 2.48 20.39 2 19.76 2.15C17.6 2.68 16 4.51 16 6ZM11 9H9V3C9 2.45 8.55 2 8 2C7.45 2 7 2.45 7 3V9H5V3C5 2.45 4.55 2 4 2C3.45 2 3 2.45 3 3V9C3 11.21 4.79 13 7 13V21C7 21.55 7.45 22 8 22C8.55 22 9 21.55 9 21V13C11.21 13 13 11.21 13 9V3C13 2.45 12.55 2 12 2C11.45 2 11 2.45 11 3V9Z" fill="currentColor"/></svg></span>
+      </button>
+      <button type="button" class="bnav-item" onclick="navTo('screen-profile',this)" aria-label="Профиль">
+        <span class="bnav-icon" aria-hidden="true"><svg class="bnav-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11.9892 6C13.0938 6 13.9892 5.10457 13.9892 4C13.9892 2.89543 13.0938 2 11.9892 2C10.8847 2 9.98924 2.89543 9.98924 4C9.98924 5.10457 10.8847 6 11.9892 6Z" fill="currentColor"/><path d="M15.8792 8.11C15.4892 7.72 14.8192 7 13.5192 7C13.3092 7 12.0992 7 10.9792 7C8.51924 6.99 6.46924 5.2 6.05924 2.85C5.97924 2.36 5.56924 2 5.07924 2C4.46924 2 3.98924 2.54 4.07924 3.14C4.51924 5.8 6.45924 7.95 8.98924 8.71V21C8.98924 21.55 9.43924 22 9.98924 22C10.5392 22 10.9892 21.55 10.9892 21V16H12.9892V21C12.9892 21.55 13.4392 22 13.9892 22C14.5392 22 14.9892 21.55 14.9892 21V10.05L18.2292 13.29C18.6192 13.68 19.2492 13.68 19.6392 13.29C20.0292 12.9 20.0292 12.27 19.6392 11.88L15.8792 8.11Z" fill="currentColor"/></svg></span>
+      </button>
+    </div>
+  </div>
 
+  <div class="screen" id="screen-lipids">
+    <div class="nav history-top-nav">
+      <button type="button" class="history-nav-side" onclick="goTo('screen-main')" aria-label="Назад" title="Назад">
+        <svg width="10" height="17" viewBox="0 0 10 17" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M8.5 15.5L1.5 8.5L8.5 1.5" stroke="#1C1B1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="history-nav-title">Липидный профиль</div>
+      <span class="history-nav-side" aria-hidden="true"></span>
+    </div>
+    <div class="content">
       <section class="main-lipids" aria-labelledby="lipid-heading">
         <h2 class="lipid-section-title" id="lipid-heading">Твой липидный профиль</h2>
         <div class="main-lipids-stack" id="main-lipids-stack">
@@ -2103,9 +2218,16 @@ function skipOnboardingToMain() {
   goTo('screen-main');
 }
 
+function isMainOrLipidsScreenActive() {
+  return (
+    document.getElementById('screen-main')?.classList.contains('active') ||
+    document.getElementById('screen-lipids')?.classList.contains('active')
+  );
+}
+
 function syncBottomNavForScreen(screenId) {
   const idx =
-    screenId === 'screen-main'
+    screenId === 'screen-main' || screenId === 'screen-lipids'
       ? 0
       : screenId === 'screen-history' || screenId === 'screen-result'
         ? 1
@@ -3046,7 +3168,10 @@ function goTo(id, opts) {
   let targetId = id;
   let forcedProfileGate = false;
   if (
-    (id === 'screen-main' || id === 'screen-history' || id === 'screen-result') &&
+    (id === 'screen-main' ||
+      id === 'screen-lipids' ||
+      id === 'screen-history' ||
+      id === 'screen-result') &&
     !profileCompleteFromStorage()
   ) {
     targetId = 'screen-profile';
@@ -3061,7 +3186,7 @@ function goTo(id, opts) {
   if (!target) return;
   document.querySelectorAll('.screen').forEach((s) => s.classList.remove('active'));
   target.classList.add('active');
-  if (targetId === 'screen-main') void prepareMainScreenLipids();
+  if (targetId === 'screen-main' || targetId === 'screen-lipids') void prepareMainScreenLipids();
   if (targetId === 'screen-history') void renderHistoryList();
   if (targetId === 'screen-profile') {
     if (forcedProfileGate || !profileCompleteFromStorage()) {
@@ -3090,7 +3215,7 @@ function goTo(id, opts) {
 function navTo(id, el) {
   goTo(id, id === 'screen-profile' ? { mode: 'edit' } : undefined);
   const actualId = document.querySelector('.phone .screen.active')?.id || id;
-  const navIdx = { 'screen-main': 0, 'screen-history': 1, 'screen-profile': 2 };
+  const navIdx = { 'screen-main': 0, 'screen-lipids': 0, 'screen-history': 1, 'screen-profile': 2 };
   const idx = navIdx[actualId];
   const nav = el?.closest('.bottom-nav');
   if (!nav) return;
@@ -3100,12 +3225,11 @@ function navTo(id, el) {
 }
 function setSeg(id, el) {
   const container = document.getElementById(id);
-  const screenMain = document.getElementById('screen-main');
   const screenProfile = document.getElementById('screen-profile');
   if (!container) return;
   container.querySelectorAll('.seg-btn').forEach((b) => b.classList.remove('active'));
   el.classList.add('active');
-  if (id === 'seg-units' && screenMain?.classList.contains('active')) syncMainCholCard();
+  if (id === 'seg-units' && isMainOrLipidsScreenActive()) syncMainCholCard();
   if (profileScreenMode === 'edit' && screenProfile?.classList.contains('active')) {
     syncProfileCtaButton();
   }
@@ -3134,7 +3258,6 @@ function toggleDontKnow() {
   const vLdl = document.getElementById('v-ldl');
   const vHdl = document.getElementById('v-hdl');
   const vTrig = document.getElementById('v-trig');
-  const screenMain = document.getElementById('screen-main');
   const screenProfile = document.getElementById('screen-profile');
   if (dontKnowOn) {
     if (vTotal) vTotal.value = AVG.total.toFixed(2);
@@ -3148,7 +3271,7 @@ function toggleDontKnow() {
     if (vTrig) vTrig.value = '';
   }
   applyDontKnowVisual();
-  if (screenMain?.classList.contains('active')) syncMainCholCard();
+  if (isMainOrLipidsScreenActive()) syncMainCholCard();
   if (profileScreenMode === 'edit' && screenProfile?.classList.contains('active')) {
     syncProfileCtaButton();
   }
@@ -3163,8 +3286,7 @@ function syncProfileCtaIfEditOpen() {
 
 ['v-total', 'v-ldl', 'v-hdl', 'v-trig'].forEach((fid) => {
   document.getElementById(fid)?.addEventListener('input', () => {
-    const screenMain = document.getElementById('screen-main');
-    if (screenMain?.classList.contains('active')) syncMainCholCard();
+    if (isMainOrLipidsScreenActive()) syncMainCholCard();
     syncProfileCtaIfEditOpen();
   });
 });
