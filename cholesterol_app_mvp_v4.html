@@ -1264,6 +1264,7 @@
       </div>
       <div class="result-actions" id="result-actions">
         <button type="button" class="btn-primary" id="result-btn-save-history" onclick="this.disabled=true;saveMealToHistoryAndGoMain()">Сохранить в историю</button>
+        <button type="button" class="btn-primary" id="result-btn-refine" style="display:none" onclick="openDescribeFoodModalForRefine()">Уточнить</button>
         <button type="button" class="btn-secondary" onclick="backFromResult()">← Назад</button>
       </div>
     </div>
@@ -1912,6 +1913,10 @@ let lastMealPhotoDataUrl = null;
 let lastMealAnalysisData = null;
 /** Запись из потока «описание словами» (без фото). */
 let lastMealTextOnly = false;
+/** Исходный текст из модалки «описать еду» — для пересчёта без фото. */
+let lastMealSourceDescribeText = null;
+/** Режим модалки: обычное описание еды или уточнение результата. */
+let describeFoodModalMode = 'describe';
 /** Куда вернуться с экрана результата: свежий анализ → главная, просмотр из истории → история */
 let resultBackScreen = 'screen-main';
 /** fresh — можно сохранить в историю; history — только просмотр */
@@ -1919,9 +1924,18 @@ let resultViewSource = 'fresh';
 
 function updateResultActionButtons() {
   const saveBtn = document.getElementById('result-btn-save-history');
-  if (!saveBtn) return;
-  saveBtn.style.display = resultViewSource === 'fresh' ? '' : 'none';
-  if (resultViewSource === 'fresh') saveBtn.disabled = false;
+  const refineBtn = document.getElementById('result-btn-refine');
+  if (saveBtn) {
+    saveBtn.style.display = resultViewSource === 'fresh' ? '' : 'none';
+    if (resultViewSource === 'fresh') saveBtn.disabled = false;
+  }
+  if (refineBtn) {
+    const ok =
+      resultViewSource === 'fresh' &&
+      lastMealAnalysisData &&
+      lastMealAnalysisData.verdict !== 'error';
+    refineBtn.style.display = ok ? '' : 'none';
+  }
 }
 
 function openHistoryMealDetail(item) {
@@ -1986,12 +2000,52 @@ function dismissPurchaseModal() {
   document.getElementById('purchase-overlay')?.classList.remove('visible');
 }
 
+function configureDescribeFoodModal(mode) {
+  describeFoodModalMode = mode;
+  const titleEl = document.getElementById('describe-food-title');
+  const ta = document.getElementById('describe-food-text');
+  const submitBtn = document.getElementById('describe-food-submit');
+  if (mode === 'refine') {
+    if (titleEl) titleEl.textContent = 'Уточнить детали';
+    if (ta) {
+      ta.placeholder =
+        'Например: масло было виноградное, а не подсолнечное. Или: порция была небольшая';
+      ta.value = '';
+    }
+    if (submitBtn) submitBtn.textContent = 'Пересчитать';
+  } else {
+    if (titleEl) titleEl.textContent = 'Описание еды';
+    if (ta) {
+      ta.placeholder =
+        'Опишите то что сегодня ели, желательно подробно, чтобы точность ответа была лучше';
+      ta.value = '';
+    }
+    if (submitBtn) submitBtn.textContent = 'Отправить';
+  }
+}
+
 function openDescribeFoodModal() {
+  configureDescribeFoodModal('describe');
+  document.getElementById('describe-food-overlay')?.classList.add('visible');
+}
+
+function openDescribeFoodModalForRefine() {
+  configureDescribeFoodModal('refine');
   document.getElementById('describe-food-overlay')?.classList.add('visible');
 }
 
 function dismissDescribeFoodModal() {
   document.getElementById('describe-food-overlay')?.classList.remove('visible');
+}
+
+function describeBlockFallbackFromLastMeal() {
+  const d = lastMealAnalysisData;
+  if (!d) return '';
+  const parts = [];
+  if (d.title) parts.push('Название: ' + String(d.title));
+  if (d.vision) parts.push('Как было описано/распознано: ' + String(d.vision));
+  if (d.summary) parts.push('Итог ранее: ' + String(d.summary));
+  return parts.join('\n');
 }
 
 async function submitDescribeFood() {
@@ -2002,6 +2056,51 @@ async function submitDescribeFood() {
     document.getElementById('app-init-error')?.classList.add('visible');
     return;
   }
+
+  if (describeFoodModalMode === 'refine') {
+    dismissDescribeFoodModal();
+    if (ta) ta.value = '';
+
+    const loaderText = document.getElementById('result-loader-text');
+    if (loaderText) loaderText.textContent = 'Уточняем оценку…';
+
+    setResultLoading(true);
+    try {
+      let data;
+      if (lastMealPhotoDataUrl) {
+        data = await analyzeFoodPhoto(lastMealPhotoDataUrl, userText);
+      } else {
+        const base =
+          (lastMealSourceDescribeText && String(lastMealSourceDescribeText).trim()) ||
+          describeBlockFallbackFromLastMeal();
+        if (!String(base).trim()) {
+          throw new Error('Нет данных для пересчёта без фото');
+        }
+        data = await analyzeFoodFromText(base, userText);
+      }
+      lastMealAnalysisData = data;
+      applyResultToUI(data);
+    } catch (err) {
+      lastMealAnalysisData = { verdict: 'error' };
+      applyResultToUI({
+        verdict: 'error',
+        title: 'Ошибка',
+        summary: String(err.message || err),
+        vision: '',
+        education: '',
+        nuances: '',
+        upgrade: '',
+        factors: []
+      });
+    } finally {
+      setResultLoading(false);
+      if (loaderText) loaderText.textContent = 'Анализируем фото…';
+      updateResultActionButtons();
+    }
+    return;
+  }
+
+  lastMealSourceDescribeText = userText;
   dismissDescribeFoodModal();
   if (ta) ta.value = '';
   lastMealPhotoDataUrl = null;
@@ -3007,14 +3106,21 @@ function setResultLoading(show) {
   if (el) el.style.display = show ? 'flex' : 'none';
 }
 
-async function analyzeFoodPhoto(dataUrl) {
+async function analyzeFoodPhoto(dataUrl, userClarification) {
   const saveBtn = document.getElementById('result-btn-save-history');
   if (saveBtn) saveBtn.disabled = false;
   if (!openaiApiKey) {
     throw new Error('Не удалось загрузить настройки приложения');
   }
 
-  const prompt = buildVisionPrompt();
+  let prompt = buildVisionPrompt();
+  const clar = userClarification != null ? String(userClarification).trim() : '';
+  if (clar) {
+    prompt +=
+      '\n\nПользователь уточняет детали блюда: ' +
+      clar +
+      '\nПересмотри оценку с учётом этого уточнения.';
+  }
 
   const res = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
@@ -3051,14 +3157,21 @@ async function analyzeFoodPhoto(dataUrl) {
   }
 }
 
-async function analyzeFoodFromText(userText) {
+async function analyzeFoodFromText(userText, userClarification) {
   const saveBtn = document.getElementById('result-btn-save-history');
   if (saveBtn) saveBtn.disabled = false;
   if (!openaiApiKey) {
     throw new Error('Не удалось загрузить настройки приложения');
   }
-  const text =
+  let text =
     buildVisionPrompt() + '\n\nПользователь описал еду словами (фото нет):\n' + userText;
+  const clar = userClarification != null ? String(userClarification).trim() : '';
+  if (clar) {
+    text +=
+      '\n\nПользователь уточняет детали блюда: ' +
+      clar +
+      '\nПересмотри оценку с учётом этого уточнения.';
+  }
   const res = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
@@ -3138,6 +3251,7 @@ document.getElementById('food-camera-input').addEventListener('change', async (e
   const dataUrl = await fileToDataUrl(file);
   lastMealPhotoDataUrl = dataUrl;
   lastMealTextOnly = false;
+  lastMealSourceDescribeText = null;
   lastMealAnalysisData = null;
   resultBackScreen = 'screen-main';
   resultViewSource = 'fresh';
