@@ -1925,15 +1925,13 @@ let resultViewSource = 'fresh';
 function updateResultActionButtons() {
   const saveBtn = document.getElementById('result-btn-save-history');
   const refineBtn = document.getElementById('result-btn-refine');
+  const errVerdict = lastMealAnalysisData && lastMealAnalysisData.verdict === 'error';
   if (saveBtn) {
-    saveBtn.style.display = resultViewSource === 'fresh' ? '' : 'none';
+    saveBtn.style.display = resultViewSource === 'fresh' && !errVerdict ? '' : 'none';
     if (resultViewSource === 'fresh') saveBtn.disabled = false;
   }
   if (refineBtn) {
-    const ok =
-      resultViewSource === 'fresh' &&
-      lastMealAnalysisData &&
-      lastMealAnalysisData.verdict !== 'error';
+    const ok = resultViewSource === 'fresh' && lastMealAnalysisData;
     refineBtn.style.display = ok ? '' : 'none';
   }
 }
@@ -3003,7 +3001,7 @@ verdict: green = score 7.0+, yellow = 5.0-6.9, red = ниже 5.0
 factors: строго 3-4 пункта, только самые значимые для липидного профиля
 Учитывай сочетание продуктов — иногда комбинация важнее отдельных компонентов
 Если ресторанное блюдо — учитывай скрытый жир в соусах
-Если не еда или фото нечёткое: verdict "error", title "Не удалось распознать", остальные поля пустые строки, factors []
+Если не еда или не уверен: verdict "error", title "Не уверен что это еда", vision — опиши что видишь на фото (например «вижу кожуру апельсина»), summary — скажи что не уверен что это еда и предложи уточнить словами, остальные поля пустые строки, factors []
 score всегда с одним знаком после запятой: 8.5 а не 8 или 8.50`;
   console.log('[prompt]', out);
   return out;
@@ -3226,32 +3224,57 @@ function applyResultToUI(data) {
   const nuancesEl = document.getElementById('result-nuances-text');
   const upgradeEl = document.getElementById('result-upgrade-text');
   const factorsWrap = document.getElementById('result-factors-list');
+  const hrEl = document.querySelector('#screen-result .result-hr');
+  const detailBlocks = [nuancesEl, educationEl, upgradeEl, factorsWrap].map((el) =>
+    el ? el.closest('.result-block') : null
+  );
+
   if (dish) dish.textContent = data.title || '—';
 
   if (err) {
     scoreRow?.classList.add('hidden');
     if (scoreDisplay) scoreDisplay.textContent = '—';
+    const vis = data.vision != null ? String(data.vision).trim() : '';
+    const sum = data.summary != null ? String(data.summary).trim() : '';
+    let summaryText = '';
+    if (vis !== '') summaryText = 'Вижу на фото: ' + vis;
+    if (sum !== '') {
+      if (summaryText !== '') summaryText += '\n\n';
+      summaryText += sum;
+    }
+    if (summaryText === '') summaryText = '—';
+    if (summaryEl) {
+      summaryEl.textContent = summaryText;
+      summaryEl.style.whiteSpace = 'pre-line';
+    }
+    if (hrEl) hrEl.style.display = 'none';
+    detailBlocks.forEach((block) => {
+      if (block) block.style.display = 'none';
+    });
   } else {
     scoreRow?.classList.remove('hidden');
     if (scoreDisplay) scoreDisplay.textContent = formatScoreDisplay(data.score) + '/10';
-  }
 
-  let summaryText = '—';
-  if (err) {
-    const s = data.summary != null ? String(data.summary).trim() : '';
-    summaryText = s !== '' ? s : '—';
-  } else {
     const fromSummary = data.summary != null ? String(data.summary).trim() : '';
     const fromReason = data.reason != null ? String(data.reason).trim() : '';
-    summaryText = fromSummary !== '' ? fromSummary : (fromReason !== '' ? fromReason : '—');
+    const summaryText =
+      fromSummary !== '' ? fromSummary : fromReason !== '' ? fromReason : '—';
+    if (summaryEl) {
+      summaryEl.textContent = summaryText;
+      summaryEl.style.whiteSpace = '';
+    }
+
+    if (hrEl) hrEl.style.display = '';
+    detailBlocks.forEach((block) => {
+      if (block) block.style.display = '';
+    });
+
+    if (educationEl) educationEl.textContent = resultFieldText(data.education, false);
+    if (nuancesEl) nuancesEl.textContent = resultFieldText(data.nuances, false);
+    if (upgradeEl) upgradeEl.textContent = resultFieldText(data.upgrade, false);
+    renderFactors(data.factors, factorsWrap);
   }
-  if (summaryEl) summaryEl.textContent = summaryText;
 
-  if (educationEl) educationEl.textContent = resultFieldText(data.education, err);
-  if (nuancesEl) nuancesEl.textContent = resultFieldText(data.nuances, err);
-  if (upgradeEl) upgradeEl.textContent = resultFieldText(data.upgrade, err);
-
-  renderFactors(data.factors, factorsWrap);
   document.querySelector('#screen-result .result-screen-inner').scrollTo(0, 0);
 }
 
