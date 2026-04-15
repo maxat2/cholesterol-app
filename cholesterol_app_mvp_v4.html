@@ -2064,7 +2064,8 @@ async function submitDescribeFood() {
   if (describeFoodModalMode === 'refine') {
     closeDescribeFoodModal();
     if (ta) ta.value = '';
-    document.getElementById('screen-result').scrollTop = 0;
+    window.scrollTo(0, 0);
+    document.querySelector('#screen-result .result-screen-inner').scrollTo(0, 0);
     showResultLoader('Уточняем оценку…');
     console.log('[refine] уточнение отправлено:', userText);
     console.log('[refine] есть фото:', !!lastMealPhotoDataUrl);
@@ -3251,7 +3252,7 @@ function applyResultToUI(data) {
   if (upgradeEl) upgradeEl.textContent = resultFieldText(data.upgrade, err);
 
   renderFactors(data.factors, factorsWrap);
-  document.getElementById('screen-result').scrollTop = 0;
+  document.querySelector('#screen-result .result-screen-inner').scrollTo(0, 0);
 }
 
 document.getElementById('food-camera-input').addEventListener('change', async (e) => {
