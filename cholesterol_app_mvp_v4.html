@@ -2038,6 +2038,10 @@ function dismissDescribeFoodModal() {
   document.getElementById('describe-food-overlay')?.classList.remove('visible');
 }
 
+function closeDescribeFoodModal() {
+  dismissDescribeFoodModal();
+}
+
 function describeBlockFallbackFromLastMeal() {
   const d = lastMealAnalysisData;
   if (!d) return '';
@@ -2058,13 +2062,13 @@ async function submitDescribeFood() {
   }
 
   if (describeFoodModalMode === 'refine') {
-    dismissDescribeFoodModal();
+    closeDescribeFoodModal();
     if (ta) ta.value = '';
-
+    document.getElementById('screen-result').scrollTop = 0;
+    showResultLoader('Уточняем оценку…');
+    console.log('[refine] уточнение отправлено:', userText);
+    console.log('[refine] есть фото:', !!lastMealPhotoDataUrl);
     const loaderText = document.getElementById('result-loader-text');
-    if (loaderText) loaderText.textContent = 'Уточняем оценку…';
-
-    setResultLoading(true);
     try {
       let data;
       if (lastMealPhotoDataUrl) {
@@ -3106,6 +3110,12 @@ function setResultLoading(show) {
   if (el) el.style.display = show ? 'flex' : 'none';
 }
 
+function showResultLoader(message) {
+  const t = document.getElementById('result-loader-text');
+  if (t) t.textContent = message;
+  setResultLoading(true);
+}
+
 async function analyzeFoodPhoto(dataUrl, userClarification) {
   const saveBtn = document.getElementById('result-btn-save-history');
   if (saveBtn) saveBtn.disabled = false;
@@ -3241,6 +3251,7 @@ function applyResultToUI(data) {
   if (upgradeEl) upgradeEl.textContent = resultFieldText(data.upgrade, err);
 
   renderFactors(data.factors, factorsWrap);
+  document.getElementById('screen-result').scrollTop = 0;
 }
 
 document.getElementById('food-camera-input').addEventListener('change', async (e) => {
