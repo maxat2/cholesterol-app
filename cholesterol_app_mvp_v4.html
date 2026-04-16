@@ -1116,19 +1116,14 @@
         </svg>
         Фото
       </button>
-      <div id="main-edu-cards">
-        <div class="edu-card">
-          <div class="edu-card-title">Холестерин — это не плохо</div>
-          <div class="edu-card-text">
-            Холестерин — жизненно важное вещество: он участвует в построении клеточных мембран, синтезе гормонов и витамина D. Большую часть организм производит сам, поэтому задача не «убрать его», а держать баланс.
-          </div>
-        </div>
-        <div class="edu-card">
-          <div class="edu-card-title">Какое значение важнее?</div>
-          <div class="edu-card-text">
-            Общий холестерин — это сумма разных фракций. Ключевую роль играет соотношение ЛПНП (атерогенных частиц) и ЛПВП (защитных), а также их концентрация в крови.
-          </div>
-        </div>
+      <div id="main-edu-wrap">
+        <iframe
+          src="cards.html"
+          id="main-edu-iframe"
+          scrolling="no"
+          frameborder="0"
+          style="width:100%; border:none; display:block;"
+        ></iframe>
       </div>
     </div>
     <div class="bottom-nav">
@@ -3513,6 +3508,23 @@ async function bootstrapApp() {
     goTo('screen-profile', { mode: 'onboarding' });
   }
 }
+
+function resizeEduIframe() {
+  const iframe = document.getElementById('main-edu-iframe');
+  if (!iframe) return;
+  try {
+    const h = iframe.contentDocument.body.scrollHeight;
+    iframe.style.height = h + 'px';
+  } catch (e) {}
+}
+window.addEventListener('load', resizeEduIframe);
+document.getElementById('main-edu-iframe')?.addEventListener('load', () => {
+  const iframeDoc = document.getElementById('main-edu-iframe').contentDocument;
+  iframeDoc.addEventListener('click', () => {
+    setTimeout(resizeEduIframe, 450);
+  });
+  resizeEduIframe();
+});
 
 bootstrapApp();
 </script>

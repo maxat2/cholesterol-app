@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Топ-10 продуктов для снижения холестерина</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Serif:wght@400;600&family=Inter:wght@400&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #F5F0E8; font-family: 'Times New Roman', Times, serif; min-height: 100vh; padding: 24px 16px 60px; }
+  .section-title { font-family: 'Inter', sans-serif; font-size: 16px; font-weight: 400; line-height: 24px; color: #555; text-align: center; margin-bottom: 24px; }
+  .cards-stack { position: relative; width: 100%; max-width: 390px; margin: 0 auto; display: flex; flex-direction: column; }
+  .card { position: relative; width: 100%; border-radius: 20px; overflow: hidden; cursor: pointer; margin-bottom: -140px; transition: margin-bottom 0.4s cubic-bezier(.22,.68,0,1.1), box-shadow 0.3s ease; box-shadow: 0 6px 24px rgba(0,0,0,0.13); }
+  .card:last-child { margin-bottom: 0; }
+  .card.expanded { margin-bottom: 12px; box-shadow: 0 14px 44px rgba(0,0,0,0.18); z-index: 50; }
+  .card-img-wrap { width: 100%; height: 200px; display: flex; align-items: center; justify-content: center; padding: 24px; position: relative; }
+  .card-img { max-width: 160px; max-height: 160px; object-fit: contain; display: block; }
+  .card-num { position: absolute; top: 14px; right: 14px; background: rgba(255,255,255,0.7); backdrop-filter: blur(4px); border-radius: 50px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-family: 'Roboto Serif', serif; font-size: 14px; font-weight: 600; color: rgba(0,0,0,0.55); }
+  .card-content { padding: 4px 20px 24px; }
+  .card-title { font-family: 'Roboto Serif', serif; font-size: 22px; font-weight: 600; color: #1a1a1a; line-height: 1.25; margin-bottom: 10px; text-align: center; }
+  .card-body { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+  .card.expanded .card-body { max-height: 400px; }
+  .card-text { font-family: 'Times New Roman', Times, serif; font-size: 16px; line-height: 1.65; color: #2a2a2a; }
+  .card-text p { margin-bottom: 8px; }
+  .card-text p:last-child { margin-bottom: 0; }
+  .card-1  { background: #F5E6C8; }
+  .card-2  { background: #C8DCE8; }
+  .card-3  { background: #C8DCC8; }
+  .card-4  { background: #E8D8B8; }
+  .card-5  { background: #C8D8C0; }
+  .card-6  { background: #D8E8D0; }
+  .card-7  { background: #F0D0D0; }
+  .card-8  { background: #F0DEC8; }
+  .card-9  { background: #C8DCCC; }
+  .card-10 { background: #E8E0D0; }
+</style>
+</head>
+<body>
+
+<p class="section-title">Топ-10 продуктов<br>для снижения холестерина</p>
+
+<div class="cards-stack">
+
+  <div class="card card-1" onclick="toggleCard(this)">
+    <div class="card-img-wrap">
+      <img class="card-img" src="https://em-content.zobj.net/source/apple/391/bowl-with-spoon_1f963.png" alt="">
+      <span class="card-num">1</span>
+    </div>
+    <div class="card-content">
+      <div class="card-title">Овсянка и овсяные отруби</div>
+      <div class="card-body"><div class="card-text">
+        <p>Содержат бета-глюканы — растворимую клетчатку, которая снижает всасывание холестерина в кишечнике. Помогает «забирать» лишний холестерин и выводить его из организма.</p>
+      </div></div>
+    </div>
+  </div>
+
+  <div class="card card-2" onclick="toggleCard(this)">
+    <div class="card-img-wrap">
+      <img class="card-img" src="https://em-content.zobj.net/source/apple/391/fish_1f41f.png" alt="">
+      <span class="card-num">2</span>
+    </div>
+    <div class="card-content">
+      <div class="card-title">Жирная рыба (лосось, скумбрия)</div>
+      <div class="card-body"><div class="card-text">
+        <p>Источник омега-3 жирных кислот, которые уменьшают воспаление и снижают триглицериды. Успокаивает сосуды и снижает «жир в крови», который перегружает сердце.</p>
+      </div></div>
+    </div>
+  </div>
+
+  <div class="card card-3" onclick="toggleCard(this)">
+    <div class="card-img-wrap">
+      <img class="card-img" src="https://em-content.zobj.net/source/apple/391/avocado_1f951.png" alt="">
+      <span class="card-num">3</span>
+    </div>
+    <div class="card-content">
+      <div class="card-title">Авокадо</div>
+      <div class="card-body"><div class="card-text">
+        <p>Богато мононенасыщенными жирами, которые помогают снижать ЛПНП и поддерживать ЛПВП. Плюс: замена «плохих» жиров без потери вкуса.</p>
+      </div></div>
+    </div>
+  </div>
+
+  <div class="card card-4" onclick="toggleCard(this)">
+    <div class="card-img-wrap">
+      <img class="card-img" src="https://em-content.zobj.net/source/apple/391/nut_1fad8.png" alt="">
+      <span class="card-num">4</span>
+    </div>
+    <div class="card-content">
+      <div class="card-title">Орехи (миндаль, грецкие)</div>
+      <div class="card-body"><div class="card-text">
+        <p>Содержат полезные жиры, фитостеролы и антиоксиданты — улучшают липидный профиль. Плюс: снижают окисление ЛПНП (важный механизм).</p>
+      </div></div>
+    </div>
+  </div>
+
+  <div class="card card-5" onclick="toggleCard(this)">
+    <div class="card-img-wrap">
+      <img class="card-img" src="https://em-content.zobj.net/source/apple/391/cooked-rice_1f35a.png" alt="">
+      <span class="card-num">5</span>
+    </div>
+    <div class="card-content">
+      <div class="card-title">Бобовые (чечевица, фасоль)</div>
+      <div class="card-body"><div class="card-text">
+        <p>Источник клетчатки и растительного белка, снижают уровень ЛПНП. Снижают всасывание холестерина в кишечнике.</p>
+      </div></div>
+    </div>
+  </div>
+
+  <div class="card card-6" onclick="toggleCard(this)">
+    <div class="card-img-wrap">
+      <img class="card-img" src="https://em-content.zobj.net/source/apple/391/bottle-with-popping-cork_1f37e.png" alt="">
+      <span class="card-num">6</span>
+    </div>
+    <div class="card-content">
+      <div class="card-title">Оливковое масло (extra virgin)</div>
+      <div class="card-body"><div class="card-text">
+        <p>Содержит мононенасыщенные жиры и полифенолы, улучшает липидный профиль и снижает воспаление. Плюс: база средиземноморского подхода.</p>
+      </div></div>
+    </div>
+  </div>
+
+  <div class="card card-7" onclick="toggleCard(this)">
+    <div class="card-img-wrap">
+      <img class="card-img" src="https://em-content.zobj.net/source/apple/391/strawberry_1f353.png" alt="">
+      <span class="card-num">7</span>
+    </div>
+    <div class="card-content">
+      <div class="card-title">Ягоды (черника, клубника, малина)</div>
+      <div class="card-body"><div class="card-text">
+        <p>Богаты антиоксидантами и клетчаткой, помогают снижать окислительный стресс. Антиоксиданты защищают сосуды от повреждений.</p>
+      </div></div>
+    </div>
+  </div>
+
+  <div class="card card-8" onclick="toggleCard(this)">
+    <div class="card-img-wrap">
+      <img class="card-img" src="https://em-content.zobj.net/source/apple/391/tangerine_1f34a.png" alt="">
+      <span class="card-num">8</span>
+    </div>
+    <div class="card-content">
+      <div class="card-title">Яблоки и цитрусовые</div>
+      <div class="card-body"><div class="card-text">
+        <p>Содержат пектин — растворимую клетчатку, которая снижает уровень холестерина в крови.</p>
+      </div></div>
+    </div>
+  </div>
+
+  <div class="card card-9" onclick="toggleCard(this)">
+    <div class="card-img-wrap">
+      <img class="card-img" src="https://em-content.zobj.net/source/apple/391/broccoli_1f966.png" alt="">
+      <span class="card-num">9</span>
+    </div>
+    <div class="card-content">
+      <div class="card-title">Зелёные овощи (брокколи, шпинат)</div>
+      <div class="card-body"><div class="card-text">
+        <p>Источник клетчатки, антиоксидантов и микронутриентов. Поддерживают здоровье сосудов и обмен веществ.</p>
+      </div></div>
+    </div>
+  </div>
+
+  <div class="card card-10" onclick="toggleCard(this)">
+    <div class="card-img-wrap">
+      <img class="card-img" src="https://em-content.zobj.net/source/apple/391/seedling_1f331.png" alt="">
+      <span class="card-num">10</span>
+    </div>
+    <div class="card-content">
+      <div class="card-title">Семена (льняные, чиа)</div>
+      <div class="card-body"><div class="card-text">
+        <p>Содержат омега-3 (растительные) и клетчатку. Помогают снижать LDL и поддерживать здоровье сердца.</p>
+      </div></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let expandedCard = null;
+function toggleCard(card) {
+  if (expandedCard === card) {
+    card.classList.remove('expanded');
+    expandedCard = null;
+    return;
+  }
+  if (expandedCard) expandedCard.classList.remove('expanded');
+  card.classList.add('expanded');
+  expandedCard = card;
+  setTimeout(() => card.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
+}
+</script>
+</body>
+</html>
