@@ -175,6 +175,22 @@
 
 <script>
 let expandedCard = null;
+(function initLastCardExpanded() {
+  const last = document.querySelector('.cards-stack .card:last-child');
+  if (last) {
+    last.classList.add('expanded');
+    expandedCard = last;
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        try {
+          if (window.parent && typeof window.parent.resizeEduIframe === 'function') {
+            window.parent.resizeEduIframe();
+          }
+        } catch (e) {}
+      });
+    });
+  }
+})();
 function toggleCard(card) {
   if (expandedCard === card) {
     card.classList.remove('expanded');

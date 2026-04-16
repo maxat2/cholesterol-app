@@ -282,11 +282,21 @@
   #screen-main .btn-camera-wide {
     margin-top: -10px;
   }
-  #main-edu-cards {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+  #main-edu-wrap {
     width: 100%;
+    max-width: 414px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0 12px;
+    box-sizing: border-box;
+    overflow: visible;
+  }
+  #main-edu-iframe {
+    width: 100%;
+    max-width: 100%;
+    border: none;
+    display: block;
+    vertical-align: top;
   }
   .edu-card {
     background: #eef2ff;
@@ -1122,7 +1132,6 @@
           id="main-edu-iframe"
           scrolling="no"
           frameborder="0"
-          style="width:100%; border:none; display:block;"
         ></iframe>
       </div>
     </div>
@@ -3519,10 +3528,6 @@ function resizeEduIframe() {
 }
 window.addEventListener('load', resizeEduIframe);
 document.getElementById('main-edu-iframe')?.addEventListener('load', () => {
-  const iframeDoc = document.getElementById('main-edu-iframe').contentDocument;
-  iframeDoc.addEventListener('click', () => {
-    setTimeout(resizeEduIframe, 450);
-  });
   resizeEduIframe();
 });
 
