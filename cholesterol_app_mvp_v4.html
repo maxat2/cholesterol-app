@@ -339,6 +339,29 @@
   .btn-camera-wide:active { opacity: .92; transform: scale(0.998); }
   .btn-camera-wide .cam-svg { flex-shrink: 0; display: block; }
 
+  .lipid-profile-card {
+    background: #7ED957;
+    border-radius: 16px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  .lipid-profile-info { flex: 1; z-index: 1; }
+  .lipid-profile-name { font-size: 20px; font-weight: 700; color: #1a1a1a; margin-bottom: 6px; }
+  .lipid-profile-meta { font-size: 16px; color: #1a1a1a; opacity: 0.8; }
+  .lipid-profile-emoji {
+    position: absolute;
+    right: -10px;
+    bottom: 0;
+    width: 140px;
+    height: 140px;
+    object-fit: contain;
+  }
+
   .main-lipids { display: flex; flex-direction: column; gap: 12px; flex-shrink: 0; }
   .lipid-section-title {
     font-size: var(--main-section-size);
@@ -1157,6 +1180,13 @@
       <span class="history-nav-side" aria-hidden="true"></span>
     </div>
     <div class="content">
+      <div class="lipid-profile-card" id="lipid-profile-card">
+        <div class="lipid-profile-info">
+          <div class="lipid-profile-name" id="lipid-card-name">—</div>
+          <div class="lipid-profile-meta" id="lipid-card-meta">—</div>
+        </div>
+        <img src="emoji_animated.svg" class="lipid-profile-emoji" alt="" />
+      </div>
       <section class="main-lipids" aria-labelledby="lipid-heading">
         <h2 class="lipid-section-title" id="lipid-heading">Твой липидный профиль</h2>
         <div class="main-lipids-stack" id="main-lipids-stack">
@@ -2931,6 +2961,28 @@ function openFoodCamera() {
   camInput?.click();
 }
 
+function updateLipidProfileCard() {
+  const nameEl = document.getElementById('input-name');
+  const hEl = document.getElementById('input-height');
+  const wEl = document.getElementById('input-weight');
+  const name = (nameEl && nameEl.value.trim()) || 'Профиль';
+  const p = getProfileForPrompt();
+  const ageStr = p.age && String(p.age).trim() && p.age !== 'не указан' ? String(p.age).trim() : '';
+  const sexStr = String(p.sex || '').trim();
+  const sexLabel =
+    sexStr === 'Мужской' || sexStr === 'male'
+      ? 'М'
+      : sexStr === 'Женский' || sexStr === 'female'
+        ? 'Ж'
+        : '—';
+  const hStr = hEl && hEl.value.trim() ? hEl.value.trim() : '—';
+  const wStr = wEl && wEl.value.trim() ? wEl.value.trim() : '—';
+  const nameElOut = document.getElementById('lipid-card-name');
+  const metaEl = document.getElementById('lipid-card-meta');
+  if (nameElOut) nameElOut.textContent = name + (ageStr ? ', ' + ageStr : '');
+  if (metaEl) metaEl.textContent = sexLabel + ' ' + hStr + '/' + wStr;
+}
+
 function getProfileForPrompt() {
   const total = getLipidMmolerForPrompt('v-total');
   const ldl = getLipidMmolerForPrompt('v-ldl');
@@ -3376,6 +3428,7 @@ function goTo(id, opts) {
   document.querySelectorAll('.screen').forEach((s) => s.classList.remove('active'));
   target.classList.add('active');
   if (targetId === 'screen-main' || targetId === 'screen-lipids') void prepareMainScreenLipids();
+  if (targetId === 'screen-lipids') updateLipidProfileCard();
   if (targetId === 'screen-history') void renderHistoryList();
   if (targetId === 'screen-profile') {
     if (forcedProfileGate || !profileCompleteFromStorage()) {
