@@ -3522,11 +3522,29 @@ function resizeEduIframe() {
   const iframe = document.getElementById('main-edu-iframe');
   if (!iframe) return;
   try {
+    const win = iframe.contentWindow;
     const doc = iframe.contentDocument;
-    if (!doc || !doc.body) return;
-    const h = Math.max(
-      doc.body.scrollHeight,
-      doc.documentElement ? doc.documentElement.scrollHeight : 0
+    if (!win || !doc || !doc.body) return;
+    const body = doc.body;
+    const html = doc.documentElement;
+    const last = doc.querySelector('.cards-stack .card:last-child');
+    const padBottom = parseFloat(getComputedStyle(body).paddingBottom) || 0;
+
+    let fromLast = 0;
+    if (last) {
+      const br = body.getBoundingClientRect();
+      const lr = last.getBoundingClientRect();
+      fromLast = lr.bottom - br.top + padBottom;
+    }
+
+    const h = Math.ceil(
+      Math.max(
+        fromLast,
+        body.scrollHeight,
+        html.scrollHeight,
+        body.offsetHeight,
+        html.offsetHeight
+      )
     );
     if (h < 1) return;
     iframe.style.height = h + 'px';

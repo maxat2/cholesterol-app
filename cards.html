@@ -182,6 +182,15 @@
 
 <script>
 let expandedCard = null;
+
+function notifyParentResize() {
+  try {
+    if (window.parent && typeof window.parent.resizeEduIframe === 'function') {
+      window.parent.resizeEduIframe();
+    }
+  } catch (e) {}
+}
+
 (function initLastCardExpanded() {
   const last = document.querySelector('.cards-stack .card:last-child');
   if (last) {
@@ -189,25 +198,39 @@ let expandedCard = null;
     expandedCard = last;
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        try {
-          if (window.parent && typeof window.parent.resizeEduIframe === 'function') {
-            window.parent.resizeEduIframe();
-          }
-        } catch (e) {}
+        notifyParentResize();
+        setTimeout(notifyParentResize, 100);
+        setTimeout(notifyParentResize, 450);
       });
     });
   }
 })();
+
+if (typeof ResizeObserver !== 'undefined') {
+  const stack = document.querySelector('.cards-stack');
+  if (stack) {
+    const ro = new ResizeObserver(() => notifyParentResize());
+    ro.observe(stack);
+  }
+}
+
+document.querySelectorAll('.card-img').forEach((img) => {
+  img.addEventListener('load', notifyParentResize);
+});
+
 function toggleCard(card) {
   if (expandedCard === card) {
     card.classList.remove('expanded');
     expandedCard = null;
+    setTimeout(notifyParentResize, 450);
     return;
   }
   if (expandedCard) expandedCard.classList.remove('expanded');
   card.classList.add('expanded');
   expandedCard = card;
   setTimeout(() => card.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
+  setTimeout(notifyParentResize, 50);
+  setTimeout(notifyParentResize, 450);
 }
 </script>
 </body>
