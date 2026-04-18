@@ -3751,6 +3751,7 @@ async function logoutFromApp() {
 }
 
 async function bootstrapApp() {
+  console.log('[bootstrap] старт');
   const appInitErr = document.getElementById('app-init-error');
   appInitErr?.classList.remove('visible');
 
@@ -3774,7 +3775,13 @@ async function bootstrapApp() {
       .maybeSingle();
     if (userRow) {
       applySupabaseUserRowToForm(userRow);
+      console.log('[auth] профиль найден в Supabase:', userRow.email, userRow.name);
       saveProfileToStorage();
+      const profileLoadedComplete = loadProfileFromStorage();
+      console.log(
+        '[bootstrap] после apply+saveProfileToStorage → loadProfileFromStorage():',
+        profileLoadedComplete
+      );
       goTo('screen-main');
     } else {
       goTo('screen-profile', { mode: 'onboarding' });
