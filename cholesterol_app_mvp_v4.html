@@ -1533,12 +1533,26 @@ const SUPABASE_ANON_KEY =
 const __supabaseSdk = supabase;
 const supabaseClient = __supabaseSdk.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-supabaseClient.auth.onAuthStateChange((event, session) => {
+supabaseClient.auth.onAuthStateChange(async (event, session) => {
+  console.log('[auth] onAuthStateChange event:', event, 'session:', session?.user?.email);
   if (!session) return;
-  if (event !== 'SIGNED_IN' && event !== 'INITIAL_SESSION') return;
-  const authEl = document.getElementById('screen-auth');
-  if (!authEl?.classList.contains('active')) return;
-  if (profileCompleteFromStorage()) {
+  // INITIAL_SESSION — в bootstrapApp; здесь только SIGNED_IN (magic link без дубля с первым запуском)
+  if (event !== 'SIGNED_IN') return;
+
+  setStoredUserId(session.user.id);
+  window.history.replaceState({}, document.title, window.location.pathname);
+
+  const { data: userRow } = await supabaseClient
+    .from('users')
+    .select('*')
+    .eq('id', session.user.id)
+    .maybeSingle();
+
+  console.log('[auth] userRow найден:', !!userRow, userRow?.email);
+
+  if (userRow) {
+    applySupabaseUserRowToForm(userRow);
+    saveProfileToStorage();
     goTo('screen-main');
   } else {
     goTo('screen-profile', { mode: 'onboarding' });
