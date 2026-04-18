@@ -3758,6 +3758,10 @@ async function bootstrapApp() {
     data: { session }
   } = await supabaseClient.auth.getSession();
 
+  if (session) {
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
   if (session?.user?.id) {
     setStoredUserId(session.user.id);
     try {
