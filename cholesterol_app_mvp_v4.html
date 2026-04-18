@@ -101,6 +101,74 @@
     min-height: 0;
     overflow: hidden;
   }
+  #screen-auth {
+    background: var(--bg) url('background_enter.png') center / cover no-repeat;
+  }
+  .auth-screen-inner {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 40px 20px max(40px, env(safe-area-inset-bottom));
+    width: 100%;
+    flex-shrink: 0;
+  }
+  .auth-status {
+    font-size: 15px;
+    line-height: 1.45;
+    color: #1a1a1a;
+    text-align: center;
+    padding: 0 4px;
+  }
+  .auth-status:empty { display: none; }
+  .auth-field-wrap {
+    position: relative;
+    width: 100%;
+  }
+  .auth-input {
+    width: 100%;
+    height: 50px;
+    padding: 0 44px 0 15px;
+    border: 1px solid #d1d1d1;
+    border-radius: 12px;
+    background: #ffffff;
+    font-family: var(--sans);
+    font-size: 16px;
+    color: #1a1a1a;
+  }
+  .auth-input::placeholder {
+    color: #999;
+  }
+  .auth-input-icon {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: #888;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .auth-btn {
+    width: 100%;
+    height: 50px;
+    border: none;
+    border-radius: 12px;
+    background: #1a1a1b;
+    color: #ffffff;
+    font-family: var(--sans);
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .auth-btn:disabled {
+    opacity: 0.65;
+    cursor: default;
+  }
+  .auth-btn:active:not(:disabled) {
+    opacity: 0.92;
+  }
   /* Десктоп: узкая мобильная колонка по центру */
   @media (min-width: 600px) {
     body { background: #ECECEC; }
@@ -976,6 +1044,21 @@
   #screen-profile.mode-onboarding .profile-lipids-link-wrap {
     display: none;
   }
+  #screen-profile.mode-onboarding .profile-logout-wrap {
+    display: none;
+  }
+  .profile-logout-wrap {
+    margin-top: 8px;
+    padding-bottom: 8px;
+  }
+  #profile-logout-btn.btn-primary {
+    background: #1C1B1F;
+    color: #fff;
+    margin-top: 16px;
+  }
+  #profile-logout-btn.btn-primary:active {
+    opacity: 0.88;
+  }
 
   @media (max-height: 700px) {
     #main-hero-animation {
@@ -997,7 +1080,29 @@
 <div class="phone" style="position:relative;">
   <div id="app-init-error" class="app-init-error" role="alert">Не удалось загрузить настройки приложения</div>
 
-  <div class="screen active mode-onboarding" id="screen-profile">
+  <div class="screen active" id="screen-auth">
+    <div class="auth-screen-inner">
+      <div class="auth-status" id="auth-status" role="status" aria-live="polite"></div>
+      <div class="auth-field-wrap">
+        <input
+          type="email"
+          id="auth-email"
+          class="auth-input"
+          placeholder="E-mail"
+          autocomplete="email"
+          inputmode="email"
+        />
+        <span class="auth-input-icon" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 6h16v12H4V6zm0 0l8 6 8-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+      </div>
+      <button type="button" class="auth-btn" id="auth-submit">Войти</button>
+    </div>
+  </div>
+
+  <div class="screen mode-onboarding" id="screen-profile">
     <div class="nav profile-nav--onboarding">
       <div class="nav-title" id="profile-nav-title">Профиль</div>
       <div class="nav-skip" onclick="skipOnboardingToMain()">Пропустить</div>
@@ -1118,6 +1223,9 @@
       <button type="button" class="btn-primary" id="profile-cta-btn" onclick="saveProfileAndStart()">Продолжить</button>
       <div class="profile-lipids-link-wrap">
         <button type="button" class="profile-lipids-link" onclick="goTo('screen-lipids')">Липидный профиль</button>
+      </div>
+      <div class="profile-logout-wrap">
+        <button type="button" class="btn-primary" id="profile-logout-btn" onclick="logoutFromApp()">Выйти</button>
       </div>
     </div>
     <div class="bottom-nav">
@@ -1424,6 +1532,18 @@ const SUPABASE_ANON_KEY =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3Ymh3d3V6bmFwYWFlaXVoeHJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5Nzk3MjAsImV4cCI6MjA5MTU1NTcyMH0.j_ociAX5y8X1FbTuSwh8fv96fx8VZkOhURzltmrHdio'.trim();
 const __supabaseSdk = supabase;
 const supabaseClient = __supabaseSdk.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+supabaseClient.auth.onAuthStateChange((event, session) => {
+  if (!session) return;
+  if (event !== 'SIGNED_IN' && event !== 'INITIAL_SESSION') return;
+  const authEl = document.getElementById('screen-auth');
+  if (!authEl?.classList.contains('active')) return;
+  if (profileCompleteFromStorage()) {
+    goTo('screen-main');
+  } else {
+    goTo('screen-profile', { mode: 'onboarding' });
+  }
+});
 
 /** Ключ OpenAI из Supabase app_settings (без localStorage). */
 let openaiApiKey = null;
@@ -1841,9 +1961,19 @@ async function upsertUserToSupabase() {
   } catch (e) {
     console.warn('[device] context', e);
   }
+
+  const {
+    data: { session }
+  } = await supabaseClient.auth.getSession();
+  const uid = session?.user?.id;
+  if (!uid) {
+    setStoredUserId(null);
+    return null;
+  }
+  setStoredUserId(uid);
+
   const raw = localStorage.getItem(LS_USER_PROFILE);
   if (!raw) {
-    setStoredUserId(null);
     return null;
   }
   let profile;
@@ -1852,18 +1982,17 @@ async function upsertUserToSupabase() {
   } catch (e) {
     return null;
   }
-  const email = String(profile.email || '')
+  const email = String(profile.email || session.user?.email || '')
     .trim()
     .toLowerCase();
   if (!email) {
-    setStoredUserId(null);
     return null;
   }
 
   const { data: existing, error: selErr } = await supabaseClient
     .from('users')
     .select('*')
-    .eq('email', email)
+    .eq('id', uid)
     .maybeSingle();
   if (selErr) {
     console.warn('[supabase] users select', selErr);
@@ -1871,23 +2000,23 @@ async function upsertUserToSupabase() {
   }
 
   if (existing) {
-    setStoredUserId(existing.id);
     if (!hasRealProfileData(profile)) {
-      return existing.id;
+      return uid;
     }
     const patch = buildMergedUserUpdate(existing, profile);
-    const { error: upErr } = await supabaseClient.from('users').update(patch).eq('id', existing.id);
+    const { error: upErr } = await supabaseClient.from('users').update(patch).eq('id', uid);
     if (upErr) {
       console.warn('[supabase] users update', upErr);
       return null;
     }
-    return existing.id;
+    return uid;
   }
 
   if (!hasRealProfileData(profile)) {
     const { data: ins, error: insErr } = await supabaseClient
       .from('users')
       .insert({
+        id: uid,
         email,
         profile_json: profile,
         updated_at: new Date().toISOString(),
@@ -1900,7 +2029,6 @@ async function upsertUserToSupabase() {
       return null;
     }
     if (ins && ins.id) {
-      setStoredUserId(ins.id);
       return ins.id;
     }
     return null;
@@ -1909,7 +2037,7 @@ async function upsertUserToSupabase() {
   const row = buildFullUserRow(profile, email);
   const { data: created, error: crErr } = await supabaseClient
     .from('users')
-    .insert(row)
+    .insert({ ...row, id: uid })
     .select('id')
     .single();
   if (crErr) {
@@ -1917,7 +2045,6 @@ async function upsertUserToSupabase() {
     return null;
   }
   if (created && created.id) {
-    setStoredUserId(created.id);
     return created.id;
   }
   return null;
@@ -2373,6 +2500,12 @@ function isMainOrLipidsScreenActive() {
 }
 
 function syncBottomNavForScreen(screenId) {
+  if (screenId === 'screen-auth') {
+    document.querySelectorAll('.bottom-nav').forEach((nav) => {
+      nav.querySelectorAll('.bnav-item').forEach((item) => item.classList.remove('active'));
+    });
+    return;
+  }
   const idx =
     screenId === 'screen-main' || screenId === 'screen-lipids'
       ? 0
@@ -3556,18 +3689,83 @@ document.getElementById('input-name')?.addEventListener('input', () => {
   syncProfileCtaIfEditOpen();
 });
 
+async function submitAuthEmail() {
+  const input = document.getElementById('auth-email');
+  const email = (input?.value || '').trim();
+  const status = document.getElementById('auth-status');
+  const btn = document.getElementById('auth-submit');
+  if (!email) {
+    if (status) status.textContent = 'Введите e-mail.';
+    return;
+  }
+  if (btn) btn.disabled = true;
+  try {
+    console.log('[auth] отправляем magic link на:', email);
+    const { error } = await supabaseClient.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: window.location.href }
+    });
+    console.log('[auth] результат:', error ? 'ошибка: ' + error.message : 'успешно отправлено');
+    if (error) throw error;
+    if (status) status.textContent = 'Проверь почту — мы отправили ссылку для входа';
+  } catch (e) {
+    if (status) status.textContent = String(e.message || e);
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+async function logoutFromApp() {
+  try {
+    await supabaseClient.auth.signOut();
+  } catch (e) {
+    console.warn('[auth] signOut', e);
+  }
+  localStorage.clear();
+  goTo('screen-auth');
+}
+
 async function bootstrapApp() {
   const appInitErr = document.getElementById('app-init-error');
   appInitErr?.classList.remove('visible');
+
+  const {
+    data: { session }
+  } = await supabaseClient.auth.getSession();
+
+  if (session?.user?.id) {
+    setStoredUserId(session.user.id);
+    try {
+      const { data, error } = await supabaseClient
+        .from('users')
+        .select('*')
+        .eq('id', session.user.id)
+        .maybeSingle();
+      if (!error && data) {
+        applySupabaseUserRowToForm(data);
+        saveProfileToStorage();
+      }
+    } catch (e) {
+      console.warn('[bootstrap] profile from supabase', e);
+    }
+  } else {
+    setStoredUserId(null);
+  }
+
   const ok = await loadOpenAiKeyFromSupabase();
   if (!ok) {
     appInitErr?.classList.add('visible');
     return;
   }
-  if (loadProfileFromStorage()) {
-    goTo('screen-main');
+
+  if (session) {
+    if (loadProfileFromStorage()) {
+      goTo('screen-main');
+    } else {
+      goTo('screen-profile', { mode: 'onboarding' });
+    }
   } else {
-    goTo('screen-profile', { mode: 'onboarding' });
+    goTo('screen-auth');
   }
 }
 
@@ -3615,6 +3813,11 @@ function scheduleResizeEduIframe() {
 
 window.addEventListener('load', scheduleResizeEduIframe);
 document.getElementById('main-edu-iframe')?.addEventListener('load', scheduleResizeEduIframe);
+
+document.getElementById('auth-submit')?.addEventListener('click', () => void submitAuthEmail());
+document.getElementById('auth-email')?.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') void submitAuthEmail();
+});
 
 bootstrapApp();
 </script>
