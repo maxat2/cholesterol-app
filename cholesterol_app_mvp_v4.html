@@ -1585,7 +1585,8 @@ const supabaseClient = __supabaseSdk.createClient(SUPABASE_URL, SUPABASE_ANON_KE
     persistSession: true,
     storage: window.localStorage,
     autoRefreshToken: true,
-    detectSessionInUrl: true
+    detectSessionInUrl: true,
+    flowType: 'pkce'
   }
 });
 
@@ -3795,7 +3796,8 @@ async function signInWithGoogleAuth() {
   await supabaseClient.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: 'https://maxat2.github.io/cholesterol-app/cholesterol_app_mvp_v4.html'
+      redirectTo: 'https://maxat2.github.io/cholesterol-app/cholesterol_app_mvp_v4.html',
+      skipBrowserRedirect: false
     }
   });
   console.log('[google] запускаем OAuth redirect');
