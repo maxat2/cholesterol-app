@@ -1583,7 +1583,6 @@ const __supabaseSdk = supabase;
 const supabaseClient = __supabaseSdk.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
     persistSession: true,
-    storageKey: 'cholesterol_app_auth',
     storage: window.localStorage,
     autoRefreshToken: true,
     detectSessionInUrl: true
