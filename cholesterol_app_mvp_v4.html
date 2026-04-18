@@ -3754,48 +3754,36 @@ async function bootstrapApp() {
   const appInitErr = document.getElementById('app-init-error');
   appInitErr?.classList.remove('visible');
 
+  const keyOk = await loadOpenAiKeyFromSupabase();
+  if (!keyOk) {
+    appInitErr?.classList.add('visible');
+    return;
+  }
+
   const {
     data: { session }
   } = await supabaseClient.auth.getSession();
 
   if (session) {
     window.history.replaceState({}, document.title, window.location.pathname);
-  }
-
-  if (session?.user?.id) {
     setStoredUserId(session.user.id);
-    try {
-      const { data, error } = await supabaseClient
-        .from('users')
-        .select('*')
-        .eq('id', session.user.id)
-        .maybeSingle();
-      if (!error && data) {
-        applySupabaseUserRowToForm(data);
-        saveProfileToStorage();
-      }
-    } catch (e) {
-      console.warn('[bootstrap] profile from supabase', e);
-    }
-  } else {
-    setStoredUserId(null);
-  }
-
-  const ok = await loadOpenAiKeyFromSupabase();
-  if (!ok) {
-    appInitErr?.classList.add('visible');
-    return;
-  }
-
-  if (session) {
-    if (loadProfileFromStorage()) {
+    const { data: userRow } = await supabaseClient
+      .from('users')
+      .select('*')
+      .eq('id', session.user.id)
+      .maybeSingle();
+    if (userRow) {
+      applySupabaseUserRowToForm(userRow);
+      saveProfileToStorage();
       goTo('screen-main');
     } else {
       goTo('screen-profile', { mode: 'onboarding' });
     }
-  } else {
-    goTo('screen-auth');
+    return;
   }
+
+  setStoredUserId(null);
+  goTo('screen-auth');
 }
 
 function resizeEduIframe() {
