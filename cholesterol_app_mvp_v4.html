@@ -1835,6 +1835,7 @@ function applySupabaseUserRowToForm(row) {
 let profileAutofillFromSupabase = false;
 let emailAutofillSeq = 0;
 let emailAutofillTimer = null;
+let authResendCountdownTimer = null;
 
 /** 'onboarding' — первый вход / гейт без профиля; 'edit' — вкладка «Профиль» из нижней навигации */
 let profileScreenMode = 'onboarding';
@@ -3693,12 +3694,14 @@ async function submitAuthEmail() {
   const input = document.getElementById('auth-email');
   const email = (input?.value || '').trim();
   const status = document.getElementById('auth-status');
-  const btn = document.getElementById('auth-submit');
+  const sendBtn = document.getElementById('auth-submit');
   if (!email) {
     if (status) status.textContent = 'Введите e-mail.';
     return;
   }
-  if (btn) btn.disabled = true;
+  if (!sendBtn) return;
+  sendBtn.disabled = true;
+  let success = false;
   try {
     console.log('[auth] отправляем magic link на:', email);
     const { error } = await supabaseClient.auth.signInWithOtp({
@@ -3708,11 +3711,33 @@ async function submitAuthEmail() {
     console.log('[auth] результат:', error ? 'ошибка: ' + error.message : 'успешно отправлено');
     if (error) throw error;
     if (status) status.textContent = 'Проверь почту — мы отправили ссылку для входа';
+    success = true;
   } catch (e) {
     if (status) status.textContent = String(e.message || e);
   } finally {
-    if (btn) btn.disabled = false;
+    if (!success) sendBtn.disabled = false;
   }
+
+  if (!success) return;
+
+  if (authResendCountdownTimer) {
+    clearInterval(authResendCountdownTimer);
+    authResendCountdownTimer = null;
+  }
+  let countdown = 60;
+  sendBtn.disabled = true;
+  sendBtn.textContent = `Повторить через ${countdown}с`;
+  const timer = setInterval(() => {
+    countdown--;
+    sendBtn.textContent = `Повторить через ${countdown}с`;
+    if (countdown <= 0) {
+      clearInterval(timer);
+      authResendCountdownTimer = null;
+      sendBtn.disabled = false;
+      sendBtn.textContent = 'Войти';
+    }
+  }, 1000);
+  authResendCountdownTimer = timer;
 }
 
 async function logoutFromApp() {
