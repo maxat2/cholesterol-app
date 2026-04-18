@@ -1593,7 +1593,24 @@ supabaseClient.auth.onAuthStateChange(async (event, session) => {
   console.log('[auth] event:', event, 'session:', session?.user?.email);
   console.log('[auth] localStorage после входа:', localStorage.getItem('cholesterol_app_supabase_user_id'));
   if (!session) return;
-  // INITIAL_SESSION — в bootstrapApp; здесь только SIGNED_IN (magic link без дубля с первым запуском)
+
+  if (event === 'INITIAL_SESSION' && session) {
+    setStoredUserId(session.user.id);
+    const { data: userRow } = await supabaseClient
+      .from('users')
+      .select('*')
+      .eq('id', session.user.id)
+      .maybeSingle();
+    if (userRow) {
+      applySupabaseUserRowToForm(userRow);
+      saveProfileToStorage();
+      goTo('screen-main');
+    } else {
+      goTo('screen-profile', { mode: 'onboarding' });
+    }
+    return;
+  }
+
   if (event !== 'SIGNED_IN') return;
 
   setStoredUserId(session.user.id);
@@ -3857,8 +3874,10 @@ async function bootstrapApp() {
   }
 
   const {
-    data: { session }
+    data: { session },
+    error: sessionError
   } = await supabaseClient.auth.getSession();
+  console.log('[bootstrap] getSession result:', session?.user?.email, '| error:', sessionError);
 
   if (session) {
     window.history.replaceState({}, document.title, window.location.pathname);
