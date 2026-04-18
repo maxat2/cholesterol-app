@@ -1580,10 +1580,19 @@ const SUPABASE_URL = 'https://jwbhwwuznapaaeiuhxrp.supabase.co'.trim();
 const SUPABASE_ANON_KEY =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3Ymh3d3V6bmFwYWFlaXVoeHJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5Nzk3MjAsImV4cCI6MjA5MTU1NTcyMH0.j_ociAX5y8X1FbTuSwh8fv96fx8VZkOhURzltmrHdio'.trim();
 const __supabaseSdk = supabase;
-const supabaseClient = __supabaseSdk.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabaseClient = __supabaseSdk.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: {
+    persistSession: true,
+    storageKey: 'cholesterol_app_auth',
+    storage: window.localStorage,
+    autoRefreshToken: true,
+    detectSessionInUrl: true
+  }
+});
 
 supabaseClient.auth.onAuthStateChange(async (event, session) => {
-  console.log('[auth] onAuthStateChange event:', event, 'session:', session?.user?.email);
+  console.log('[auth] event:', event, 'session:', session?.user?.email);
+  console.log('[auth] localStorage после входа:', localStorage.getItem('cholesterol_app_supabase_user_id'));
   if (!session) return;
   // INITIAL_SESSION — в bootstrapApp; здесь только SIGNED_IN (magic link без дубля с первым запуском)
   if (event !== 'SIGNED_IN') return;
@@ -3773,6 +3782,7 @@ async function signInWithGoogleAuth() {
       redirectTo: 'https://maxat2.github.io/cholesterol-app/cholesterol_app_mvp_v4.html'
     }
   });
+  console.log('[google] запускаем OAuth redirect');
 }
 
 async function submitAuthEmail() {
