@@ -1552,19 +1552,13 @@ supabaseClient.auth.onAuthStateChange(async (event, session) => {
   if (byId) {
     userRow = byId;
   } else {
-    // Старая запись по email — обновляем id
     const { data: byEmail } = await supabaseClient
       .from('users')
       .select('*')
       .eq('email', session.user.email)
       .maybeSingle();
     if (byEmail) {
-      // Обновляем id на новый из Auth
-      await supabaseClient
-        .from('users')
-        .update({ id: session.user.id })
-        .eq('email', session.user.email);
-      userRow = { ...byEmail, id: session.user.id };
+      userRow = byEmail;
     }
   }
   console.log('[auth] userRow найден:', !!userRow, userRow?.email);
