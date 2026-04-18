@@ -1585,8 +1585,7 @@ const supabaseClient = __supabaseSdk.createClient(SUPABASE_URL, SUPABASE_ANON_KE
     persistSession: true,
     storage: window.localStorage,
     autoRefreshToken: true,
-    detectSessionInUrl: true,
-    flowType: 'pkce'
+    detectSessionInUrl: true
   }
 });
 
@@ -1616,6 +1615,8 @@ supabaseClient.auth.onAuthStateChange(async (event, session) => {
 
   setStoredUserId(session.user.id);
   window.history.replaceState({}, document.title, window.location.pathname);
+
+  console.log('[auth] SIGNED_IN - ищем профиль для id:', session.user.id, 'email:', session.user.email);
 
   let userRow = null;
   const { data: byId } = await supabaseClient
