@@ -1700,22 +1700,27 @@ async function handleAuthSession(session) {
     window.history.replaceState({}, document.title, loc.pathname);
   }
   try {
+    console.log('[auth] handleAuthSession: запрос профиля для', session.user.id);
     const { data: userRow, error } = await supabaseClient
       .from('users')
       .select('*')
       .eq('id', session.user.id)
       .maybeSingle();
+    console.log('[auth] handleAuthSession: userRow=', !!userRow, 'error=', error?.message);
     if (error) throw error;
     if (userRow) {
       applySupabaseUserRowToForm(userRow);
       saveProfileToStorage();
+      console.log('[auth] handleAuthSession: goTo screen-main');
       goTo('screen-main');
     } else {
+      console.log('[auth] handleAuthSession: goTo screen-profile onboarding');
       goTo('screen-profile', { mode: 'onboarding' });
     }
   } catch (e) {
     console.warn('[auth] DB error in handleAuthSession, navigating anyway', e);
     const hasProfile = !!localStorage.getItem('cholesterol_app_user_profile');
+    console.log('[auth] handleAuthSession catch: hasProfile=', hasProfile);
     goTo(hasProfile ? 'screen-main' : 'screen-profile', hasProfile ? undefined : { mode: 'onboarding' });
   }
 }
