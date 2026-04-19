@@ -1037,10 +1037,10 @@
     font-size: 13px;
     text-align: center;
   }
-  .history-star--g { color: #00AD30; }
-  .history-star--y { color: #FF6C02; }
-  .history-star--b { color: #5B94FF; }
-  .history-star--r { color: #E53935; }
+  .history-star--g, .history-star--y, .history-star--b, .history-star--r { color: rgba(0,0,0,0.5); }
+
+
+
   .history-score-line { font-size: 13px; color: var(--muted); margin-top: 6px; display: flex; align-items: center; gap: 4px; }
   .history-empty { text-align: center; padding: 40px 16px; color: var(--muted); font-size: 15px; line-height: 1.5; }
 
@@ -1329,9 +1329,7 @@
 
       <div class="inline-error" id="profile-validate-error" role="alert">Укажите e-mail и имя.</div>
       <button type="button" class="btn-primary" id="profile-cta-btn" onclick="setBtnLoading(this);saveProfileAndStart()"><span class="btn-label">Продолжить</span><span class="btn-spinner"></span></button>
-      <div class="profile-lipids-link-wrap">
-        <button type="button" class="profile-lipids-link" onclick="goTo('screen-lipids')">Липидный профиль</button>
-      </div>
+
       <div class="profile-logout-wrap">
         <button type="button" class="btn-primary" id="profile-logout-btn" onclick="logoutFromApp()">Выйти</button>
       </div>
@@ -1464,7 +1462,9 @@
 
   <div class="screen" id="screen-my-profile">
     <div class="nav history-top-nav">
-      <span class="history-nav-side" aria-hidden="true"></span>
+      <button type="button" class="history-nav-side" onclick="goTo('screen-main')" aria-label="Назад">
+        <svg width="10" height="17" viewBox="0 0 10 17" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M8.5 15.5L1.5 8.5L8.5 1.5" stroke="#1C1B1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
       <div class="history-nav-title">Профиль</div>
       <button type="button" class="history-nav-side" onclick="goTo('screen-profile', {mode:'edit'})" aria-label="Редактировать профиль">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z" stroke="#1C1B1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" stroke="#1C1B1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -1516,8 +1516,7 @@
       </section>
 
       <!-- Референсные значения -->
-      <section aria-labelledby="ref-heading">
-        <h2 class="my-profile-section-title" id="ref-heading">Описание значений</h2>
+      <section>
         <div class="ref-card">
           <div class="ref-card-title">Референсные значения</div>
           <div class="ref-divider"></div>
