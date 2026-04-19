@@ -1599,9 +1599,13 @@ supabaseClient.auth.onAuthStateChange(async (event, session) => {
     if (session) {
       await handleAuthSession(session);
     } else {
+      console.log('[auth] INITIAL_SESSION без сессии — ждём refresh токена до 2с');
       setTimeout(() => {
-        if (!authNavigationDone) goTo('screen-auth');
-      }, 500);
+        if (!authNavigationDone) {
+          console.log('[auth] refresh не пришёл за 2с → screen-auth');
+          goTo('screen-auth');
+        }
+      }, 2000);
     }
     bootstrapDone = true;
     return;
