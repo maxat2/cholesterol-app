@@ -299,10 +299,36 @@
     background: var(--accent); color: #fff; border: none; border-radius: 16px;
     height: 56px; width: 100%; font-family: var(--sans); font-size: 16px; font-weight: 600;
     cursor: pointer; margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: transform 0.12s ease, opacity 0.12s ease;
+    -webkit-tap-highlight-color: transparent;
+    position: relative;
+    overflow: hidden;
   }
-  .btn-primary:active { opacity: .88; }
+  .btn-primary:active:not(:disabled) { opacity: .82; transform: scale(0.97); }
+  .btn-primary:disabled { opacity: 0.6; cursor: default; }
+  .btn-primary.btn-loading { pointer-events: none; }
+  .btn-primary.btn-loading .btn-label { opacity: 0; }
+  .btn-primary .btn-spinner {
+    display: none;
+    position: absolute;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    border: 2.5px solid rgba(255,255,255,0.35);
+    border-top-color: #fff;
+    animation: btn-spin 0.65s linear infinite;
+  }
+  .btn-primary.btn-loading .btn-spinner { display: block; }
+  @keyframes btn-spin { to { transform: rotate(360deg); } }
   .btn-primary--split { justify-content: space-between; padding: 0 20px; }
-  .btn-secondary { background: var(--bg); color: var(--accent); border: 1px solid var(--line); border-radius: 16px; height: 52px; width: 100%; font-size: 15px; font-weight: 500; cursor: pointer; margin-top: 8px; font-family: var(--sans); }
+  .btn-secondary {
+    background: var(--bg); color: var(--accent); border: 1px solid var(--line); border-radius: 16px;
+    height: 52px; width: 100%; font-size: 15px; font-weight: 500; cursor: pointer; margin-top: 8px;
+    font-family: var(--sans); transition: transform 0.12s ease, opacity 0.12s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn-secondary:active { opacity: .82; transform: scale(0.97); }
+  .btn-camera-wide { transition: transform 0.12s ease, opacity 0.12s ease !important; }
+  .btn-camera-wide:active { opacity: .88 !important; transform: scale(0.97) !important; }
   .disclaimer { font-size: 11px; color: var(--muted2); text-align: center; padding: 16px 8px 0; }
 
   .inline-error { font-size: 13px; color: #DC2626; margin: -8px 0 12px; display: none; }
@@ -1269,7 +1295,7 @@
       </div>
 
       <div class="inline-error" id="profile-validate-error" role="alert">Укажите e-mail и имя.</div>
-      <button type="button" class="btn-primary" id="profile-cta-btn" onclick="saveProfileAndStart()">Продолжить</button>
+      <button type="button" class="btn-primary" id="profile-cta-btn" onclick="setBtnLoading(this);saveProfileAndStart()"><span class="btn-label">Продолжить</span><span class="btn-spinner"></span></button>
       <div class="profile-lipids-link-wrap">
         <button type="button" class="profile-lipids-link" onclick="goTo('screen-lipids')">Липидный профиль</button>
       </div>
@@ -1454,7 +1480,7 @@
         </div>
       </div>
       <div class="result-actions" id="result-actions">
-        <button type="button" class="btn-primary" id="result-btn-save-history" onclick="this.disabled=true;saveMealToHistoryAndGoMain()">Сохранить в историю</button>
+        <button type="button" class="btn-primary" id="result-btn-save-history" onclick="setBtnLoading(this);saveMealToHistoryAndGoMain()"><span class="btn-label">Сохранить в историю</span><span class="btn-spinner"></span></button>
         <button type="button" class="btn-primary" id="result-btn-refine" style="display:none" onclick="openDescribeFoodModalForRefine()">Уточнить</button>
         <button type="button" class="btn-secondary" onclick="backFromResult()">← Назад</button>
       </div>
@@ -1552,7 +1578,7 @@
         placeholder="Опишите то что сегодня ели, желательно подробно, чтобы точность ответа была лучше"
         rows="6"
       ></textarea>
-      <button type="button" class="btn-primary" id="describe-food-submit" onclick="submitDescribeFood()">Отправить</button>
+      <button type="button" class="btn-primary" id="describe-food-submit" onclick="setBtnLoading(this);submitDescribeFood()"><span class="btn-label">Отправить</span><span class="btn-spinner"></span></button>
     </div>
   </div>
 
@@ -2546,6 +2572,7 @@ async function submitDescribeFood() {
     setResultLoading(false);
     if (loaderText) loaderText.textContent = 'Анализируем фото…';
     updateResultActionButtons();
+    clearBtnLoading(document.getElementById('describe-food-submit'));
   }
 }
 
@@ -3115,6 +3142,8 @@ async function saveMealToHistoryAndGoMain() {
   goTo('screen-main');
   } finally {
     saveMealToHistoryAndGoMain._running = false;
+    const saveBtn = document.getElementById('result-btn-save-history');
+    clearBtnLoading(saveBtn);
   }
 }
 
@@ -3993,6 +4022,18 @@ async function logoutFromApp() {
   }
   localStorage.clear();
   goTo('screen-auth');
+}
+
+function setBtnLoading(btn) {
+  if (!btn) return;
+  btn.classList.add('btn-loading');
+  btn.disabled = true;
+}
+
+function clearBtnLoading(btn) {
+  if (!btn) return;
+  btn.classList.remove('btn-loading');
+  btn.disabled = false;
 }
 
 async function bootstrapApp() {
