@@ -605,6 +605,7 @@
     opacity: 0;
   }
   .history-content.is-history-loading #history-summary-card,
+  .history-content.is-history-loading #history-describe-btn,
   .history-content.is-history-loading #history-empty,
   .history-content.is-history-loading #history-list {
     visibility: hidden;
@@ -835,20 +836,27 @@
 
   .history-describe-btn {
     width: 100%;
-    margin-top: 12px;
-    padding: 14px 16px;
+    height: 56px;
+    margin-top: -8px;
+    padding: 0 16px;
     border: none;
     border-radius: 16px;
-    background: var(--card-blue);
+    background: var(--accent);
     font-family: var(--sans);
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--accent);
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
     cursor: pointer;
     box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.12s ease, opacity 0.12s ease;
+    -webkit-tap-highlight-color: transparent;
   }
   .history-describe-btn:active {
-    opacity: 0.92;
+    opacity: 0.82;
+    transform: scale(0.97);
   }
 
   .describe-food-overlay {
@@ -1659,9 +1667,8 @@
           <span class="history-summary-star" aria-hidden="true">★</span>
         </div>
       </div>
-      <button type="button" class="btn-primary" id="history-describe-btn" onclick="setBtnLoading(this);openDescribeFoodModal()" style="margin-top:-4px;">
-        <span class="btn-label">Описать еду словами</span>
-        <span class="btn-spinner"></span>
+      <button type="button" class="history-describe-btn" id="history-describe-btn" onclick="openDescribeFoodModal()">
+        Описать еду словами
       </button>
 
       <div class="history-empty" id="history-empty" style="display:none;">Пока нет записей. Сфоткай свою первую еду!</div>
@@ -2560,7 +2567,6 @@ function configureDescribeFoodModal(mode) {
 function openDescribeFoodModal() {
   configureDescribeFoodModal('describe');
   document.getElementById('describe-food-overlay')?.classList.add('visible');
-  clearBtnLoading(document.getElementById('history-describe-btn'));
 }
 
 function openDescribeFoodModalForRefine() {
