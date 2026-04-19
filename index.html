@@ -1590,60 +1590,33 @@ const supabaseClient = __supabaseSdk.createClient(SUPABASE_URL, SUPABASE_ANON_KE
 });
 
 let bootstrapDone = false;
+
 supabaseClient.auth.onAuthStateChange(async (event, session) => {
-  console.log('[auth] event:', event, 'session:', session?.user?.email);
-  console.log('[auth] localStorage после входа:', localStorage.getItem('cholesterol_app_supabase_user_id'));
-  if (bootstrapDone && document.getElementById('screen-main')?.classList.contains('active')) {
-    console.log('[auth] bootstrap уже выполнен, пропускаем');
-    return;
-  }
-  if (!session) return;
+  console.log('[auth]', event, session?.user?.email ?? 'no session');
 
-  if (event === 'INITIAL_SESSION' && session) {
-    setStoredUserId(session.user.id);
-    const { data: userRow } = await supabaseClient
-      .from('users')
-      .select('*')
-      .eq('id', session.user.id)
-      .maybeSingle();
-    if (userRow) {
-      applySupabaseUserRowToForm(userRow);
-      saveProfileToStorage();
-      goTo('screen-main');
+  if (event === 'INITIAL_SESSION') {
+    if (session) {
+      await handleAuthSession(session);
     } else {
-      goTo('screen-profile', { mode: 'onboarding' });
+      goTo('screen-auth');
     }
-    return;
+    bootstrapDone = true;
   }
 
-  if (event !== 'SIGNED_IN') return;
+  if (event === 'SIGNED_IN' && !bootstrapDone) {
+    await handleAuthSession(session);
+    bootstrapDone = true;
+  }
+});
 
+async function handleAuthSession(session) {
   setStoredUserId(session.user.id);
   window.history.replaceState({}, document.title, window.location.pathname);
-
-  console.log('[auth] SIGNED_IN - ищем профиль для id:', session.user.id, 'email:', session.user.email);
-
-  let userRow = null;
-  const { data: byId } = await supabaseClient
+  const { data: userRow } = await supabaseClient
     .from('users')
     .select('*')
     .eq('id', session.user.id)
     .maybeSingle();
-
-  if (byId) {
-    userRow = byId;
-  } else {
-    const { data: byEmail } = await supabaseClient
-      .from('users')
-      .select('*')
-      .eq('email', session.user.email)
-      .maybeSingle();
-    if (byEmail) {
-      userRow = byEmail;
-    }
-  }
-  console.log('[auth] userRow найден:', !!userRow, userRow?.email);
-
   if (userRow) {
     applySupabaseUserRowToForm(userRow);
     saveProfileToStorage();
@@ -1651,7 +1624,7 @@ supabaseClient.auth.onAuthStateChange(async (event, session) => {
   } else {
     goTo('screen-profile', { mode: 'onboarding' });
   }
-});
+}
 
 /** Ключ OpenAI из Supabase app_settings (без localStorage). */
 let openaiApiKey = null;
@@ -3873,47 +3846,10 @@ async function bootstrapApp() {
   console.log('[bootstrap] старт');
   const appInitErr = document.getElementById('app-init-error');
   appInitErr?.classList.remove('visible');
-
   const keyOk = await loadOpenAiKeyFromSupabase();
-  console.log('[bootstrap] ключ загружен:', keyOk, '| openaiApiKey:', !!openaiApiKey);
   if (!keyOk) {
     appInitErr?.classList.add('visible');
-    return;
   }
-
-  const {
-    data: { session },
-    error: sessionError
-  } = await supabaseClient.auth.getSession();
-  console.log('[bootstrap] getSession result:', session?.user?.email, '| error:', sessionError);
-
-  if (session) {
-    window.history.replaceState({}, document.title, window.location.pathname);
-    setStoredUserId(session.user.id);
-    const { data: userRow } = await supabaseClient
-      .from('users')
-      .select('*')
-      .eq('id', session.user.id)
-      .maybeSingle();
-    if (userRow) {
-      applySupabaseUserRowToForm(userRow);
-      console.log('[auth] профиль найден в Supabase:', userRow.email, userRow.name);
-      saveProfileToStorage();
-      const profileLoadedComplete = loadProfileFromStorage();
-      console.log(
-        '[bootstrap] после apply+saveProfileToStorage → loadProfileFromStorage():',
-        profileLoadedComplete
-      );
-      goTo('screen-main');
-      bootstrapDone = true;
-    } else {
-      goTo('screen-profile', { mode: 'onboarding' });
-    }
-    return;
-  }
-
-  setStoredUserId(null);
-  goTo('screen-auth');
 }
 
 function resizeEduIframe() {
