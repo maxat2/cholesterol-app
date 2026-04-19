@@ -1603,7 +1603,7 @@ supabaseClient.auth.onAuthStateChange(async (event, session) => {
     bootstrapDone = true;
   }
 
-  if (event === 'SIGNED_IN' && !bootstrapDone) {
+  if (event === 'SIGNED_IN') {
     await handleAuthSession(session);
     bootstrapDone = true;
   }
@@ -3850,29 +3850,6 @@ async function bootstrapApp() {
   const keyOk = await loadOpenAiKeyFromSupabase();
   if (!keyOk) {
     appInitErr?.classList.add('visible');
-    return;
-  }
-
-  const {
-    data: { session }
-  } = await supabaseClient.auth.getSession();
-  console.log('[bootstrap] getSession:', session?.user?.email ?? 'нет сессии');
-
-  if (session) {
-    await handleAuthSession(session);
-    bootstrapDone = true;
-  }
-
-  if (!session) {
-    console.log('[bootstrap] сессии нет, пробуем refreshSession...');
-    const { data: refreshed } = await supabaseClient.auth.refreshSession();
-    console.log('[bootstrap] refreshSession:', refreshed?.session?.user?.email ?? 'нет');
-    if (refreshed?.session) {
-      await handleAuthSession(refreshed.session);
-      bootstrapDone = true;
-      return;
-    }
-    goTo('screen-auth');
   }
 }
 
