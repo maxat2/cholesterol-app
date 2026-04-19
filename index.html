@@ -1647,12 +1647,7 @@
         <svg width="10" height="17" viewBox="0 0 10 17" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M8.5 15.5L1.5 8.5L8.5 1.5" stroke="#1C1B1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
       <div class="history-nav-title">История</div>
-      <button type="button" class="history-nav-side" onclick="showPurchaseModal()" aria-label="Настройки">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <path d="M12 15a3 3 0 100-6 3 3 0 000 6z" stroke="#1C1B1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" stroke="#1C1B1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </button>
+      <span class="history-nav-side" aria-hidden="true"></span>
     </div>
     <div class="content history-content">
       <div id="history-summary-card" class="history-summary" style="display:none;">
@@ -1665,9 +1660,11 @@
           <span class="history-summary-star" aria-hidden="true">★</span>
         </div>
       </div>
-      <button type="button" class="history-describe-btn" id="history-describe-btn" onclick="openDescribeFoodModal()">
-        Описать еду словами
+      <button type="button" class="btn-primary" id="history-describe-btn" onclick="setBtnLoading(this);openDescribeFoodModal()" style="margin-top:0;">
+        <span class="btn-label">Описать еду словами</span>
+        <span class="btn-spinner"></span>
       </button>
+
       <div class="history-empty" id="history-empty" style="display:none;">Пока нет записей. Сфоткай свою первую еду!</div>
       <div class="history-skeleton-wrap" id="history-skeleton-wrap" aria-hidden="true">
         <div class="history-skel-item">
@@ -2564,6 +2561,7 @@ function configureDescribeFoodModal(mode) {
 function openDescribeFoodModal() {
   configureDescribeFoodModal('describe');
   document.getElementById('describe-food-overlay')?.classList.add('visible');
+  clearBtnLoading(document.getElementById('history-describe-btn'));
 }
 
 function openDescribeFoodModalForRefine() {
@@ -2982,10 +2980,17 @@ function profileNameForMotivation() {
 
 function motivationTextForAvg(avg) {
   const n = profileNameForMotivation();
-  if (avg >= 8) return `Это очень круто!\nТак держать, ${n}!`;
-  if (avg >= 6) return `Хороший темп!\nПродолжай, ${n}!`;
-  if (avg >= 4) return `Есть куда расти — шаг за шагом, ${n}.`;
-  return `Попробуй чаще выбирать более лёгкие варианты.\nУ тебя получится, ${n}!`;
+  if (avg >= 8.5) return `${n}, ты просто огонь! 🔥\nТакое питание — мечта кардиолога.`;
+  if (avg >= 7) return `Отличный результат, ${n}!\nТвоё сердце говорит спасибо.`;
+  if (avg >= 5.5) return `Неплохо, ${n}!\nЕсть куда расти — ты на правильном пути.`;
+  if (avg >= 4) return `${n}, стоит присмотреться к питанию.\nПару замен — и станет заметно лучше.`;
+  return `${n}, питание требует внимания.\nПопробуй чаще выбирать более лёгкие блюда.`;
+}
+
+function motivationLabelForAvg(avg) {
+  if (avg >= 7) return 'Средняя оценка питания';
+  if (avg >= 4) return 'Средняя оценка питания';
+  return 'Средняя оценка питания';
 }
 
 function updateHistorySummaryCard() {
