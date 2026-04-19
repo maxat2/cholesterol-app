@@ -1581,52 +1581,74 @@ const SUPABASE_ANON_KEY =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3Ymh3d3V6bmFwYWFlaXVoeHJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5Nzk3MjAsImV4cCI6MjA5MTU1NTcyMH0.j_ociAX5y8X1FbTuSwh8fv96fx8VZkOhURzltmrHdio'.trim();
 const __supabaseSdk = supabase;
 
-// Dual storage: пишем в куку И в localStorage одновременно.
-// При чтении берём из куки (устойчива к bounce tracking), fallback — localStorage.
-const dualStorage = {
-  _cookieKey(key) { return 'sb_ck_' + key; },
-  _writeCookie(key, value) {
+// Яндекс Браузер удаляет localStorage после закрытия вкладки (bounce tracking protection).
+// Решение: проксируем localStorage — при каждой записи дублируем в куку.
+// При чтении: если в localStorage пусто — восстанавливаем из куки.
+(function patchLocalStorageForBounceTracking() {
+  const SB_KEY = 'sb-jwbhwwuznapaaeiuhxrp-auth-token';
+  const COOKIE_NAME = 'sb_session_bak';
+  const _setItem = Storage.prototype.setItem;
+  const _getItem = Storage.prototype.getItem;
+  const _removeItem = Storage.prototype.removeItem;
+
+  function writeCookie(value) {
     try {
       const expires = new Date(Date.now() + 7 * 864e5).toUTCString();
-      // Используем простое имя без encodeURIComponent — Supabase SDK ожидает точное совпадение ключа
-      document.cookie = 'sb_ck_' + key + '=' + encodeURIComponent(value)
+      document.cookie = COOKIE_NAME + '=' + encodeURIComponent(value)
         + '; expires=' + expires + '; path=/; SameSite=Lax';
     } catch (e) {}
-  },
-  _readCookie(key) {
-    try {
-      const name = 'sb_ck_' + key + '=';
-      for (const part of document.cookie.split(';')) {
-        const p = part.trim();
-        if (p.startsWith(name)) return decodeURIComponent(p.slice(name.length));
-      }
-    } catch (e) {}
-    return null;
-  },
-  _deleteCookie(key) {
-    try {
-      document.cookie = 'sb_ck_' + key + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Lax';
-    } catch (e) {}
-  },
-  getItem(key) {
-    const fromCookie = this._readCookie(key);
-    if (fromCookie !== null) return fromCookie;
-    try { return localStorage.getItem(key); } catch (e) { return null; }
-  },
-  setItem(key, value) {
-    this._writeCookie(key, value);
-    try { localStorage.setItem(key, value); } catch (e) {}
-  },
-  removeItem(key) {
-    this._deleteCookie(key);
-    try { localStorage.removeItem(key); } catch (e) {}
   }
-};
+  function readCookie() {
+    try {
+      const match = document.cookie.match('(?:^|;)\\s*' + COOKIE_NAME + '=([^;]*)');
+      return match ? decodeURIComponent(match[1]) : null;
+    } catch (e) { return null; }
+  }
+  function deleteCookie() {
+    document.cookie = COOKIE_NAME + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Lax';
+  }
+
+  Storage.prototype.setItem = function(key, value) {
+    _setItem.call(this, key, value);
+    if (this === window.localStorage && key === SB_KEY) {
+      writeCookie(value);
+    }
+  };
+  Storage.prototype.getItem = function(key) {
+    const val = _getItem.call(this, key);
+    if (this === window.localStorage && key === SB_KEY && val === null) {
+      const fromCookie = readCookie();
+      if (fromCookie) {
+        // Восстанавливаем в localStorage из куки
+        try { _setItem.call(this, key, fromCookie); } catch (e) {}
+        return fromCookie;
+      }
+    }
+    return val;
+  };
+  Storage.prototype.removeItem = function(key) {
+    _removeItem.call(this, key);
+    if (this === window.localStorage && key === SB_KEY) {
+      deleteCookie();
+    }
+  };
+
+  // При старте: если localStorage пуст но кука есть — восстанавливаем
+  try {
+    if (!localStorage.getItem(SB_KEY)) {
+      const backed = readCookie();
+      if (backed) {
+        _setItem.call(localStorage, SB_KEY, backed);
+        console.log('[auth] сессия восстановлена из куки в localStorage');
+      }
+    }
+  } catch (e) {}
+})();
 
 const supabaseClient = __supabaseSdk.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
     persistSession: true,
-    storage: dualStorage,
+    storage: window.localStorage,
     autoRefreshToken: true,
     detectSessionInUrl: true
   }
