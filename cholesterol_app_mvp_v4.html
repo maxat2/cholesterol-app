@@ -3797,7 +3797,7 @@ async function signInWithGoogleAuth() {
   await supabaseClient.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: 'https://maxat2.github.io/cholesterol-app/cholesterol_app_mvp_v4.html',
+      redirectTo: 'https://cholesterol-app.vercel.app',
       skipBrowserRedirect: false
     }
   });
@@ -3820,7 +3820,7 @@ async function submitAuthEmail() {
     console.log('[auth] отправляем magic link на:', email);
     const { error } = await supabaseClient.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: window.location.href }
+      options: { emailRedirectTo: 'https://cholesterol-app.vercel.app' }
     });
     console.log('[auth] результат:', error ? 'ошибка: ' + error.message : 'успешно отправлено');
     if (error) throw error;
