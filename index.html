@@ -1727,10 +1727,28 @@ async function handleAuthSession(session) {
       saveProfileToStorage();
       goTo('screen-main');
     } else {
+      // Новый пользователь — подставляем email из Google в поле формы
+      const emailFromGoogle = session.user.email || '';
+      if (emailFromGoogle) {
+        const emailEl = document.getElementById('input-email');
+        if (emailEl) emailEl.value = emailFromGoogle;
+      }
+      // Также имя из Google если есть
+      const nameFromGoogle = session.user.user_metadata?.full_name || session.user.user_metadata?.name || '';
+      if (nameFromGoogle) {
+        const nameEl = document.getElementById('input-name');
+        if (nameEl) { nameEl.value = nameFromGoogle; updateName(nameFromGoogle); }
+      }
       goTo('screen-profile', { mode: 'onboarding' });
     }
   } catch (e) {
     console.warn('[auth] DB timeout/error, going to onboarding', e);
+    // Даже при ошибке подставляем email
+    const emailFromGoogle = session.user.email || '';
+    if (emailFromGoogle) {
+      const emailEl = document.getElementById('input-email');
+      if (emailEl) emailEl.value = emailFromGoogle;
+    }
     goTo('screen-profile', { mode: 'onboarding' });
   }
 }
