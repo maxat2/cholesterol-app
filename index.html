@@ -605,7 +605,6 @@
     opacity: 0;
   }
   .history-content.is-history-loading #history-summary-card,
-  .history-content.is-history-loading #history-describe-btn,
   .history-content.is-history-loading #history-empty,
   .history-content.is-history-loading #history-list {
     visibility: hidden;
@@ -616,16 +615,11 @@
     overflow: hidden;
     pointer-events: none;
   }
-  /* Явно восстанавливаем кнопку после загрузки */
-  .history-content:not(.is-history-loading) #history-describe-btn {
-    visibility: visible !important;
-    opacity: 1 !important;
-    position: static !important;
-    width: 100% !important;
-    height: 56px !important;
-    overflow: visible !important;
-    pointer-events: auto !important;
-    display: flex !important;
+  /* Кнопка описания скрывается отдельно — без схлопывания высоты */
+  .history-content.is-history-loading #history-describe-btn {
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
   }
   .history-skel-item {
     display: flex;
