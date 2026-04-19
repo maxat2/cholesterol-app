@@ -1664,13 +1664,15 @@ supabaseClient.auth.onAuthStateChange(async (event, session) => {
     if (session) {
       await handleAuthSession(session);
     } else {
-      console.log('[auth] INITIAL_SESSION без сессии — ждём refresh токена до 2с');
+      // Токен мог истечь — SDK делает refresh по сети и вернёт SIGNED_IN.
+      // Ждём до 10 секунд прежде чем показать экран входа.
+      console.log('[auth] INITIAL_SESSION без сессии — ждём refresh токена до 10с');
       setTimeout(() => {
         if (!authNavigationDone) {
-          console.log('[auth] refresh не пришёл за 2с → screen-auth');
+          console.log('[auth] refresh не пришёл за 10с → screen-auth');
           goTo('screen-auth');
         }
-      }, 2000);
+      }, 10000);
     }
     bootstrapDone = true;
     return;
@@ -1697,17 +1699,24 @@ async function handleAuthSession(session) {
   if (loc.hash.includes('access_token') || loc.search.includes('access_token') || loc.hash.includes('type=')) {
     window.history.replaceState({}, document.title, loc.pathname);
   }
-  const { data: userRow } = await supabaseClient
-    .from('users')
-    .select('*')
-    .eq('id', session.user.id)
-    .maybeSingle();
-  if (userRow) {
-    applySupabaseUserRowToForm(userRow);
-    saveProfileToStorage();
-    goTo('screen-main');
-  } else {
-    goTo('screen-profile', { mode: 'onboarding' });
+  try {
+    const { data: userRow, error } = await supabaseClient
+      .from('users')
+      .select('*')
+      .eq('id', session.user.id)
+      .maybeSingle();
+    if (error) throw error;
+    if (userRow) {
+      applySupabaseUserRowToForm(userRow);
+      saveProfileToStorage();
+      goTo('screen-main');
+    } else {
+      goTo('screen-profile', { mode: 'onboarding' });
+    }
+  } catch (e) {
+    console.warn('[auth] DB error in handleAuthSession, navigating anyway', e);
+    const hasProfile = !!localStorage.getItem('cholesterol_app_user_profile');
+    goTo(hasProfile ? 'screen-main' : 'screen-profile', hasProfile ? undefined : { mode: 'onboarding' });
   }
 }
 
