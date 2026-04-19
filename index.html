@@ -1589,20 +1589,17 @@ const supabaseClient = __supabaseSdk.createClient(SUPABASE_URL, SUPABASE_ANON_KE
   }
 });
 
-let authHandling = false;
+let bootstrapDone = false;
 supabaseClient.auth.onAuthStateChange(async (event, session) => {
   console.log('[auth] event:', event, 'session:', session?.user?.email);
   console.log('[auth] localStorage после входа:', localStorage.getItem('cholesterol_app_supabase_user_id'));
-  if (!session) return;
-
-  if (authHandling) {
-    console.log('[auth] уже обрабатывается, пропускаем');
+  if (bootstrapDone && document.getElementById('screen-main')?.classList.contains('active')) {
+    console.log('[auth] bootstrap уже выполнен, пропускаем');
     return;
   }
-  authHandling = true;
+  if (!session) return;
 
-  try {
-    if (event === 'INITIAL_SESSION' && session) {
+  if (event === 'INITIAL_SESSION' && session) {
     setStoredUserId(session.user.id);
     const { data: userRow } = await supabaseClient
       .from('users')
@@ -1653,9 +1650,6 @@ supabaseClient.auth.onAuthStateChange(async (event, session) => {
     goTo('screen-main');
   } else {
     goTo('screen-profile', { mode: 'onboarding' });
-  }
-  } finally {
-    authHandling = false;
   }
 });
 
@@ -3911,6 +3905,7 @@ async function bootstrapApp() {
         profileLoadedComplete
       );
       goTo('screen-main');
+      bootstrapDone = true;
     } else {
       goTo('screen-profile', { mode: 'onboarding' });
     }
