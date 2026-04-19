@@ -1677,7 +1677,7 @@ supabaseClient.auth.onAuthStateChange(async (event, session) => {
   }
 
   if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-    if (session && !authNavigationDone) {
+    if (session) {
       await handleAuthSession(session);
     }
     bootstrapDone = true;
