@@ -1581,49 +1581,52 @@ const SUPABASE_ANON_KEY =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3Ymh3d3V6bmFwYWFlaXVoeHJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5Nzk3MjAsImV4cCI6MjA5MTU1NTcyMH0.j_ociAX5y8X1FbTuSwh8fv96fx8VZkOhURzltmrHdio'.trim();
 const __supabaseSdk = supabase;
 
-// Разовая миграция: если токен есть в localStorage — переносим в куку
-(function migrateSessionToCookie() {
-  try {
-    const lsKey = 'sb-jwbhwwuznapaaeiuhxrp-auth-token';
-    const lsVal = localStorage.getItem(lsKey);
-    if (lsVal) {
+// Dual storage: пишем в куку И в localStorage одновременно.
+// При чтении берём из куки (устойчива к bounce tracking), fallback — localStorage.
+const dualStorage = {
+  _cookieKey(key) { return 'sb_ck_' + key; },
+  _writeCookie(key, value) {
+    try {
       const expires = new Date(Date.now() + 7 * 864e5).toUTCString();
-      document.cookie = encodeURIComponent(lsKey) + '=' + encodeURIComponent(lsVal)
-        + '; expires=' + expires + '; path=/; SameSite=Lax; Secure';
-      localStorage.removeItem(lsKey);
-      console.log('[auth] сессия перенесена из localStorage в куку');
-    }
-  } catch (e) {}
-})();
-
-// Яндекс Браузер и другие браузеры с bounce tracking protection
-// удаляют localStorage после закрытия вкладки если данные записаны через редирект.
-// Куки с SameSite=Lax не удаляются — используем их для хранения сессии.
-const cookieStorage = {
+      // Используем простое имя без encodeURIComponent — Supabase SDK ожидает точное совпадение ключа
+      document.cookie = 'sb_ck_' + key + '=' + encodeURIComponent(value)
+        + '; expires=' + expires + '; path=/; SameSite=Lax';
+    } catch (e) {}
+  },
+  _readCookie(key) {
+    try {
+      const name = 'sb_ck_' + key + '=';
+      for (const part of document.cookie.split(';')) {
+        const p = part.trim();
+        if (p.startsWith(name)) return decodeURIComponent(p.slice(name.length));
+      }
+    } catch (e) {}
+    return null;
+  },
+  _deleteCookie(key) {
+    try {
+      document.cookie = 'sb_ck_' + key + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Lax';
+    } catch (e) {}
+  },
   getItem(key) {
-    const match = document.cookie.match(
-      '(?:^|;)\\s*' + encodeURIComponent(key) + '=([^;]*)'
-    );
-    if (!match) return null;
-    try { return decodeURIComponent(match[1]); } catch { return null; }
+    const fromCookie = this._readCookie(key);
+    if (fromCookie !== null) return fromCookie;
+    try { return localStorage.getItem(key); } catch (e) { return null; }
   },
   setItem(key, value) {
-    const days = 7;
-    const expires = new Date(Date.now() + days * 864e5).toUTCString();
-    document.cookie =
-      encodeURIComponent(key) + '=' + encodeURIComponent(value) +
-      '; expires=' + expires + '; path=/; SameSite=Lax; Secure';
+    this._writeCookie(key, value);
+    try { localStorage.setItem(key, value); } catch (e) {}
   },
   removeItem(key) {
-    document.cookie =
-      encodeURIComponent(key) + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Lax; Secure';
+    this._deleteCookie(key);
+    try { localStorage.removeItem(key); } catch (e) {}
   }
 };
 
 const supabaseClient = __supabaseSdk.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
     persistSession: true,
-    storage: cookieStorage,
+    storage: dualStorage,
     autoRefreshToken: true,
     detectSessionInUrl: true
   }
