@@ -1591,12 +1591,7 @@
           <svg width="10" height="17" viewBox="0 0 10 17" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M8.5 15.5L1.5 8.5L8.5 1.5" stroke="#1C1B1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
         <div class="history-nav-title">Фотография</div>
-        <button type="button" class="history-nav-side" onclick="showPurchaseModal()" aria-label="Настройки">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M12 15a3 3 0 100-6 3 3 0 000 6z" stroke="#1C1B1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" stroke="#1C1B1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
+        <span class="history-nav-side" aria-hidden="true"></span>
       </div>
       <div class="result-photo" id="result-photo-wrap">
         <div class="result-photo-placeholder" id="result-photo-placeholder" aria-hidden="true">
@@ -1669,7 +1664,12 @@
         </div>
       </div>
       <button type="button" class="history-describe-btn" id="history-describe-btn" onclick="openDescribeFoodModal()">
-        Описать еду словами
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="flex-shrink:0;">
+          <path d="M3.37 14.28C4.16 13.99 4.54 13.5 5.36 13.5C6.55 13.5 6.78 14.5 8.69 14.5C10.64 14.5 10.78 13.5 12.02 13.5C13.21 13.5 13.44 14.5 15.35 14.5C17.3 14.5 17.44 13.5 18.68 13.5C19.49 13.5 19.85 13.96 20.61 14.26C21.28 14.52 22 14.01 22 13.3C22 12.87 21.72 12.49 21.31 12.34C20.34 11.99 20.09 11.51 18.66 11.51C16.71 11.51 16.57 12.51 15.33 12.51C14.14 12.51 13.91 11.51 12 11.51C10.05 11.51 9.91 12.51 8.67 12.51C7.48 12.51 7.25 11.51 5.34 11.51C3.79 11.51 3.38 12.14 2.66 12.4C2.27 12.54 2.01 12.92 2.01 13.34C2.01 14.03 2.71 14.52 3.37 14.28Z" fill="white"/>
+          <path d="M2 19C2 20.1 2.9 21 4 21H20C21.1 21 22 20.1 22 19V18C22 16.9 21.1 16 20 16H4C2.9 16 2 16.9 2 18V19Z" fill="white"/>
+          <path d="M22 9C22.02 5 17.72 3 12 3C6.29 3 2 5 2 9C2 9.55 2.45 10 3 10H21C21.55 10 22 9.55 22 9Z" fill="white"/>
+        </svg>
+        Добавить без фото
       </button>
 
       <div class="history-empty" id="history-empty" style="display:none;">Пока нет записей. Сфоткай свою первую еду!</div>
