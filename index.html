@@ -2450,13 +2450,7 @@ async function submitDescribeFood() {
   const ta = document.getElementById('describe-food-text');
   const userText = (ta?.value || '').trim();
   if (!userText) return;
-  if (!openaiApiKey) {
-    const ok = await loadOpenAiKeyFromSupabase();
-    if (!ok) {
-      document.getElementById('app-init-error')?.classList.add('visible');
-      return;
-    }
-  }
+
 
   if (describeFoodModalMode === 'refine') {
     closeDescribeFoodModal();
@@ -3332,14 +3326,6 @@ function syncMainCholCard() {
 async function openFoodCamera() {
   const appInitErr = document.getElementById('app-init-error');
   const camInput = document.getElementById('food-camera-input');
-  // Если ключ не загружен — пробуем загрузить ещё раз (могло не сработать при старте)
-  if (!openaiApiKey) {
-    const ok = await loadOpenAiKeyFromSupabase();
-    if (!ok) {
-      appInitErr?.classList.add('visible');
-      return;
-    }
-  }
   appInitErr?.classList.remove('visible');
   camInput?.click();
 }
@@ -3567,10 +3553,6 @@ function showResultLoader(message) {
 async function analyzeFoodPhoto(dataUrl, userClarification) {
   const saveBtn = document.getElementById('result-btn-save-history');
   if (saveBtn) saveBtn.disabled = false;
-  if (!openaiApiKey) {
-    throw new Error('Не удалось загрузить настройки приложения');
-  }
-
   let prompt = buildVisionPrompt();
   const clar = userClarification != null ? String(userClarification).trim() : '';
   if (clar) {
@@ -3580,12 +3562,9 @@ async function analyzeFoodPhoto(dataUrl, userClarification) {
       '\nПересмотри оценку с учётом этого уточнения.';
   }
 
-  const res = await fetch('https://api.openai.com/v1/chat/completions', {
+  const res = await fetch('/api/analyze', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: 'Bearer ' + openaiApiKey
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       model: 'gpt-4o',
       response_format: { type: 'json_object' },
@@ -3618,9 +3597,6 @@ async function analyzeFoodPhoto(dataUrl, userClarification) {
 async function analyzeFoodFromText(userText, userClarification) {
   const saveBtn = document.getElementById('result-btn-save-history');
   if (saveBtn) saveBtn.disabled = false;
-  if (!openaiApiKey) {
-    throw new Error('Не удалось загрузить настройки приложения');
-  }
   let text =
     buildVisionPrompt() + '\n\nПользователь описал еду словами (фото нет):\n' + userText;
   const clar = userClarification != null ? String(userClarification).trim() : '';
@@ -3630,12 +3606,9 @@ async function analyzeFoodFromText(userText, userClarification) {
       clar +
       '\nПересмотри оценку с учётом этого уточнения.';
   }
-  const res = await fetch('https://api.openai.com/v1/chat/completions', {
+  const res = await fetch('/api/analyze', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: 'Bearer ' + openaiApiKey
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       model: 'gpt-4o',
       response_format: { type: 'json_object' },
@@ -4038,14 +4011,7 @@ function clearBtnLoading(btn) {
 
 async function bootstrapApp() {
   console.log('[bootstrap] старт');
-  loadOpenAiKeyFromSupabase().then((keyOk) => {
-    if (!keyOk) {
-      const active = document.querySelector('.screen.active')?.id;
-      if (active && active !== 'screen-auth' && active !== 'screen-profile') {
-        document.getElementById('app-init-error')?.classList.add('visible');
-      }
-    }
-  });
+  // OpenAI ключ теперь хранится в Vercel env vars, не загружаем на клиент
 }
 
 function resizeEduIframe() {
