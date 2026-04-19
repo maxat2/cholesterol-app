@@ -1,0 +1,3968 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#FFFFFF" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <title>Холестериновая слежка</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html {
+    height: 100%;
+    max-height: 100dvh;
+    overflow: hidden;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    margin: 0;
+    height: 100%;
+    max-height: 100dvh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    font-family: system-ui, sans-serif;
+    background: var(--bg, #fff);
+  }
+  :root {
+    --bg: #FFFFFF;
+    --accent: #000000;
+    --text: #000000;
+    --muted: #666666;
+    --muted2: #999999;
+    --line: #E0E0E0;
+    --bad-bg: #FFF0F0;
+    --ok-bg: #F0FFF4;
+    --history-yellow: #FEF0E6;
+    --history-green-card: #F6FEE6;
+    --card-blue: #E7EDFF;
+    --dontknow-bg: #EEF2FF;
+    --star-green: #22C55E;
+    --sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    /* Главный экран (ориентир под Figma mobile / node main) */
+    --main-pad-x: 20px;
+    --main-pad-top: 24px;
+    --main-greeting-size: 32px;
+    --main-lead-size: 16px;
+    --main-lead-color: #666666;
+    --main-section-size: 22px;
+    --main-block-gap: 24px;
+    --chol-card-radius: 16px;
+    --chol-grid-gap: 12px;
+    --chol-name-color: #666666;
+    --chol-foot-size: 12px;
+  }
+  /* Мобильный: на весь экран, без «телефонной» рамки */
+  .app-wrap {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    width: 100%;
+    max-width: 100%;
+    min-height: 0;
+    max-height: 100%;
+    overflow: hidden;
+    padding: 0;
+    font-family: var(--sans);
+    background: var(--bg);
+  }
+  .phone {
+    width: 100%;
+    max-width: 100%;
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    max-height: 100%;
+    background: var(--bg);
+    border-radius: 0;
+    overflow: hidden;
+    box-shadow: none;
+    position: relative;
+    padding-top: env(safe-area-inset-top);
+  }
+  .screen {
+    display: none;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    background: var(--bg);
+    animation: fadeIn 0.25s ease;
+  }
+  /* Активный экран заполняет .phone; нижнее меню прижато к низу через flex + margin-top: auto */
+  .screen.active {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+  }
+  #screen-auth {
+    background: var(--bg) url('background_enter.png') center / cover no-repeat;
+  }
+  .auth-screen-inner {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 40px 20px max(40px, env(safe-area-inset-bottom));
+    width: 100%;
+    flex-shrink: 0;
+  }
+  .auth-status {
+    font-size: 15px;
+    line-height: 1.45;
+    color: #1a1a1a;
+    text-align: center;
+    padding: 0 4px;
+  }
+  .auth-status:empty { display: none; }
+  .auth-field-wrap {
+    position: relative;
+    width: 100%;
+  }
+  .auth-input {
+    width: 100%;
+    height: 50px;
+    padding: 0 44px 0 15px;
+    border: 1px solid #d1d1d1;
+    border-radius: 12px;
+    background: #ffffff;
+    font-family: var(--sans);
+    font-size: 16px;
+    color: #1a1a1a;
+  }
+  .auth-input::placeholder {
+    color: #999;
+  }
+  .auth-input-icon {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: #888;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .auth-btn {
+    width: 100%;
+    height: 50px;
+    border: none;
+    border-radius: 12px;
+    background: #1a1a1b;
+    color: #ffffff;
+    font-family: var(--sans);
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .auth-btn:disabled {
+    opacity: 0.65;
+    cursor: default;
+  }
+  .auth-btn:active:not(:disabled) {
+    opacity: 0.92;
+  }
+  #screen-auth .auth-btn-google {
+    width: 100%;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: #ffffff;
+    color: #1a1a1a;
+    font-family: var(--sans);
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  #screen-auth .auth-btn-google svg {
+    flex-shrink: 0;
+  }
+  #screen-auth .auth-btn-google:active {
+    opacity: 0.92;
+  }
+  .auth-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--muted);
+    font-size: 14px;
+    margin: 8px 0;
+  }
+  .auth-divider::before,
+  .auth-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--line);
+  }
+  /* Десктоп: узкая мобильная колонка по центру */
+  @media (min-width: 600px) {
+    body { background: #ECECEC; }
+    .app-wrap {
+      align-items: center;
+      padding: 24px 16px 48px;
+      padding-top: max(24px, env(safe-area-inset-top));
+      padding-bottom: max(48px, env(safe-area-inset-bottom));
+      flex: 1;
+      min-height: 0;
+      max-height: 100%;
+    }
+    .phone {
+      width: 100%;
+      max-width: 390px;
+      height: calc(100dvh - 96px);
+      min-height: 720px;
+      max-height: 900px;
+      border-radius: 40px;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.12), 0 0 0 1px #EEEEEE;
+      flex: 0 0 auto;
+    }
+    .screen {
+      min-height: 0;
+    }
+  }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+
+  .h2-section { font-size: 22px; font-weight: 700; color: var(--accent); margin: 24px 0 12px; }
+  .h2-section:first-of-type { margin-top: 0; }
+
+  .nav { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px 8px; min-height: 48px; flex-shrink: 0; }
+  .nav-title { font-size: 17px; font-weight: 600; color: var(--accent); }
+  .nav-back, .nav-skip, .nav-ico { cursor: pointer; font-size: 20px; color: var(--accent); line-height: 1; padding: 4px; background: none; border: none; }
+  .nav-skip { font-size: 15px; font-weight: 400; color: var(--muted2); }
+
+  .content { flex: 1; min-height: 0; padding: 8px 20px 24px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+
+  .field { background: var(--bg); border-radius: 12px; padding: 12px 14px; margin-bottom: 10px; border: 1px solid var(--line); transition: opacity .3s; }
+  .field:focus-within { border-color: #BBBBBB; }
+  .field.dimmed { opacity: .4; pointer-events: none; }
+  .field-label { font-size: 12px; color: var(--muted); margin-bottom: 6px; font-weight: 500; }
+  .field-row { display: flex; align-items: center; gap: 8px; }
+  .field input, .field textarea {
+    flex: 1; border: none; outline: none; font-family: var(--sans); font-size: 16px; font-weight: 400; color: var(--text); background: transparent; width: 100%;
+  }
+  .field input::placeholder { color: var(--muted2); }
+  .field-unit { font-size: 13px; color: var(--muted2); white-space: nowrap; }
+  .field-row-2 { display: flex; gap: 10px; }
+  .field-row-2 .field { flex: 1; }
+
+  .dontknow-btn {
+    background: var(--dontknow-bg);
+    border: none;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+  .dontknow-btn:active { opacity: .92; }
+  .dontknow-btn.open .dontknow-arrow { transform: rotate(180deg); }
+  .dontknow-text { font-size: 15px; font-weight: 500; color: var(--muted); }
+  .dontknow-arrow { font-size: 14px; color: var(--muted2); transition: transform .2s; }
+
+  .dontknow-hint {
+    background: #F8FAFC; border-radius: 12px; padding: 0 14px;
+    margin-bottom: 10px; border: 1px solid #E8E8E8;
+    max-height: 0; overflow: hidden; opacity: 0;
+    transition: max-height .3s ease, opacity .25s ease, padding .3s ease;
+  }
+  .dontknow-hint.visible { max-height: 220px; opacity: 1; padding: 14px; }
+  .dontknow-hint-title { font-size: 14px; font-weight: 600; color: var(--accent); margin-bottom: 6px; }
+  .dontknow-hint-text { font-size: 13px; color: var(--muted); line-height: 1.55; }
+
+  .toggle-row-plain { display: flex; align-items: center; justify-content: space-between; padding: 12px 0 20px; border: none; background: transparent; }
+  .toggle-label { font-size: 16px; font-weight: 600; color: var(--accent); }
+  .toggle-switch { width: 51px; height: 31px; border-radius: 16px; background: #E5E5E5; position: relative; cursor: pointer; transition: background .2s; flex-shrink: 0; }
+  .toggle-switch.on { background: #34C759; }
+  .toggle-switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 27px; height: 27px; border-radius: 50%; background: white; transition: transform .2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+  .toggle-switch.on::after { transform: translateX(20px); }
+
+  .seg { display: flex; background: var(--bg); border-radius: 12px; padding: 4px; margin-bottom: 10px; border: 1px solid var(--line); gap: 4px; }
+  .seg-btn { flex: 1; padding: 10px; text-align: center; font-size: 14px; font-weight: 500; color: var(--muted); border-radius: 8px; cursor: pointer; border: none; background: transparent; font-family: var(--sans); }
+  .seg-btn.active { background: var(--accent); color: #fff; }
+
+  .btn-primary {
+    background: var(--accent); color: #fff; border: none; border-radius: 16px;
+    height: 56px; width: 100%; font-family: var(--sans); font-size: 16px; font-weight: 600;
+    cursor: pointer; margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .btn-primary:active { opacity: .88; }
+  .btn-primary--split { justify-content: space-between; padding: 0 20px; }
+  .btn-secondary { background: var(--bg); color: var(--accent); border: 1px solid var(--line); border-radius: 16px; height: 52px; width: 100%; font-size: 15px; font-weight: 500; cursor: pointer; margin-top: 8px; font-family: var(--sans); }
+  .disclaimer { font-size: 11px; color: var(--muted2); text-align: center; padding: 16px 8px 0; }
+
+  .inline-error { font-size: 13px; color: #DC2626; margin: -8px 0 12px; display: none; }
+  .inline-error.visible { display: block; }
+  .app-init-error {
+    display: none;
+    position: absolute;
+    inset: 0;
+    z-index: 500;
+    background: var(--bg);
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    text-align: center;
+    font-size: 16px;
+    color: #333;
+    line-height: 1.5;
+    font-family: var(--sans);
+  }
+  .app-init-error.visible { display: flex; }
+  .field.field--error { border-color: #DC2626; }
+  #screen-profile.mode-edit .profile-nav--onboarding {
+    display: none !important;
+  }
+  #screen-profile.mode-onboarding .profile-nav--edit {
+    display: none !important;
+  }
+  #screen-profile .profile-nav--edit {
+    display: flex;
+  }
+  #profile-cta-btn.profile-cta--hidden {
+    display: none !important;
+  }
+
+  #screen-main .main-wrap {
+    flex: 1;
+    min-height: 0;
+    padding: var(--main-pad-top) var(--main-pad-x) 20px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--main-block-gap);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .main-header { display: flex; flex-direction: column; gap: 8px; }
+  .main-header--hero {
+    align-items: center;
+    text-align: center;
+    margin-top: 20px;
+  }
+  .main-header--hero .main-greeting {
+    width: 100%;
+    text-align: center;
+  }
+  .main-header--hero .main-lead {
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    max-width: 36em;
+  }
+  .main-greeting {
+    font-size: var(--main-greeting-size);
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1.12;
+    letter-spacing: -0.03em;
+  }
+  .main-lead {
+    font-size: var(--main-lead-size);
+    font-weight: 400;
+    color: var(--main-lead-color);
+    line-height: 1.5;
+    max-width: 36em;
+  }
+  #main-hero-animation {
+    max-width: 244px;
+    width: 100%;
+    margin: -24px auto 30px;
+
+    flex-shrink: 0;
+  }
+  #screen-main .btn-camera-wide {
+    margin-top: -10px;
+  }
+  #main-edu-wrap {
+    width: 100%;
+    max-width: 414px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0;
+    box-sizing: border-box;
+    overflow: visible;
+  }
+  #main-edu-iframe {
+    width: 100%;
+    max-width: 100%;
+    border: none;
+    display: block;
+    vertical-align: top;
+  }
+  .edu-card {
+    background: #eef2ff;
+    border-radius: 16px;
+    padding: 16px;
+    box-sizing: border-box;
+  }
+  .edu-card-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 8px;
+    line-height: 1.3;
+  }
+  .edu-card-text {
+    font-size: 14px;
+    font-weight: 400;
+    color: #333;
+    line-height: 1.5;
+    margin: 0;
+  }
+  .btn-camera-wide {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 16px;
+    height: 56px;
+    width: 100%;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-family: var(--sans);
+    flex-shrink: 0;
+  }
+  .btn-camera-wide:active { opacity: .92; transform: scale(0.998); }
+  .btn-camera-wide .cam-svg { flex-shrink: 0; display: block; }
+
+  .lipid-profile-card {
+    background: #C7E1B2;
+    border-radius: 16px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  .lipid-profile-info { flex: 1; z-index: 1; }
+  .lipid-profile-name { font-size: 20px; font-weight: 700; color: #1a1a1a; margin-bottom: 6px; }
+  .lipid-profile-meta { font-size: 16px; color: #1a1a1a; opacity: 0.8; }
+  .lipid-profile-emoji {
+    position: absolute;
+    right: -10px;
+    bottom: -44px;
+    width: 200px;
+    height: 200px;
+    object-fit: contain;
+  }
+
+  .main-lipids { display: flex; flex-direction: column; gap: 12px; flex-shrink: 0; }
+  .lipid-section-title {
+    font-size: var(--main-section-size);
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    margin: 0;
+  }
+  .chol-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--chol-grid-gap);
+  }
+  .chol-mini {
+    border-radius: var(--chol-card-radius);
+    padding: 14px 14px 12px;
+    min-height: 104px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .chol-mini--bad { background: #FFF0F0; }
+  .chol-mini--ok { background: #F0FFF4; }
+  .chol-mini--mid { background: #FFFBF0; }
+  .chol-mini--empty { background: #FAFAFA; border: 1px dashed #E5E5E5; }
+  .chol-mini > div:first-child { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .chol-mini-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--chol-name-color);
+    line-height: 1.3;
+    max-width: 56%;
+  }
+  .chol-mini-val {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+    flex-shrink: 0;
+    letter-spacing: -0.02em;
+  }
+  .chol-mini-foot {
+    font-size: var(--chol-foot-size);
+    color: var(--muted);
+    margin-top: 10px;
+    line-height: 1.35;
+  }
+  .chol-mini-foot .st { font-weight: 600; }
+  .chol-mini--ok .st { color: #16A34A; }
+  .chol-mini--mid .st { color: #EA580C; }
+  .chol-mini--bad .st { color: #DC2626; }
+
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  .skeleton {
+    background: linear-gradient(90deg, #ececec 25%, #dedede 50%, #ececec 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite;
+    border-radius: 12px;
+  }
+
+  .main-lipids-stack {
+    position: relative;
+    min-height: 228px;
+  }
+  #main-lipids-skeleton {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    z-index: 2;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+  }
+  .main-lipids-stack.is-loading #main-lipids-skeleton {
+    opacity: 1;
+    visibility: visible;
+  }
+  .main-lipids-stack.is-loading #main-lipids-real {
+    opacity: 0;
+  }
+  #main-lipids-real {
+    transition: opacity 0.3s ease;
+  }
+  .skeleton-lipid-grid .skeleton-sk-card {
+    min-height: 104px;
+    border-radius: var(--chol-card-radius);
+  }
+
+  .history-content.is-history-loading {
+    position: relative;
+    min-height: 420px;
+  }
+  .history-skeleton-wrap {
+    display: none;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+    transition: opacity 0.3s ease;
+  }
+  .history-content.is-history-loading .history-skeleton-wrap {
+    display: flex;
+  }
+  .history-content.is-history-loading .history-skeleton-wrap.is-fading {
+    opacity: 0;
+  }
+  .history-content.is-history-loading #history-summary-card,
+  .history-content.is-history-loading #history-describe-btn,
+  .history-content.is-history-loading #history-empty,
+  .history-content.is-history-loading #history-list {
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .history-skel-item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    min-height: 132px;
+    padding: 16px 12px;
+    border-radius: 16px;
+    box-sizing: border-box;
+    width: 100%;
+    background: #f0f0f0;
+  }
+  .history-skel-thumb {
+    width: 100px;
+    height: 100px;
+    min-width: 100px;
+    border-radius: 22.87px;
+    flex-shrink: 0;
+  }
+  .history-skel-text {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    justify-content: center;
+  }
+  .history-skel-text .sk-line {
+    height: 14px;
+    border-radius: 8px;
+  }
+  .history-skel-text .sk-line--long { width: 92%; }
+  .history-skel-text .sk-line--short { width: 58%; }
+
+  .result-screen-inner {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding-bottom: max(24px, env(safe-area-inset-bottom));
+    background: var(--bg);
+    position: relative;
+  }
+  .result-photo {
+    width: auto;
+    margin: 0 var(--main-pad-x);
+    height: 240px;
+    background: #F0F0F0;
+    overflow: hidden;
+    position: relative;
+    border-radius: var(--chol-card-radius);
+  }
+  .result-photo-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: min(32px, 8%);
+    box-sizing: border-box;
+  }
+  .result-photo-placeholder-img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+  }
+  .result-photo-img { width: 100%; height: 100%; object-fit: cover; display: none; }
+  .result-gpt-line {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px var(--main-pad-x);
+    font-size: 12px;
+    color: var(--muted2);
+    background: #FAFAFA;
+    border-bottom: 1px solid #F0F0F0;
+  }
+  .result-body { padding: 20px var(--main-pad-x) 8px; }
+  .result-dish-title { font-size: 26px; font-weight: 700; color: var(--accent); line-height: 1.2; margin-bottom: 12px; }
+  .result-summary-text { font-size: 15px; color: #333; line-height: 1.55; margin-bottom: 16px; }
+  .result-score-row { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .result-score-row.hidden { display: none !important; }
+  .result-score-star { font-size: 28px; line-height: 1; color: var(--star-green); }
+  .result-score-big { font-size: 28px; font-weight: 600; color: #666; }
+  .result-hr { height: 1px; background: var(--line); margin: 0 0 16px; }
+  .result-block { margin-bottom: 20px; }
+  .result-block-title { font-size: 16px; font-weight: 700; color: var(--accent); margin-bottom: 8px; }
+  .result-block-text { font-size: 15px; color: #333; line-height: 1.55; }
+  .result-actions { padding: 0 var(--main-pad-x) 24px; display: flex; flex-direction: column; gap: 8px; }
+
+  .result-loader-overlay {
+    position: absolute; inset: 0; z-index: 20; background: rgba(255,255,255,0.92);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
+  }
+  .result-loader-spinner {
+    width: 36px; height: 36px; border-radius: 50%; border: 3px solid #EEE; border-top-color: var(--accent);
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .result-loader-text { font-size: 15px; color: var(--muted); font-weight: 500; }
+
+  .factor-row { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 1px solid #F0F0F0; }
+  .factor-row:last-child { border-bottom: none; }
+  .factor-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 6px; }
+  .factor-dot.bad { background: #EF4444; }
+  .factor-dot.ok { background: var(--star-green); }
+  .factor-dot.mid { background: #F59E0B; }
+  .factor-name { font-size: 14px; font-weight: 500; color: var(--accent); flex: 1; }
+  .factor-value { font-size: 13px; color: var(--muted); }
+
+  /* История: карточки на всю ширину контента (как блоки на главной) */
+  #screen-history .content.history-content {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 0 var(--main-pad-x) 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+    box-sizing: border-box;
+  }
+  .nav.history-top-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    padding: 12px 16px;
+    min-height: 54px;
+    background: var(--bg);
+    flex-shrink: 0;
+  }
+  .history-top-nav .history-nav-side {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    color: #1C1B1F;
+  }
+  .history-top-nav .history-nav-title {
+    flex: 1;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 24px;
+    color: #1C1B1F;
+    font-family: var(--sans);
+  }
+
+  .history-summary {
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 132px;
+    background: var(--card-blue);
+    border-radius: 16px;
+    padding: 14px 16px 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .history-summary-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .history-summary-label {
+    flex: 1;
+    min-width: 0;
+    font-size: 15.24px;
+    font-weight: 400;
+    line-height: 1.25;
+    color: #000000;
+    font-family: var(--sans);
+  }
+  .history-summary-num {
+    flex-shrink: 0;
+    font-size: 50.75px;
+    font-weight: 700;
+    line-height: 0.95;
+    color: #000000;
+    font-family: var(--sans);
+    letter-spacing: -0.03em;
+  }
+  .history-summary-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 8px;
+    padding-right: 2px;
+  }
+  .history-summary-motiv {
+    margin: 0;
+    flex: 1;
+    min-width: 0;
+    font-size: 11px;
+    font-weight: 400;
+    line-height: 1.35;
+    color: #000000;
+    font-family: var(--sans);
+    white-space: pre-line;
+  }
+  .history-summary-star {
+    font-size: 15px;
+    line-height: 1;
+    color: #000000;
+    flex-shrink: 0;
+  }
+
+  .history-describe-btn {
+    width: 100%;
+    margin-top: 12px;
+    padding: 14px 16px;
+    border: none;
+    border-radius: 16px;
+    background: var(--card-blue);
+    font-family: var(--sans);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--accent);
+    cursor: pointer;
+    box-sizing: border-box;
+  }
+  .history-describe-btn:active {
+    opacity: 0.92;
+  }
+
+  .describe-food-overlay {
+    display: none;
+    position: absolute;
+    inset: 0;
+    z-index: 300;
+    background: rgba(0, 0, 0, 0.45);
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .describe-food-overlay.visible {
+    display: flex;
+  }
+  .describe-food-sheet {
+    width: 100%;
+    background: var(--bg);
+    border-radius: 24px 24px 0 0;
+    padding: 12px 20px max(28px, env(safe-area-inset-bottom));
+    max-height: 85%;
+    animation: sheetUp 0.28s ease;
+    box-sizing: border-box;
+  }
+  .describe-food-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 14px;
+    font-family: var(--sans);
+  }
+  .describe-food-textarea {
+    width: 100%;
+    min-height: 160px;
+    padding: 14px;
+    margin-bottom: 16px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.45;
+    color: var(--text);
+    resize: vertical;
+    box-sizing: border-box;
+  }
+  .describe-food-textarea:focus {
+    outline: none;
+    border-color: #bbb;
+  }
+
+  #history-list {
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .history-item {
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 132px;
+    border-radius: 16px;
+    padding: 16px 12px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+  .history-item:active { opacity: 0.94; }
+  .history-item--green { background: var(--history-green-card); }
+  .history-item--yellow { background: var(--history-yellow); }
+  .history-item--red { background: var(--bad-bg); }
+  /* Контейнер превью — фиксированный квадрат; картинка не может раздуть карточку */
+  .history-thumb {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    min-width: 100px;
+    max-width: 100px;
+    min-height: 100px;
+    max-height: 100px;
+    border-radius: 22.87px;
+    background: #EEE;
+    flex-shrink: 0;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+  }
+  .history-thumb img.history-thumb-img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+  .history-thumb.history-thumb--no-photo {
+    background: none;
+  }
+  .history-thumb-placeholder-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    padding: 0;
+    box-sizing: border-box;
+    display: block;
+  }
+  .history-thumb-placeholder-svg {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+    display: block;
+    box-sizing: border-box;
+    flex-shrink: 0;
+    align-self: stretch;
+    min-width: 0;
+    min-height: 0;
+  }
+  .history-thumb.is-loading {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite;
+  }
+  .history-thumb.is-loading img.history-thumb-img {
+    opacity: 0;
+  }
+  .history-thumb img.history-thumb-img {
+    transition: opacity 0.3s ease;
+  }
+  .history-info {
+    flex: 1;
+    min-width: 0;
+    min-height: 100px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding-top: 0;
+  }
+  .history-date {
+    font-size: 12.2px;
+    font-weight: 400;
+    line-height: 1.2;
+    color: #9B9B9B;
+    font-family: var(--sans);
+    margin-bottom: 6px;
+  }
+  .history-name {
+    font-size: 15.24px;
+    font-weight: 600;
+    line-height: 1.3;
+    color: #000000;
+    font-family: var(--sans);
+    flex: 1;
+    min-height: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .history-rating {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: auto;
+    padding-top: 6px;
+    font-size: 12.2px;
+    font-weight: 400;
+    line-height: 1.2;
+    color: #9B9B9B;
+    font-family: var(--sans);
+  }
+  .history-star {
+    display: inline-block;
+    width: 15px;
+    height: 14px;
+    line-height: 14px;
+    font-size: 13px;
+    text-align: center;
+  }
+  .history-star--g { color: #00AD30; }
+  .history-star--y { color: #FF6C02; }
+  .history-star--b { color: #5B94FF; }
+  .history-star--r { color: #E53935; }
+  .history-score-line { font-size: 13px; color: var(--muted); margin-top: 6px; display: flex; align-items: center; gap: 4px; }
+  .history-empty { text-align: center; padding: 40px 16px; color: var(--muted); font-size: 15px; line-height: 1.5; }
+
+  .bottom-nav {
+    display: flex;
+    background: var(--bg);
+    border-top: 1px solid #F0F0F0;
+    padding: 12px 0 calc(20px + env(safe-area-inset-bottom));
+    justify-content: space-around;
+    align-items: center;
+    flex-shrink: 0;
+    margin-top: auto;
+  }
+  @media (min-width: 600px) {
+    .bottom-nav { padding-bottom: 20px; }
+  }
+  .bnav-item { cursor: pointer; padding: 8px 16px; border: none; background: none; font-family: var(--sans); }
+  .bnav-item .bnav-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #BFBFBF;
+    transition: color 0.2s;
+    line-height: 0;
+  }
+  .bnav-item .bnav-icon .bnav-svg { display: block; width: 24px; height: 24px; }
+  .bnav-item.active .bnav-icon { color: var(--accent); }
+
+  .purchase-overlay {
+    display: none; position: absolute; inset: 0; z-index: 300; background: rgba(0,0,0,0.45);
+    align-items: flex-end; justify-content: center;
+  }
+  .purchase-overlay.visible { display: flex; }
+  .purchase-sheet {
+    width: 100%; background: var(--bg); border-radius: 24px 24px 0 0; padding: 12px 20px 28px;
+    max-height: 85%; animation: sheetUp 0.28s ease;
+  }
+  @keyframes sheetUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  .purchase-grab { width: 40px; height: 4px; background: #E0E0E0; border-radius: 2px; margin: 0 auto 16px; }
+  .purchase-icon-wrap { width: 56px; height: 56px; border-radius: 14px; background: #F5F5F5; margin: 0 auto 14px; display: flex; align-items: center; justify-content: center; }
+  .purchase-icon-inner { width: 36px; height: 36px; border-radius: 50%; background: #22C55E; color: #fff; font-size: 20px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .purchase-title { font-size: 22px; font-weight: 700; text-align: center; color: var(--accent); margin-bottom: 12px; }
+  .purchase-text { font-size: 15px; color: #333; line-height: 1.5; text-align: center; margin-bottom: 20px; }
+  .units-mini { margin: 8px 0 4px; font-size: 12px; color: var(--muted2); }
+
+  .profile-lipids-link-wrap {
+    margin-top: 28px;
+    padding-bottom: 4px;
+    text-align: center;
+  }
+  .profile-lipids-link {
+    background: none;
+    border: none;
+    padding: 10px 12px;
+    margin: 0;
+    font-family: var(--sans);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+  }
+  #screen-profile.mode-onboarding .profile-lipids-link-wrap {
+    display: none;
+  }
+  #screen-profile.mode-onboarding .profile-logout-wrap {
+    display: none;
+  }
+  .profile-logout-wrap {
+    margin-top: 8px;
+    padding-bottom: 8px;
+  }
+  #profile-logout-btn.btn-primary {
+    background: #1C1B1F;
+    color: #fff;
+    margin-top: 16px;
+  }
+  #profile-logout-btn.btn-primary:active {
+    opacity: 0.88;
+  }
+
+  @media (max-height: 700px) {
+    #main-hero-animation {
+      max-height: 35vh;
+    }
+    #main-hero-animation img {
+      max-height: 35vh;
+      width: auto;
+    }
+  }
+
+</style>
+</head>
+<body>
+
+<input type="file" id="food-camera-input" accept="image/*" capture="environment" style="display:none" />
+
+<div class="app-wrap">
+<div class="phone" style="position:relative;">
+  <div id="app-init-error" class="app-init-error" role="alert">Не удалось загрузить настройки приложения</div>
+
+  <div class="screen active" id="screen-auth">
+    <div class="auth-screen-inner">
+      <div class="auth-status" id="auth-status" role="status" aria-live="polite"></div>
+      <button type="button" class="auth-btn-google" id="auth-google" aria-label="Continue with Google">
+        <svg width="20" height="20" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/>
+          <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/>
+          <path fill="#FBBC05" d="M3.964 10.712c-.18-.54-.282-1.117-.282-1.712s.102-1.172.282-1.712V4.956H.957C.348 6.175 0 7.55 0 9s.348 2.825.957 4.044l3.007-2.332z"/>
+          <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.956L3.964 7.288C4.672 5.163 6.656 3.58 9 3.58z"/>
+        </svg>
+        Continue with Google
+      </button>
+      <div class="auth-divider">
+        <span>или</span>
+      </div>
+      <div class="auth-field-wrap">
+        <input
+          type="email"
+          id="auth-email"
+          class="auth-input"
+          placeholder="E-mail"
+          autocomplete="email"
+          inputmode="email"
+        />
+        <span class="auth-input-icon" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 6h16v12H4V6zm0 0l8 6 8-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+      </div>
+      <button type="button" class="auth-btn" id="auth-submit">Войти</button>
+    </div>
+  </div>
+
+  <div class="screen mode-onboarding" id="screen-profile">
+    <div class="nav profile-nav--onboarding">
+      <div class="nav-title" id="profile-nav-title">Профиль</div>
+      <div class="nav-skip" onclick="skipOnboardingToMain()">Пропустить</div>
+    </div>
+    <div class="nav history-top-nav profile-nav--edit" aria-hidden="true">
+      <button type="button" class="history-nav-side" onclick="goTo('screen-main')" aria-label="Назад" title="Назад">
+        <svg width="10" height="17" viewBox="0 0 10 17" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M8.5 15.5L1.5 8.5L8.5 1.5" stroke="#1C1B1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="history-nav-title">Профиль</div>
+      <button type="button" class="history-nav-side" onclick="showPurchaseModal()" aria-label="Настройки">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M12 15a3 3 0 100-6 3 3 0 000 6z" stroke="#1C1B1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" stroke="#1C1B1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+    <div class="content">
+      <div class="h2-section">Личные данные</div>
+      <div class="field" id="field-wrap-email">
+        <div class="field-label">E-mail <span style="color:#DC2626">*</span></div>
+        <div class="field-row">
+          <input type="email" id="input-email" placeholder="you@example.com" required autocomplete="email" inputmode="email" aria-required="true" />
+        </div>
+      </div>
+      <div class="field" id="field-wrap-name">
+        <div class="field-label">Имя <span style="color:#DC2626">*</span></div>
+        <div class="field-row">
+          <input type="text" id="input-name" placeholder="Имя" required autocomplete="name" aria-required="true" oninput="updateName(this.value)" />
+        </div>
+      </div>
+      <div class="field-row-2">
+        <div class="field">
+          <div class="field-label">Рост</div>
+          <div class="field-row">
+            <input type="number" id="input-height" placeholder="178" />
+            <span class="field-unit">см</span>
+          </div>
+        </div>
+        <div class="field">
+          <div class="field-label">Вес</div>
+          <div class="field-row">
+            <input type="number" id="input-weight" placeholder="80" />
+            <span class="field-unit">кг</span>
+          </div>
+        </div>
+      </div>
+      <div class="field-row-2">
+        <div class="field">
+          <div class="field-label">Возраст</div>
+          <div class="field-row">
+            <input type="number" id="input-age" placeholder="38" />
+            <span class="field-unit">лет</span>
+          </div>
+        </div>
+        <div>
+          <div class="field-label" style="margin-bottom:6px;">Пол</div>
+          <div class="seg" id="seg-gender">
+            <div class="seg-btn active" onclick="setSeg('seg-gender',this)">Мужской</div>
+            <div class="seg-btn" onclick="setSeg('seg-gender',this)">Женский</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="h2-section">Твой липидный профиль</div>
+      <div class="field" id="f-total">
+        <div class="field-label">Общий холестерин</div>
+        <div class="field-row">
+          <input type="number" id="v-total" placeholder="5.2" />
+          <span class="field-unit">ммоль/л</span>
+        </div>
+      </div>
+      <div class="field" id="f-ldl">
+        <div class="field-label">Липопротеины низкой плотности (ЛПНП, «плохой» холестерин)</div>
+        <div class="field-row">
+          <input type="number" id="v-ldl" placeholder="3.3" />
+          <span class="field-unit">ммоль/л</span>
+        </div>
+      </div>
+      <div class="field" id="f-hdl">
+        <div class="field-label">Липопротеины высокой плотности (ЛПВП, «хороший» холестерин)</div>
+        <div class="field-row">
+          <input type="number" id="v-hdl" placeholder="1.3" />
+          <span class="field-unit">ммоль/л</span>
+        </div>
+      </div>
+      <div class="field" id="f-trig">
+        <div class="field-label">Триглицериды</div>
+        <div class="field-row">
+          <input type="number" id="v-trig" placeholder="1.5" />
+          <span class="field-unit">ммоль/л</span>
+        </div>
+      </div>
+
+      <button type="button" class="dontknow-btn" id="dontknow-btn" onclick="toggleDontKnow()">
+        <span class="dontknow-text">Я не знаю свои показатели</span>
+        <span class="dontknow-arrow">▾</span>
+      </button>
+
+      <div class="dontknow-hint" id="dontknow-hint">
+        <div class="dontknow-hint-title">Всё равно начнём!</div>
+        <div class="dontknow-hint-text">
+          Мы подставили <b>средние показатели</b> — AI даст общие рекомендации. После анализов обнови цифры в профиле.
+        </div>
+      </div>
+
+      <div class="toggle-row-plain">
+        <span class="toggle-label">Принимаю статины</span>
+        <div class="toggle-switch" id="toggle-statins" onclick="toggleSwitch(this)"></div>
+      </div>
+
+      <div class="field-label units-mini">Единицы измерения анализов</div>
+      <div class="seg" id="seg-units">
+        <div class="seg-btn active" onclick="setSeg('seg-units',this)">ммоль/л</div>
+        <div class="seg-btn" onclick="setSeg('seg-units',this)">мг/дл</div>
+      </div>
+
+      <div class="inline-error" id="profile-validate-error" role="alert">Укажите e-mail и имя.</div>
+      <button type="button" class="btn-primary" id="profile-cta-btn" onclick="saveProfileAndStart()">Продолжить</button>
+      <div class="profile-lipids-link-wrap">
+        <button type="button" class="profile-lipids-link" onclick="goTo('screen-lipids')">Липидный профиль</button>
+      </div>
+      <div class="profile-logout-wrap">
+        <button type="button" class="btn-primary" id="profile-logout-btn" onclick="logoutFromApp()">Выйти</button>
+      </div>
+    </div>
+    <div class="bottom-nav">
+      <button type="button" class="bnav-item" onclick="navTo('screen-main',this)" aria-label="Главная">
+        <span class="bnav-icon" aria-hidden="true"><svg class="bnav-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3.5 8.5C3.5 9.05 3.95 9.5 4.5 9.5C5.05 9.5 5.5 9.05 5.5 8.5V6.5H7.5C8.05 6.5 8.5 6.05 8.5 5.5C8.5 4.95 8.05 4.5 7.5 4.5H5.5V2.5C5.5 1.95 5.05 1.5 4.5 1.5C3.95 1.5 3.5 1.95 3.5 2.5V4.5H1.5C0.95 4.5 0.5 4.95 0.5 5.5C0.5 6.05 0.95 6.5 1.5 6.5H3.5V8.5Z" fill="currentColor"/><path d="M13.5 17.5C15.1569 17.5 16.5 16.1569 16.5 14.5C16.5 12.8431 15.1569 11.5 13.5 11.5C11.8431 11.5 10.5 12.8431 10.5 14.5C10.5 16.1569 11.8431 17.5 13.5 17.5Z" fill="currentColor"/><path d="M21.5 6.5H18.33L17.09 5.15C16.72 4.74 16.18 4.5 15.62 4.5H9.22C9.39 4.8 9.5 5.13 9.5 5.5C9.5 6.6 8.6 7.5 7.5 7.5H6.5V8.5C6.5 9.6 5.6 10.5 4.5 10.5C4.13 10.5 3.8 10.39 3.5 10.22V20.5C3.5 21.6 4.4 22.5 5.5 22.5H21.5C22.6 22.5 23.5 21.6 23.5 20.5V8.5C23.5 7.4 22.6 6.5 21.5 6.5ZM13.5 19.5C10.74 19.5 8.5 17.26 8.5 14.5C8.5 11.74 10.74 9.5 13.5 9.5C16.26 9.5 18.5 11.74 18.5 14.5C18.5 17.26 16.26 19.5 13.5 19.5Z" fill="currentColor"/></svg></span>
+      </button>
+      <button type="button" class="bnav-item" onclick="navTo('screen-history',this)" aria-label="История">
+        <span class="bnav-icon" aria-hidden="true"><svg class="bnav-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16 6V12C16 13.1 16.9 14 18 14H19V21C19 21.55 19.45 22 20 22C20.55 22 21 21.55 21 21V3.13C21 2.48 20.39 2 19.76 2.15C17.6 2.68 16 4.51 16 6ZM11 9H9V3C9 2.45 8.55 2 8 2C7.45 2 7 2.45 7 3V9H5V3C5 2.45 4.55 2 4 2C3.45 2 3 2.45 3 3V9C3 11.21 4.79 13 7 13V21C7 21.55 7.45 22 8 22C8.55 22 9 21.55 9 21V13C11.21 13 13 11.21 13 9V3C13 2.45 12.55 2 12 2C11.45 2 11 2.45 11 3V9Z" fill="currentColor"/></svg></span>
+      </button>
+      <button type="button" class="bnav-item active" onclick="navTo('screen-profile',this)" aria-label="Профиль">
+        <span class="bnav-icon" aria-hidden="true"><svg class="bnav-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11.9892 6C13.0938 6 13.9892 5.10457 13.9892 4C13.9892 2.89543 13.0938 2 11.9892 2C10.8847 2 9.98924 2.89543 9.98924 4C9.98924 5.10457 10.8847 6 11.9892 6Z" fill="currentColor"/><path d="M15.8792 8.11C15.4892 7.72 14.8192 7 13.5192 7C13.3092 7 12.0992 7 10.9792 7C8.51924 6.99 6.46924 5.2 6.05924 2.85C5.97924 2.36 5.56924 2 5.07924 2C4.46924 2 3.98924 2.54 4.07924 3.14C4.51924 5.8 6.45924 7.95 8.98924 8.71V21C8.98924 21.55 9.43924 22 9.98924 22C10.5392 22 10.9892 21.55 10.9892 21V16H12.9892V21C12.9892 21.55 13.4392 22 13.9892 22C14.5392 22 14.9892 21.55 14.9892 21V10.05L18.2292 13.29C18.6192 13.68 19.2492 13.68 19.6392 13.29C20.0292 12.9 20.0292 12.27 19.6392 11.88L15.8792 8.11Z" fill="currentColor"/></svg></span>
+      </button>
+    </div>
+  </div>
+
+  <div class="screen" id="screen-main">
+    <div class="main-wrap">
+      <div class="main-header main-header--hero">
+        <div class="main-greeting" id="main-greeting-line">Привет!</div>
+        <p class="main-lead">Что ешь сегодня? Сфотографируй еду — узнай подходит ли она тебе.</p>
+      </div>
+      <div id="main-hero-animation">
+        <img src="main_animation.svg" id="main-anim-img" alt="" style="width:100%;height:auto;display:block;" />
+      </div>
+      <button type="button" class="btn-camera-wide" onclick="openFoodCamera()" aria-label="Сделать фото еды">
+        <svg class="cam-svg" width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2v11z" stroke="#fff" stroke-width="2" stroke-linejoin="round"/>
+          <circle cx="12" cy="13" r="4" stroke="#fff" stroke-width="2"/>
+        </svg>
+        Фото
+      </button>
+      <div id="main-edu-wrap">
+        <iframe
+          src="cards.html"
+          id="main-edu-iframe"
+          scrolling="no"
+          frameborder="0"
+        ></iframe>
+      </div>
+    </div>
+    <div class="bottom-nav">
+      <button type="button" class="bnav-item active" onclick="navTo('screen-main',this)" aria-label="Главная">
+        <span class="bnav-icon" aria-hidden="true"><svg class="bnav-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3.5 8.5C3.5 9.05 3.95 9.5 4.5 9.5C5.05 9.5 5.5 9.05 5.5 8.5V6.5H7.5C8.05 6.5 8.5 6.05 8.5 5.5C8.5 4.95 8.05 4.5 7.5 4.5H5.5V2.5C5.5 1.95 5.05 1.5 4.5 1.5C3.95 1.5 3.5 1.95 3.5 2.5V4.5H1.5C0.95 4.5 0.5 4.95 0.5 5.5C0.5 6.05 0.95 6.5 1.5 6.5H3.5V8.5Z" fill="currentColor"/><path d="M13.5 17.5C15.1569 17.5 16.5 16.1569 16.5 14.5C16.5 12.8431 15.1569 11.5 13.5 11.5C11.8431 11.5 10.5 12.8431 10.5 14.5C10.5 16.1569 11.8431 17.5 13.5 17.5Z" fill="currentColor"/><path d="M21.5 6.5H18.33L17.09 5.15C16.72 4.74 16.18 4.5 15.62 4.5H9.22C9.39 4.8 9.5 5.13 9.5 5.5C9.5 6.6 8.6 7.5 7.5 7.5H6.5V8.5C6.5 9.6 5.6 10.5 4.5 10.5C4.13 10.5 3.8 10.39 3.5 10.22V20.5C3.5 21.6 4.4 22.5 5.5 22.5H21.5C22.6 22.5 23.5 21.6 23.5 20.5V8.5C23.5 7.4 22.6 6.5 21.5 6.5ZM13.5 19.5C10.74 19.5 8.5 17.26 8.5 14.5C8.5 11.74 10.74 9.5 13.5 9.5C16.26 9.5 18.5 11.74 18.5 14.5C18.5 17.26 16.26 19.5 13.5 19.5Z" fill="currentColor"/></svg></span>
+      </button>
+      <button type="button" class="bnav-item" onclick="navTo('screen-history',this)" aria-label="История">
+        <span class="bnav-icon" aria-hidden="true"><svg class="bnav-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16 6V12C16 13.1 16.9 14 18 14H19V21C19 21.55 19.45 22 20 22C20.55 22 21 21.55 21 21V3.13C21 2.48 20.39 2 19.76 2.15C17.6 2.68 16 4.51 16 6ZM11 9H9V3C9 2.45 8.55 2 8 2C7.45 2 7 2.45 7 3V9H5V3C5 2.45 4.55 2 4 2C3.45 2 3 2.45 3 3V9C3 11.21 4.79 13 7 13V21C7 21.55 7.45 22 8 22C8.55 22 9 21.55 9 21V13C11.21 13 13 11.21 13 9V3C13 2.45 12.55 2 12 2C11.45 2 11 2.45 11 3V9Z" fill="currentColor"/></svg></span>
+      </button>
+      <button type="button" class="bnav-item" onclick="navTo('screen-profile',this)" aria-label="Профиль">
+        <span class="bnav-icon" aria-hidden="true"><svg class="bnav-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11.9892 6C13.0938 6 13.9892 5.10457 13.9892 4C13.9892 2.89543 13.0938 2 11.9892 2C10.8847 2 9.98924 2.89543 9.98924 4C9.98924 5.10457 10.8847 6 11.9892 6Z" fill="currentColor"/><path d="M15.8792 8.11C15.4892 7.72 14.8192 7 13.5192 7C13.3092 7 12.0992 7 10.9792 7C8.51924 6.99 6.46924 5.2 6.05924 2.85C5.97924 2.36 5.56924 2 5.07924 2C4.46924 2 3.98924 2.54 4.07924 3.14C4.51924 5.8 6.45924 7.95 8.98924 8.71V21C8.98924 21.55 9.43924 22 9.98924 22C10.5392 22 10.9892 21.55 10.9892 21V16H12.9892V21C12.9892 21.55 13.4392 22 13.9892 22C14.5392 22 14.9892 21.55 14.9892 21V10.05L18.2292 13.29C18.6192 13.68 19.2492 13.68 19.6392 13.29C20.0292 12.9 20.0292 12.27 19.6392 11.88L15.8792 8.11Z" fill="currentColor"/></svg></span>
+      </button>
+    </div>
+  </div>
+
+  <div class="screen" id="screen-lipids">
+    <div class="nav history-top-nav">
+      <button type="button" class="history-nav-side" onclick="goTo('screen-main')" aria-label="Назад" title="Назад">
+        <svg width="10" height="17" viewBox="0 0 10 17" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M8.5 15.5L1.5 8.5L8.5 1.5" stroke="#1C1B1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="history-nav-title">Липидный профиль</div>
+      <span class="history-nav-side" aria-hidden="true"></span>
+    </div>
+    <div class="content">
+      <div class="lipid-profile-card" id="lipid-profile-card">
+        <div class="lipid-profile-info">
+          <div class="lipid-profile-name" id="lipid-card-name">—</div>
+          <div class="lipid-profile-meta" id="lipid-card-meta">—</div>
+        </div>
+        <img src="emoji_animated.svg" class="lipid-profile-emoji" alt="" />
+      </div>
+      <section class="main-lipids" aria-labelledby="lipid-heading">
+        <h2 class="lipid-section-title" id="lipid-heading">Твой липидный профиль</h2>
+        <div class="main-lipids-stack" id="main-lipids-stack">
+        <div id="main-lipids-skeleton" aria-hidden="true">
+          <div class="chol-grid skeleton-lipid-grid">
+            <div class="skeleton skeleton-sk-card"></div>
+            <div class="skeleton skeleton-sk-card"></div>
+            <div class="skeleton skeleton-sk-card"></div>
+            <div class="skeleton skeleton-sk-card"></div>
+          </div>
+        </div>
+        <div id="main-lipids-real">
+        <div class="chol-grid" id="main-chol-grid">
+        <div class="chol-mini chol-mini--empty" id="main-chol-cell-total">
+          <div>
+            <div class="chol-mini-name">Общий холестерин</div>
+            <div class="chol-mini-val" id="main-chol-total-num">—</div>
+          </div>
+          <div class="chol-mini-foot"><span id="main-chol-total-unit">ммоль/л</span><span class="st" id="main-chol-total-st"></span></div>
+        </div>
+        <div class="chol-mini chol-mini--empty" id="main-chol-cell-ldl">
+          <div>
+            <div class="chol-mini-name">LDL</div>
+            <div class="chol-mini-val" id="main-chol-ldl-num">—</div>
+          </div>
+          <div class="chol-mini-foot"><span id="main-chol-ldl-unit">ммоль/л</span><span class="st" id="main-chol-ldl-st"></span></div>
+        </div>
+        <div class="chol-mini chol-mini--empty" id="main-chol-cell-hdl">
+          <div>
+            <div class="chol-mini-name">HDL</div>
+            <div class="chol-mini-val" id="main-chol-hdl-num">—</div>
+          </div>
+          <div class="chol-mini-foot"><span id="main-chol-hdl-unit">ммоль/л</span><span class="st" id="main-chol-hdl-st"></span></div>
+        </div>
+        <div class="chol-mini chol-mini--empty" id="main-chol-cell-trig">
+          <div>
+            <div class="chol-mini-name">Триглицер</div>
+            <div class="chol-mini-val" id="main-chol-trig-num">—</div>
+          </div>
+          <div class="chol-mini-foot"><span id="main-chol-trig-unit">ммоль/л</span><span class="st" id="main-chol-trig-st"></span></div>
+        </div>
+        </div>
+        </div>
+        </div>
+      </section>
+    </div>
+    <div class="bottom-nav">
+      <button type="button" class="bnav-item active" onclick="navTo('screen-main',this)" aria-label="Главная">
+        <span class="bnav-icon" aria-hidden="true"><svg class="bnav-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3.5 8.5C3.5 9.05 3.95 9.5 4.5 9.5C5.05 9.5 5.5 9.05 5.5 8.5V6.5H7.5C8.05 6.5 8.5 6.05 8.5 5.5C8.5 4.95 8.05 4.5 7.5 4.5H5.5V2.5C5.5 1.95 5.05 1.5 4.5 1.5C3.95 1.5 3.5 1.95 3.5 2.5V4.5H1.5C0.95 4.5 0.5 4.95 0.5 5.5C0.5 6.05 0.95 6.5 1.5 6.5H3.5V8.5Z" fill="currentColor"/><path d="M13.5 17.5C15.1569 17.5 16.5 16.1569 16.5 14.5C16.5 12.8431 15.1569 11.5 13.5 11.5C11.8431 11.5 10.5 12.8431 10.5 14.5C10.5 16.1569 11.8431 17.5 13.5 17.5Z" fill="currentColor"/><path d="M21.5 6.5H18.33L17.09 5.15C16.72 4.74 16.18 4.5 15.62 4.5H9.22C9.39 4.8 9.5 5.13 9.5 5.5C9.5 6.6 8.6 7.5 7.5 7.5H6.5V8.5C6.5 9.6 5.6 10.5 4.5 10.5C4.13 10.5 3.8 10.39 3.5 10.22V20.5C3.5 21.6 4.4 22.5 5.5 22.5H21.5C22.6 22.5 23.5 21.6 23.5 20.5V8.5C23.5 7.4 22.6 6.5 21.5 6.5ZM13.5 19.5C10.74 19.5 8.5 17.26 8.5 14.5C8.5 11.74 10.74 9.5 13.5 9.5C16.26 9.5 18.5 11.74 18.5 14.5C18.5 17.26 16.26 19.5 13.5 19.5Z" fill="currentColor"/></svg></span>
+      </button>
+      <button type="button" class="bnav-item" onclick="navTo('screen-history',this)" aria-label="История">
+        <span class="bnav-icon" aria-hidden="true"><svg class="bnav-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16 6V12C16 13.1 16.9 14 18 14H19V21C19 21.55 19.45 22 20 22C20.55 22 21 21.55 21 21V3.13C21 2.48 20.39 2 19.76 2.15C17.6 2.68 16 4.51 16 6ZM11 9H9V3C9 2.45 8.55 2 8 2C7.45 2 7 2.45 7 3V9H5V3C5 2.45 4.55 2 4 2C3.45 2 3 2.45 3 3V9C3 11.21 4.79 13 7 13V21C7 21.55 7.45 22 8 22C8.55 22 9 21.55 9 21V13C11.21 13 13 11.21 13 9V3C13 2.45 12.55 2 12 2C11.45 2 11 2.45 11 3V9Z" fill="currentColor"/></svg></span>
+      </button>
+      <button type="button" class="bnav-item" onclick="navTo('screen-profile',this)" aria-label="Профиль">
+        <span class="bnav-icon" aria-hidden="true"><svg class="bnav-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11.9892 6C13.0938 6 13.9892 5.10457 13.9892 4C13.9892 2.89543 13.0938 2 11.9892 2C10.8847 2 9.98924 2.89543 9.98924 4C9.98924 5.10457 10.8847 6 11.9892 6Z" fill="currentColor"/><path d="M15.8792 8.11C15.4892 7.72 14.8192 7 13.5192 7C13.3092 7 12.0992 7 10.9792 7C8.51924 6.99 6.46924 5.2 6.05924 2.85C5.97924 2.36 5.56924 2 5.07924 2C4.46924 2 3.98924 2.54 4.07924 3.14C4.51924 5.8 6.45924 7.95 8.98924 8.71V21C8.98924 21.55 9.43924 22 9.98924 22C10.5392 22 10.9892 21.55 10.9892 21V16H12.9892V21C12.9892 21.55 13.4392 22 13.9892 22C14.5392 22 14.9892 21.55 14.9892 21V10.05L18.2292 13.29C18.6192 13.68 19.2492 13.68 19.6392 13.29C20.0292 12.9 20.0292 12.27 19.6392 11.88L15.8792 8.11Z" fill="currentColor"/></svg></span>
+      </button>
+    </div>
+  </div>
+
+  <div class="screen" id="screen-result">
+    <div class="result-screen-inner">
+      <div id="result-loader" class="result-loader-overlay" style="display:none;">
+        <div class="result-loader-spinner"></div>
+        <div class="result-loader-text" id="result-loader-text">Анализируем фото…</div>
+      </div>
+      <div class="nav history-top-nav">
+        <button type="button" class="history-nav-side" onclick="backFromResult()" aria-label="Назад" title="Назад">
+          <svg width="10" height="17" viewBox="0 0 10 17" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M8.5 15.5L1.5 8.5L8.5 1.5" stroke="#1C1B1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="history-nav-title">Фотография</div>
+        <button type="button" class="history-nav-side" onclick="showPurchaseModal()" aria-label="Настройки">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M12 15a3 3 0 100-6 3 3 0 000 6z" stroke="#1C1B1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" stroke="#1C1B1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+      <div class="result-photo" id="result-photo-wrap">
+        <div class="result-photo-placeholder" id="result-photo-placeholder" aria-hidden="true">
+          <img class="result-photo-placeholder-img" src="no_image_big.svg" alt="" />
+        </div>
+        <img class="result-photo-img" id="result-photo-img" alt="" />
+      </div>
+      <div class="result-gpt-line">ⓘ Ответ подготовлен на основе GPT-4o</div>
+      <div class="result-body">
+        <div class="result-dish-title" id="result-dish-title">—</div>
+        <div class="result-summary-text" id="result-summary-text">—</div>
+        <div class="result-score-row" id="result-score-row">
+          <span class="result-score-star" id="result-score-star" aria-hidden="true">★</span>
+          <span class="result-score-big" id="result-score-display">—</span>
+        </div>
+        <div class="result-hr"></div>
+        <div class="result-block">
+          <div class="result-block-title">Нюансы</div>
+          <div class="result-block-text" id="result-nuances-text">—</div>
+        </div>
+        <div class="result-block">
+          <div class="result-block-title">Как это работает</div>
+          <div class="result-block-text" id="result-education-text">—</div>
+        </div>
+        <div class="result-block">
+          <div class="result-block-title">Как сделать 10/10</div>
+          <div class="result-block-text" id="result-upgrade-text">—</div>
+        </div>
+        <div class="result-block">
+          <div class="result-block-title">Факторы</div>
+          <div id="result-factors-list"></div>
+        </div>
+      </div>
+      <div class="result-actions" id="result-actions">
+        <button type="button" class="btn-primary" id="result-btn-save-history" onclick="this.disabled=true;saveMealToHistoryAndGoMain()">Сохранить в историю</button>
+        <button type="button" class="btn-primary" id="result-btn-refine" style="display:none" onclick="openDescribeFoodModalForRefine()">Уточнить</button>
+        <button type="button" class="btn-secondary" onclick="backFromResult()">← Назад</button>
+      </div>
+    </div>
+    <div class="bottom-nav">
+      <button type="button" class="bnav-item" onclick="navTo('screen-main',this)" aria-label="Главная">
+        <span class="bnav-icon" aria-hidden="true"><svg class="bnav-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3.5 8.5C3.5 9.05 3.95 9.5 4.5 9.5C5.05 9.5 5.5 9.05 5.5 8.5V6.5H7.5C8.05 6.5 8.5 6.05 8.5 5.5C8.5 4.95 8.05 4.5 7.5 4.5H5.5V2.5C5.5 1.95 5.05 1.5 4.5 1.5C3.95 1.5 3.5 1.95 3.5 2.5V4.5H1.5C0.95 4.5 0.5 4.95 0.5 5.5C0.5 6.05 0.95 6.5 1.5 6.5H3.5V8.5Z" fill="currentColor"/><path d="M13.5 17.5C15.1569 17.5 16.5 16.1569 16.5 14.5C16.5 12.8431 15.1569 11.5 13.5 11.5C11.8431 11.5 10.5 12.8431 10.5 14.5C10.5 16.1569 11.8431 17.5 13.5 17.5Z" fill="currentColor"/><path d="M21.5 6.5H18.33L17.09 5.15C16.72 4.74 16.18 4.5 15.62 4.5H9.22C9.39 4.8 9.5 5.13 9.5 5.5C9.5 6.6 8.6 7.5 7.5 7.5H6.5V8.5C6.5 9.6 5.6 10.5 4.5 10.5C4.13 10.5 3.8 10.39 3.5 10.22V20.5C3.5 21.6 4.4 22.5 5.5 22.5H21.5C22.6 22.5 23.5 21.6 23.5 20.5V8.5C23.5 7.4 22.6 6.5 21.5 6.5ZM13.5 19.5C10.74 19.5 8.5 17.26 8.5 14.5C8.5 11.74 10.74 9.5 13.5 9.5C16.26 9.5 18.5 11.74 18.5 14.5C18.5 17.26 16.26 19.5 13.5 19.5Z" fill="currentColor"/></svg></span>
+      </button>
+      <button type="button" class="bnav-item active" onclick="navTo('screen-history',this)" aria-label="История">
+        <span class="bnav-icon" aria-hidden="true"><svg class="bnav-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16 6V12C16 13.1 16.9 14 18 14H19V21C19 21.55 19.45 22 20 22C20.55 22 21 21.55 21 21V3.13C21 2.48 20.39 2 19.76 2.15C17.6 2.68 16 4.51 16 6ZM11 9H9V3C9 2.45 8.55 2 8 2C7.45 2 7 2.45 7 3V9H5V3C5 2.45 4.55 2 4 2C3.45 2 3 2.45 3 3V9C3 11.21 4.79 13 7 13V21C7 21.55 7.45 22 8 22C8.55 22 9 21.55 9 21V13C11.21 13 13 11.21 13 9V3C13 2.45 12.55 2 12 2C11.45 2 11 2.45 11 3V9Z" fill="currentColor"/></svg></span>
+      </button>
+      <button type="button" class="bnav-item" onclick="navTo('screen-profile',this)" aria-label="Профиль">
+        <span class="bnav-icon" aria-hidden="true"><svg class="bnav-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11.9892 6C13.0938 6 13.9892 5.10457 13.9892 4C13.9892 2.89543 13.0938 2 11.9892 2C10.8847 2 9.98924 2.89543 9.98924 4C9.98924 5.10457 10.8847 6 11.9892 6Z" fill="currentColor"/><path d="M15.8792 8.11C15.4892 7.72 14.8192 7 13.5192 7C13.3092 7 12.0992 7 10.9792 7C8.51924 6.99 6.46924 5.2 6.05924 2.85C5.97924 2.36 5.56924 2 5.07924 2C4.46924 2 3.98924 2.54 4.07924 3.14C4.51924 5.8 6.45924 7.95 8.98924 8.71V21C8.98924 21.55 9.43924 22 9.98924 22C10.5392 22 10.9892 21.55 10.9892 21V16H12.9892V21C12.9892 21.55 13.4392 22 13.9892 22C14.5392 22 14.9892 21.55 14.9892 21V10.05L18.2292 13.29C18.6192 13.68 19.2492 13.68 19.6392 13.29C20.0292 12.9 20.0292 12.27 19.6392 11.88L15.8792 8.11Z" fill="currentColor"/></svg></span>
+      </button>
+    </div>
+  </div>
+
+  <div class="screen" id="screen-history">
+    <div class="nav history-top-nav">
+      <button type="button" class="history-nav-side" onclick="goTo('screen-main')" aria-label="Назад" title="Назад">
+        <svg width="10" height="17" viewBox="0 0 10 17" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M8.5 15.5L1.5 8.5L8.5 1.5" stroke="#1C1B1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="history-nav-title">История</div>
+      <button type="button" class="history-nav-side" onclick="showPurchaseModal()" aria-label="Настройки">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M12 15a3 3 0 100-6 3 3 0 000 6z" stroke="#1C1B1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" stroke="#1C1B1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+    <div class="content history-content">
+      <div id="history-summary-card" class="history-summary" style="display:none;">
+        <div class="history-summary-top">
+          <span class="history-summary-label">Средняя оценка питания</span>
+          <span class="history-summary-num" id="history-avg-num">—</span>
+        </div>
+        <div class="history-summary-bottom">
+          <p class="history-summary-motiv" id="history-avg-motiv">Это очень круто! Так держать!</p>
+          <span class="history-summary-star" aria-hidden="true">★</span>
+        </div>
+      </div>
+      <button type="button" class="history-describe-btn" id="history-describe-btn" onclick="openDescribeFoodModal()">
+        Описать еду словами
+      </button>
+      <div class="history-empty" id="history-empty" style="display:none;">Пока нет записей. Сфоткай свою первую еду!</div>
+      <div class="history-skeleton-wrap" id="history-skeleton-wrap" aria-hidden="true">
+        <div class="history-skel-item">
+          <div class="skeleton history-skel-thumb"></div>
+          <div class="history-skel-text">
+            <div class="skeleton sk-line sk-line--long"></div>
+            <div class="skeleton sk-line sk-line--short"></div>
+          </div>
+        </div>
+        <div class="history-skel-item">
+          <div class="skeleton history-skel-thumb"></div>
+          <div class="history-skel-text">
+            <div class="skeleton sk-line sk-line--long"></div>
+            <div class="skeleton sk-line sk-line--short"></div>
+          </div>
+        </div>
+        <div class="history-skel-item">
+          <div class="skeleton history-skel-thumb"></div>
+          <div class="history-skel-text">
+            <div class="skeleton sk-line sk-line--long"></div>
+            <div class="skeleton sk-line sk-line--short"></div>
+          </div>
+        </div>
+      </div>
+      <div id="history-list"></div>
+    </div>
+    <div class="bottom-nav">
+      <button type="button" class="bnav-item" onclick="navTo('screen-main',this)" aria-label="Главная">
+        <span class="bnav-icon" aria-hidden="true"><svg class="bnav-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3.5 8.5C3.5 9.05 3.95 9.5 4.5 9.5C5.05 9.5 5.5 9.05 5.5 8.5V6.5H7.5C8.05 6.5 8.5 6.05 8.5 5.5C8.5 4.95 8.05 4.5 7.5 4.5H5.5V2.5C5.5 1.95 5.05 1.5 4.5 1.5C3.95 1.5 3.5 1.95 3.5 2.5V4.5H1.5C0.95 4.5 0.5 4.95 0.5 5.5C0.5 6.05 0.95 6.5 1.5 6.5H3.5V8.5Z" fill="currentColor"/><path d="M13.5 17.5C15.1569 17.5 16.5 16.1569 16.5 14.5C16.5 12.8431 15.1569 11.5 13.5 11.5C11.8431 11.5 10.5 12.8431 10.5 14.5C10.5 16.1569 11.8431 17.5 13.5 17.5Z" fill="currentColor"/><path d="M21.5 6.5H18.33L17.09 5.15C16.72 4.74 16.18 4.5 15.62 4.5H9.22C9.39 4.8 9.5 5.13 9.5 5.5C9.5 6.6 8.6 7.5 7.5 7.5H6.5V8.5C6.5 9.6 5.6 10.5 4.5 10.5C4.13 10.5 3.8 10.39 3.5 10.22V20.5C3.5 21.6 4.4 22.5 5.5 22.5H21.5C22.6 22.5 23.5 21.6 23.5 20.5V8.5C23.5 7.4 22.6 6.5 21.5 6.5ZM13.5 19.5C10.74 19.5 8.5 17.26 8.5 14.5C8.5 11.74 10.74 9.5 13.5 9.5C16.26 9.5 18.5 11.74 18.5 14.5C18.5 17.26 16.26 19.5 13.5 19.5Z" fill="currentColor"/></svg></span>
+      </button>
+      <button type="button" class="bnav-item active" onclick="navTo('screen-history',this)" aria-label="История">
+        <span class="bnav-icon" aria-hidden="true"><svg class="bnav-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16 6V12C16 13.1 16.9 14 18 14H19V21C19 21.55 19.45 22 20 22C20.55 22 21 21.55 21 21V3.13C21 2.48 20.39 2 19.76 2.15C17.6 2.68 16 4.51 16 6ZM11 9H9V3C9 2.45 8.55 2 8 2C7.45 2 7 2.45 7 3V9H5V3C5 2.45 4.55 2 4 2C3.45 2 3 2.45 3 3V9C3 11.21 4.79 13 7 13V21C7 21.55 7.45 22 8 22C8.55 22 9 21.55 9 21V13C11.21 13 13 11.21 13 9V3C13 2.45 12.55 2 12 2C11.45 2 11 2.45 11 3V9Z" fill="currentColor"/></svg></span>
+      </button>
+      <button type="button" class="bnav-item" onclick="navTo('screen-profile',this)" aria-label="Профиль">
+        <span class="bnav-icon" aria-hidden="true"><svg class="bnav-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11.9892 6C13.0938 6 13.9892 5.10457 13.9892 4C13.9892 2.89543 13.0938 2 11.9892 2C10.8847 2 9.98924 2.89543 9.98924 4C9.98924 5.10457 10.8847 6 11.9892 6Z" fill="currentColor"/><path d="M15.8792 8.11C15.4892 7.72 14.8192 7 13.5192 7C13.3092 7 12.0992 7 10.9792 7C8.51924 6.99 6.46924 5.2 6.05924 2.85C5.97924 2.36 5.56924 2 5.07924 2C4.46924 2 3.98924 2.54 4.07924 3.14C4.51924 5.8 6.45924 7.95 8.98924 8.71V21C8.98924 21.55 9.43924 22 9.98924 22C10.5392 22 10.9892 21.55 10.9892 21V16H12.9892V21C12.9892 21.55 13.4392 22 13.9892 22C14.5392 22 14.9892 21.55 14.9892 21V10.05L18.2292 13.29C18.6192 13.68 19.2492 13.68 19.6392 13.29C20.0292 12.9 20.0292 12.27 19.6392 11.88L15.8792 8.11Z" fill="currentColor"/></svg></span>
+      </button>
+    </div>
+  </div>
+
+  <div
+    class="describe-food-overlay"
+    id="describe-food-overlay"
+    onclick="if(event.target===this)dismissDescribeFoodModal()"
+  >
+    <div class="describe-food-sheet" onclick="event.stopPropagation()">
+      <div class="purchase-grab"></div>
+      <div class="describe-food-title">Описание еды</div>
+      <textarea
+        id="describe-food-text"
+        class="describe-food-textarea"
+        placeholder="Опишите то что сегодня ели, желательно подробно, чтобы точность ответа была лучше"
+        rows="6"
+      ></textarea>
+      <button type="button" class="btn-primary" id="describe-food-submit" onclick="submitDescribeFood()">Отправить</button>
+    </div>
+  </div>
+
+  <div class="purchase-overlay" id="purchase-overlay" onclick="if(event.target===this)dismissPurchaseModal()">
+    <div class="purchase-sheet" onclick="event.stopPropagation()">
+      <div class="purchase-grab"></div>
+      <div class="purchase-icon-wrap">
+        <div class="purchase-icon-inner">!</div>
+      </div>
+      <div class="purchase-title">Покупка</div>
+      <p class="purchase-text">Обычно за 30 дней можно научиться определять еду. Поэтому это единоразовый платёж за приложение. Это дешевле, чем сходить к диетологу!</p>
+      <button type="button" class="btn-primary btn-primary--split" onclick="dismissPurchaseModal()">
+        <span>Купить</span>
+        <span>$29</span>
+      </button>
+    </div>
+  </div>
+
+
+</div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://jwbhwwuznapaaeiuhxrp.supabase.co'.trim();
+const SUPABASE_ANON_KEY =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3Ymh3d3V6bmFwYWFlaXVoeHJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5Nzk3MjAsImV4cCI6MjA5MTU1NTcyMH0.j_ociAX5y8X1FbTuSwh8fv96fx8VZkOhURzltmrHdio'.trim();
+const __supabaseSdk = supabase;
+const supabaseClient = __supabaseSdk.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: {
+    persistSession: true,
+    storage: window.localStorage,
+    autoRefreshToken: true,
+    detectSessionInUrl: true
+  }
+});
+
+supabaseClient.auth.onAuthStateChange(async (event, session) => {
+  console.log('[auth] event:', event, 'session:', session?.user?.email);
+  console.log('[auth] localStorage после входа:', localStorage.getItem('cholesterol_app_supabase_user_id'));
+  if (!session) return;
+
+  if (event === 'INITIAL_SESSION' && session) {
+    setStoredUserId(session.user.id);
+    const { data: userRow } = await supabaseClient
+      .from('users')
+      .select('*')
+      .eq('id', session.user.id)
+      .maybeSingle();
+    if (userRow) {
+      applySupabaseUserRowToForm(userRow);
+      saveProfileToStorage();
+      goTo('screen-main');
+    } else {
+      goTo('screen-profile', { mode: 'onboarding' });
+    }
+    return;
+  }
+
+  if (event !== 'SIGNED_IN') return;
+
+  setStoredUserId(session.user.id);
+  window.history.replaceState({}, document.title, window.location.pathname);
+
+  console.log('[auth] SIGNED_IN - ищем профиль для id:', session.user.id, 'email:', session.user.email);
+
+  let userRow = null;
+  const { data: byId } = await supabaseClient
+    .from('users')
+    .select('*')
+    .eq('id', session.user.id)
+    .maybeSingle();
+
+  if (byId) {
+    userRow = byId;
+  } else {
+    const { data: byEmail } = await supabaseClient
+      .from('users')
+      .select('*')
+      .eq('email', session.user.email)
+      .maybeSingle();
+    if (byEmail) {
+      userRow = byEmail;
+    }
+  }
+  console.log('[auth] userRow найден:', !!userRow, userRow?.email);
+
+  if (userRow) {
+    applySupabaseUserRowToForm(userRow);
+    saveProfileToStorage();
+    goTo('screen-main');
+  } else {
+    goTo('screen-profile', { mode: 'onboarding' });
+  }
+});
+
+/** Ключ OpenAI из Supabase app_settings (без localStorage). */
+let openaiApiKey = null;
+
+const APP_VERSION = '1.0.0';
+let cachedDeviceContext = null;
+let deviceContextPromise = null;
+
+async function refreshDeviceContext() {
+  const info = {
+    language: navigator.language,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    screen_width: screen.width,
+    screen_height: screen.height,
+    device_type: /Mobi|Android/i.test(navigator.userAgent) ? 'mobile' : 'desktop',
+    browser: navigator.userAgent,
+    app_version: APP_VERSION
+  };
+  cachedDeviceContext = { ...info };
+  try {
+    const geoRes = await fetch('https://ipapi.co/json/');
+    if (geoRes.ok) {
+      const geo = await geoRes.json();
+      info.country = geo.country_name;
+      info.city = geo.city;
+      cachedDeviceContext = { ...info };
+    }
+  } catch (e) {
+    console.warn('[device] geo', e);
+  }
+  return cachedDeviceContext;
+}
+
+function getDeviceInfoForUpsert() {
+  if (cachedDeviceContext) return { ...cachedDeviceContext };
+  return {
+    language: navigator.language,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    screen_width: screen.width,
+    screen_height: screen.height,
+    device_type: /Mobi|Android/i.test(navigator.userAgent) ? 'mobile' : 'desktop',
+    browser: navigator.userAgent,
+    app_version: APP_VERSION
+  };
+}
+
+deviceContextPromise = refreshDeviceContext().catch((e) => {
+  console.warn('[device] refreshDeviceContext', e);
+  return cachedDeviceContext;
+});
+
+async function loadOpenAiKeyFromSupabase() {
+  openaiApiKey = null;
+  try {
+    const { data, error } = await supabaseClient
+      .from('app_settings')
+      .select('value')
+      .eq('key', 'openai_api_key')
+      .single();
+    if (error) {
+      console.warn('[supabase] app_settings error:', error);
+      return false;
+    }
+    const v = data?.value != null ? String(data.value).trim() : '';
+    if (!v) return false;
+    openaiApiKey = v;
+    return true;
+  } catch (e) {
+    console.warn(e);
+    return false;
+  }
+}
+
+const LS_USER_PROFILE = 'cholesterol_app_user_profile';
+const LS_MEAL_HISTORY = 'meal_history';
+const LS_SUPABASE_USER_ID = 'cholesterol_app_supabase_user_id';
+const ASSET_NO_IMAGE_BIG = 'no_image_big.svg';
+
+const HISTORY_THUMB_PLACEHOLDER_SVG_INNER =
+  '<g><path d="M100.295 77.796L2.75488 79.3201L3.2629 93.5447L11.3912 118.438L17.4875 123.01L32.7281 128.09L35.2683 140.283L64.7335 140.791L66.7656 140.283L67.7816 128.598L84.0383 123.01L93.6907 113.358L98.2629 101.165L100.295 77.796Z" fill="#BAA4A4" fill-opacity="0.4"/><path d="M44.9211 41.7265L43.3971 40.2025H41.365L30.6965 43.7586L29.6805 42.7426L29.1725 38.1704L26.1243 34.1062L17.996 36.6463L15.4559 39.1864L9.35964 48.3308L2.75536 41.2185L0.723278 41.7265L-5.37298 48.8388L-7.91309 53.919V56.4591L-3.34089 65.6035L3.26339 73.7319L32.7286 73.2238L42.381 62.5554L45.9372 56.9672L47.9693 50.3629V46.8067L44.9211 41.7265Z" fill="#BAA4A4" fill-opacity="0.4"/><path d="M97.7554 -5.01147L86.579 -0.439282L81.4987 5.14895L74.3864 14.8014L71.8463 20.8976L71.3383 25.4698L70.8303 25.9778V30.042L70.3223 30.55V40.2024L73.3704 43.7586L77.9426 42.2345L83.0228 38.6784L93.6913 28.0099L97.7554 22.9297L101.82 12.2613L101.312 2.60885L97.7554 -5.01147Z" fill="#BAA4A4" fill-opacity="0.4"/><path d="M105.375 37.1544L104.359 36.6464L100.295 38.1704H98.2625L89.6262 41.7266H88.1021L85.562 43.2506L68.7973 61.0314L68.2893 62.0474L67.7812 73.7319L87.0861 73.2239L92.6743 71.6998L97.7545 68.6517L100.295 64.0795L103.851 53.4111L105.375 37.1544Z" fill="#BAA4A4" fill-opacity="0.4"/><path d="M82.5141 -16.1879L78.45 -12.6317L57.1131 12.7694L47.4606 13.2774L36.2842 24.4538L37.8082 26.994H39.3323L44.9205 22.9298L45.4286 23.9458L40.8564 28.518L41.8724 31.0581H43.3965L48.9847 26.994L49.4927 28.01L44.9205 33.0902L46.4446 34.6143L54.0649 29.026L54.5729 30.0421L49.4927 37.1544L52.5409 39.6945L55.081 37.1544L61.1772 28.01L61.6852 16.8335L86.0703 -12.1237L82.5141 -16.1879Z" fill="#BAA4A4" fill-opacity="0.4"/><path d="M-4.86503 13.2773L-5.37305 13.7854V16.3255L-4.86503 16.8335V19.8816L-4.357 20.3896L-3.84898 22.4217L-2.83294 23.4378L-1.8169 25.4699L-0.292833 26.9939V27.5019L2.75529 31.0581H3.26332L7.32749 34.1062L9.35957 34.6142L13.9318 30.0421V29.026L14.4398 28.518V27.5019L15.4558 25.4699V18.8656L14.9478 18.3576V16.8335L14.4398 15.8175L11.3917 13.7854L10.3756 14.2934L9.86759 16.3255L9.35957 16.8335L8.85155 22.9298L8.34353 23.4378L6.81947 22.4217V21.9137L0.215188 14.8014L-0.292833 13.7854L-1.30888 13.2773H-4.86503Z" fill="#BAA4A4" fill-opacity="0.4"/><path d="M50.0015 59.5073L47.4614 62.0474V62.5554L46.9533 63.0634V64.5875L46.4453 65.0955V68.1436L46.9533 68.6516V70.6837L47.4614 71.1917H47.9694L48.4774 71.6998H49.4934L50.5095 72.7158H51.5255L52.0335 73.2238H54.0656L54.5737 72.7158H56.6057L57.1138 72.2078H58.1298L58.6378 71.6998H59.6539L61.1779 70.1757V69.6677L61.686 69.1597V68.1436L62.194 67.6356V65.6035L61.686 65.0955V63.5714L61.1779 63.0634V62.0474L60.6699 61.5393V61.0313L58.6378 58.9992H57.6218L57.1138 58.4912H52.0335L51.5255 58.9992H51.0175L50.5095 59.5073H50.0015Z" fill="#BAA4A4" fill-opacity="0.4"/><path d="M59.1456 40.2025L58.6376 40.7105H58.1296L54.5735 44.2667V44.7747L54.0654 45.2827V46.2988L54.5735 46.8068V48.3309L55.0815 48.8389V49.8549L57.6216 52.395H58.1296L59.1456 53.4111H59.6537L60.6697 54.4271H61.1777L61.6858 54.9351H62.1938L62.7018 54.4271H63.2098L63.7178 53.9191H64.2259L64.7339 53.4111H65.2419L66.2579 52.395H66.766L69.3061 49.8549V48.3309L69.8141 47.8228V47.3148L69.3061 46.8068V45.7908L68.7981 45.2827V44.7747L65.2419 41.2186H64.7339L63.7178 40.2025H59.1456Z" fill="#BAA4A4" fill-opacity="0.4"/><path d="M23.5841 16.8335L23.076 17.3415V17.8495L22.06 18.8655V19.8816L21.552 20.3896V21.4057L21.0439 21.9137V25.4698L23.5841 28.0099H24.0921L25.1081 29.026H26.1242L26.6322 29.534H30.6964L32.2204 28.0099V26.9939L32.7284 26.4859V24.9618L33.2365 24.4538V21.9137L32.7284 21.4057V20.3896L32.2204 19.8816V19.3736L31.7124 18.8655V18.3575L31.2044 17.8495V17.3415L30.6964 16.8335H30.1883L29.6803 16.3254H24.6001L24.0921 16.8335H23.5841Z" fill="#BAA4A4" fill-opacity="0.4"/></g>';
+
+function fillHistoryThumbPlaceholder(wrap) {
+  wrap.classList.remove('is-loading');
+  wrap.classList.add('history-thumb--no-photo');
+  const cid = 'hp-' + Math.random().toString(36).slice(2, 11);
+  wrap.innerHTML =
+    '<svg class="history-thumb-placeholder-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" preserveAspectRatio="xMidYMid slice" style="width:100%;height:100%;">' +
+    '<defs><clipPath id="' +
+    cid +
+    '"><rect width="100" height="100" fill="white"/></clipPath></defs><g clip-path="url(#' +
+    cid +
+    ')">' +
+    HISTORY_THUMB_PLACEHOLDER_SVG_INNER +
+    '</g></svg>';
+}
+
+function getStoredUserId() {
+  try {
+    const id = localStorage.getItem(LS_SUPABASE_USER_ID);
+    return id && String(id).trim() ? String(id).trim() : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function setStoredUserId(id) {
+  try {
+    if (id) localStorage.setItem(LS_SUPABASE_USER_ID, String(id));
+    else localStorage.removeItem(LS_SUPABASE_USER_ID);
+  } catch (e) {}
+}
+
+function mealRowToLocal(row) {
+  let factors = row.factors;
+  if (factors == null) factors = [];
+  else if (typeof factors === 'string') {
+    try {
+      factors = JSON.parse(factors);
+    } catch (e) {
+      factors = [];
+    }
+  }
+  return {
+    supabaseId: row.id,
+    photo_url: row.photo_url != null ? String(row.photo_url) : '',
+    verdict: row.verdict,
+    score: row.score,
+    title: row.title != null ? String(row.title) : '',
+    vision: row.vision != null ? String(row.vision) : '',
+    summary: row.summary != null ? String(row.summary) : '',
+    education: row.education != null ? String(row.education) : '',
+    nuances: row.nuances != null ? String(row.nuances) : '',
+    upgrade: row.upgrade != null ? String(row.upgrade) : '',
+    factors: Array.isArray(factors) ? factors : [],
+    at: row.created_at || row.at || new Date().toISOString()
+  };
+}
+
+function profileUnitsToDb(unitsLabel) {
+  const u = String(unitsLabel || '').toLowerCase();
+  if (u.includes('мг') || u.includes('mg')) return 'mgdl';
+  return 'mmol';
+}
+
+function profileToSex(profile) {
+  if (profile.sex != null && String(profile.sex).trim() !== '') {
+    return String(profile.sex).trim();
+  }
+  const g = String(profile.gender || '').toLowerCase();
+  if (g.includes('жен')) return 'female';
+  if (g.includes('муж')) return 'male';
+  return null;
+}
+
+function parseIntProfile(v) {
+  const s = String(v ?? '')
+    .trim()
+    .replace(',', '.');
+  if (s === '') return null;
+  const n = parseInt(s, 10);
+  return Number.isFinite(n) ? n : null;
+}
+
+function parseFloatProfile(v) {
+  const s = String(v ?? '')
+    .trim()
+    .replace(',', '.');
+  if (s === '') return null;
+  const n = parseFloat(s);
+  return Number.isFinite(n) ? n : null;
+}
+
+/** Достаточно данных для полного update (не только email). */
+function hasRealProfileData(profile) {
+  const name = String(profile.name ?? '').trim();
+  if (name) return true;
+  const totalSrc = profile.total != null ? profile.total : profile.v_total;
+  return parseFloatProfile(totalSrc) != null;
+}
+
+function buildFullUserRow(profile, emailNormalized) {
+  const totalSrc = profile.total != null ? profile.total : profile.v_total;
+  const ldlSrc = profile.ldl != null ? profile.ldl : profile.v_ldl;
+  const hdlSrc = profile.hdl != null ? profile.hdl : profile.v_hdl;
+  const trigSrc = profile.trig != null ? profile.trig : profile.v_trig;
+  return {
+    email: emailNormalized,
+    name: String(profile.name ?? '').trim(),
+    age: parseIntProfile(profile.age),
+    sex: profileToSex(profile),
+    height_cm: parseIntProfile(profile.height),
+    weight_kg: parseFloatProfile(profile.weight),
+    statins: profile.statins === true,
+    cholesterol: parseFloatProfile(totalSrc),
+    ldl: parseFloatProfile(ldlSrc),
+    hdl: parseFloatProfile(hdlSrc),
+    triglycerides: parseFloatProfile(trigSrc),
+    units: profileUnitsToDb(profile.units) || 'mmol',
+    profile_json: profile,
+    updated_at: new Date().toISOString(),
+    ...getDeviceInfoForUpsert()
+  };
+}
+
+/** Обновление без затирания существующих значений пустыми полями формы. */
+function buildMergedUserUpdate(existing, profile) {
+  const totalSrc = profile.total != null ? profile.total : profile.v_total;
+  const ldlSrc = profile.ldl != null ? profile.ldl : profile.v_ldl;
+  const hdlSrc = profile.hdl != null ? profile.hdl : profile.v_hdl;
+  const trigSrc = profile.trig != null ? profile.trig : profile.v_trig;
+  const nameNew = String(profile.name ?? '').trim();
+  const sexNew = profileToSex(profile);
+  return {
+    name: nameNew !== '' ? nameNew : existing.name ?? null,
+    age: parseIntProfile(profile.age) ?? existing.age ?? null,
+    sex: sexNew != null ? sexNew : existing.sex ?? null,
+    height_cm: parseIntProfile(profile.height) ?? existing.height_cm ?? null,
+    weight_kg: parseFloatProfile(profile.weight) ?? existing.weight_kg ?? null,
+    statins: profile.statins === true,
+    cholesterol: parseFloatProfile(totalSrc) ?? existing.cholesterol ?? null,
+    ldl: parseFloatProfile(ldlSrc) ?? existing.ldl ?? null,
+    hdl: parseFloatProfile(hdlSrc) ?? existing.hdl ?? null,
+    triglycerides: parseFloatProfile(trigSrc) ?? existing.triglycerides ?? null,
+    units: profileUnitsToDb(profile.units) || existing.units || 'mmol',
+    profile_json: profile,
+    updated_at: new Date().toISOString(),
+    ...getDeviceInfoForUpsert()
+  };
+}
+
+function formatNumberForProfileInput(n) {
+  if (n == null || n === '') return '';
+  const x = Number(n);
+  if (!Number.isFinite(x)) return '';
+  if (Math.abs(x - Math.round(x)) < 1e-9) return String(Math.round(x));
+  const s = x.toFixed(1);
+  return s.endsWith('.0') ? String(Math.round(x)) : s;
+}
+
+/** Липиды в полях формы и из Supabase — всегда два знака после запятой (parseFloat при сохранении в БД). */
+function formatLipidInputFromNumber(n) {
+  if (n == null || n === '') return '';
+  const x = parseFloat(n);
+  return Number.isFinite(x) ? x.toFixed(2) : '';
+}
+
+function dbSexToGenderLabel(sex) {
+  const s = String(sex || '').toLowerCase();
+  if (s === 'female' || s === 'женский' || s.includes('жен')) return 'Женский';
+  return 'Мужской';
+}
+
+function dbUnitsToLabel(units) {
+  const u = String(units || '').toLowerCase();
+  if (u === 'mgdl' || u.includes('mg')) return 'мг/дл';
+  return 'ммоль/л';
+}
+
+/** Заполняет форму профиля из строки users (ответ Supabase). */
+function applySupabaseUserRowToForm(row) {
+  if (!row) return;
+  const emailEl = document.getElementById('input-email');
+  const nameEl = document.getElementById('input-name');
+  const ageEl = document.getElementById('input-age');
+  const heightEl = document.getElementById('input-height');
+  const weightEl = document.getElementById('input-weight');
+  const vTotal = document.getElementById('v-total');
+  const vLdl = document.getElementById('v-ldl');
+  const vHdl = document.getElementById('v-hdl');
+  const vTrig = document.getElementById('v-trig');
+  if (emailEl && row.email != null) emailEl.value = String(row.email).trim();
+  if (nameEl) nameEl.value = row.name != null ? String(row.name) : '';
+  if (row.age != null && ageEl) ageEl.value = formatNumberForProfileInput(row.age);
+  if (row.height_cm != null && heightEl) heightEl.value = formatNumberForProfileInput(row.height_cm);
+  if (row.weight_kg != null && weightEl) weightEl.value = formatNumberForProfileInput(row.weight_kg);
+  if (row.cholesterol != null && vTotal) vTotal.value = formatLipidInputFromNumber(row.cholesterol);
+  if (row.ldl != null && vLdl) vLdl.value = formatLipidInputFromNumber(row.ldl);
+  if (row.hdl != null && vHdl) vHdl.value = formatLipidInputFromNumber(row.hdl);
+  if (row.triglycerides != null && vTrig) vTrig.value = formatLipidInputFromNumber(row.triglycerides);
+  setSegActiveByLabel('seg-gender', dbSexToGenderLabel(row.sex));
+  setSegActiveByLabel('seg-units', dbUnitsToLabel(row.units));
+  const st = document.getElementById('toggle-statins');
+  if (st) st.classList.toggle('on', row.statins === true);
+  dontKnowOn = false;
+  applyDontKnowVisual();
+  updateName((nameEl?.value || '').trim());
+}
+
+let profileAutofillFromSupabase = false;
+let emailAutofillSeq = 0;
+let emailAutofillTimer = null;
+let authResendCountdownTimer = null;
+
+/** 'onboarding' — первый вход / гейт без профиля; 'edit' — вкладка «Профиль» из нижней навигации */
+let profileScreenMode = 'onboarding';
+let profileEditBaseline = null;
+
+function getProfileFormSnapshot() {
+  const genderEl = document.querySelector('#seg-gender .seg-btn.active');
+  const unitsEl = document.querySelector('#seg-units .seg-btn.active');
+  const emailEl = document.getElementById('input-email');
+  const nameEl = document.getElementById('input-name');
+  const vTotal = document.getElementById('v-total');
+  const vLdl = document.getElementById('v-ldl');
+  const vHdl = document.getElementById('v-hdl');
+  const vTrig = document.getElementById('v-trig');
+  const ageEl = document.getElementById('input-age');
+  const heightEl = document.getElementById('input-height');
+  const weightEl = document.getElementById('input-weight');
+  const statinsEl = document.getElementById('toggle-statins');
+  return JSON.stringify({
+    email: (emailEl?.value ?? '').trim(),
+    name: (nameEl?.value ?? '').trim(),
+    v_total: vTotal?.value ?? '',
+    v_ldl: vLdl?.value ?? '',
+    v_hdl: vHdl?.value ?? '',
+    v_trig: vTrig?.value ?? '',
+    dontKnowOn: !!dontKnowOn,
+    gender: genderEl ? genderEl.textContent.trim() : 'Мужской',
+    units: unitsEl ? unitsEl.textContent.trim() : 'ммоль/л',
+    age: ageEl?.value ?? '',
+    height: heightEl?.value ?? '',
+    weight: weightEl?.value ?? '',
+    statins: statinsEl?.classList.contains('on') ?? false
+  });
+}
+
+function captureProfileEditBaseline() {
+  profileEditBaseline = getProfileFormSnapshot();
+}
+
+function isProfileFormDirty() {
+  if (profileEditBaseline === null) return false;
+  return getProfileFormSnapshot() !== profileEditBaseline;
+}
+
+function applyProfileScreenModeToDom() {
+  const root = document.getElementById('screen-profile');
+  if (!root) return;
+  root.classList.toggle('mode-edit', profileScreenMode === 'edit');
+  root.classList.toggle('mode-onboarding', profileScreenMode === 'onboarding');
+  const editNav = root.querySelector('.profile-nav--edit');
+  if (editNav) editNav.setAttribute('aria-hidden', profileScreenMode === 'edit' ? 'false' : 'true');
+}
+
+function refreshProfileEditBaselineAfterAutofill() {
+  if (profileScreenMode === 'edit') captureProfileEditBaseline();
+  syncProfileCtaButton();
+}
+
+async function tryAutofillProfileFromSupabaseEmail() {
+  const emailEl = document.getElementById('input-email');
+  const screenProfile = document.getElementById('screen-profile');
+  if (!emailEl || !screenProfile?.classList.contains('active')) return;
+  const email = String(emailEl.value || '')
+    .trim()
+    .toLowerCase();
+  if (!email) {
+    profileAutofillFromSupabase = false;
+    refreshProfileEditBaselineAfterAutofill();
+    return;
+  }
+  const probe = document.createElement('input');
+  probe.type = 'email';
+  probe.value = email;
+  if (!probe.validity.valid) {
+    refreshProfileEditBaselineAfterAutofill();
+    return;
+  }
+
+  const seq = ++emailAutofillSeq;
+  const { data, error } = await supabaseClient.from('users').select('*').eq('email', email).maybeSingle();
+  if (seq !== emailAutofillSeq) return;
+  if (error) {
+    console.warn('[supabase] users autofill', error);
+    refreshProfileEditBaselineAfterAutofill();
+    return;
+  }
+  if (!data) {
+    profileAutofillFromSupabase = false;
+    refreshProfileEditBaselineAfterAutofill();
+    return;
+  }
+
+  profileAutofillFromSupabase = true;
+  applySupabaseUserRowToForm(data);
+  saveProfileToStorage();
+  setStoredUserId(data.id);
+  refreshProfileEditBaselineAfterAutofill();
+}
+
+function syncProfileCtaButton() {
+  const btn = document.getElementById('profile-cta-btn');
+  const screenProfile = document.getElementById('screen-profile');
+  if (!btn) return;
+  if (!screenProfile?.classList.contains('active')) return;
+
+  if (profileScreenMode === 'onboarding') {
+    btn.classList.remove('profile-cta--hidden');
+    btn.textContent = 'Продолжить';
+    return;
+  }
+
+  btn.textContent = 'Сохранить изменения';
+  if (profileEditBaseline === null) {
+    btn.classList.add('profile-cta--hidden');
+    return;
+  }
+  if (isProfileFormDirty()) btn.classList.remove('profile-cta--hidden');
+  else btn.classList.add('profile-cta--hidden');
+}
+
+async function upsertUserToSupabase() {
+  try {
+    await deviceContextPromise;
+  } catch (e) {
+    console.warn('[device] context', e);
+  }
+
+  const {
+    data: { session }
+  } = await supabaseClient.auth.getSession();
+  const uid = session?.user?.id;
+  if (!uid) {
+    setStoredUserId(null);
+    return null;
+  }
+  setStoredUserId(uid);
+
+  const raw = localStorage.getItem(LS_USER_PROFILE);
+  if (!raw) {
+    return null;
+  }
+  let profile;
+  try {
+    profile = JSON.parse(raw);
+  } catch (e) {
+    return null;
+  }
+  const email = String(profile.email || session.user?.email || '')
+    .trim()
+    .toLowerCase();
+  if (!email) {
+    return null;
+  }
+
+  const { data: existing, error: selErr } = await supabaseClient
+    .from('users')
+    .select('*')
+    .eq('id', uid)
+    .maybeSingle();
+  if (selErr) {
+    console.warn('[supabase] users select', selErr);
+    return null;
+  }
+
+  if (existing) {
+    if (!hasRealProfileData(profile)) {
+      return uid;
+    }
+    const patch = buildMergedUserUpdate(existing, profile);
+    const { error: upErr } = await supabaseClient.from('users').update(patch).eq('id', uid);
+    if (upErr) {
+      console.warn('[supabase] users update', upErr);
+      return null;
+    }
+    return uid;
+  }
+
+  if (!hasRealProfileData(profile)) {
+    const { data: ins, error: insErr } = await supabaseClient
+      .from('users')
+      .insert({
+        id: uid,
+        email,
+        profile_json: profile,
+        updated_at: new Date().toISOString(),
+        ...getDeviceInfoForUpsert()
+      })
+      .select('id')
+      .single();
+    if (insErr) {
+      console.warn('[supabase] users insert (email only)', insErr);
+      return null;
+    }
+    if (ins && ins.id) {
+      return ins.id;
+    }
+    return null;
+  }
+
+  const row = buildFullUserRow(profile, email);
+  const { data: created, error: crErr } = await supabaseClient
+    .from('users')
+    .insert({ ...row, id: uid })
+    .select('id')
+    .single();
+  if (crErr) {
+    console.warn('[supabase] users insert', crErr);
+    return null;
+  }
+  if (created && created.id) {
+    return created.id;
+  }
+  return null;
+}
+
+async function refreshMealsCacheFromSupabase() {
+  const uid = getStoredUserId();
+  if (!uid) return;
+  const { data, error } = await supabaseClient
+    .from('meals')
+    .select('*')
+    .eq('user_id', uid)
+    .order('created_at', { ascending: true });
+  if (error) {
+    console.warn('[supabase] meals select', error);
+    return;
+  }
+  const fromServer = (data || []).map(mealRowToLocal);
+  const local = getMealHistory();
+  const pending = local.filter((m) => !m.supabaseId);
+  const merged = fromServer.concat(pending);
+  merged.sort((a, b) => new Date(a.at).getTime() - new Date(b.at).getTime());
+  setMealHistory(merged);
+}
+
+let lastMealPhotoDataUrl = null;
+let lastMealAnalysisData = null;
+/** Запись из потока «описание словами» (без фото). */
+let lastMealTextOnly = false;
+/** Исходный текст из модалки «описать еду» — для пересчёта без фото. */
+let lastMealSourceDescribeText = null;
+/** Режим модалки: обычное описание еды или уточнение результата. */
+let describeFoodModalMode = 'describe';
+/** Куда вернуться с экрана результата: свежий анализ → главная, просмотр из истории → история */
+let resultBackScreen = 'screen-main';
+/** fresh — можно сохранить в историю; history — только просмотр */
+let resultViewSource = 'fresh';
+
+function updateResultActionButtons() {
+  const saveBtn = document.getElementById('result-btn-save-history');
+  const refineBtn = document.getElementById('result-btn-refine');
+  const errVerdict = lastMealAnalysisData && lastMealAnalysisData.verdict === 'error';
+  if (saveBtn) {
+    saveBtn.style.display = resultViewSource === 'fresh' && !errVerdict ? '' : 'none';
+    if (resultViewSource === 'fresh') saveBtn.disabled = false;
+  }
+  if (refineBtn) {
+    const ok = resultViewSource === 'fresh' && lastMealAnalysisData;
+    refineBtn.style.display = ok ? '' : 'none';
+  }
+}
+
+function openHistoryMealDetail(item) {
+  if (!item) return;
+  const verdict = item.verdict;
+  if (verdict === 'error') return;
+  resultBackScreen = 'screen-history';
+  resultViewSource = 'history';
+  lastMealPhotoDataUrl = item.photoBase64 || item.photo_url || null;
+  lastMealTextOnly = !!item.textOnly;
+  lastMealAnalysisData = {
+    verdict: verdict,
+    score: item.score,
+    title: item.title,
+    vision: item.vision != null ? String(item.vision) : '',
+    summary: item.summary,
+    education: item.education,
+    nuances: item.nuances,
+    upgrade: item.upgrade,
+    factors: Array.isArray(item.factors) ? item.factors : []
+  };
+  if (lastFoodObjectUrl) {
+    URL.revokeObjectURL(lastFoodObjectUrl);
+    lastFoodObjectUrl = null;
+  }
+  const img = document.getElementById('result-photo-img');
+  const ph = document.getElementById('result-photo-placeholder');
+  const detailSrc = item.textOnly ? '' : item.photoBase64 || item.photo_url || '';
+  img.onerror = null;
+  if (detailSrc) {
+    img.src = detailSrc;
+    const show = () => {
+      img.style.display = 'block';
+      if (ph) ph.style.display = 'none';
+    };
+    const onFail = () => {
+      img.style.display = 'none';
+      img.removeAttribute('src');
+      fillResultPhotoPlaceholder(ph);
+      if (ph) ph.style.display = 'flex';
+    };
+    img.onerror = onFail;
+    if (img.complete && img.naturalWidth) show();
+    else img.onload = show;
+  } else {
+    img.style.display = 'none';
+    img.removeAttribute('src');
+    fillResultPhotoPlaceholder(ph);
+    if (ph) ph.style.display = 'flex';
+  }
+  applyResultToUI(lastMealAnalysisData);
+  setResultLoading(false);
+  updateResultActionButtons();
+  goTo('screen-result');
+}
+
+function showPurchaseModal() {
+  document.getElementById('purchase-overlay')?.classList.add('visible');
+}
+
+function dismissPurchaseModal() {
+  document.getElementById('purchase-overlay')?.classList.remove('visible');
+}
+
+function configureDescribeFoodModal(mode) {
+  describeFoodModalMode = mode;
+  const titleEl = document.getElementById('describe-food-title');
+  const ta = document.getElementById('describe-food-text');
+  const submitBtn = document.getElementById('describe-food-submit');
+  if (mode === 'refine') {
+    if (titleEl) titleEl.textContent = 'Уточнить детали';
+    if (ta) {
+      ta.placeholder =
+        'Например: масло было виноградное, а не подсолнечное. Или: порция была небольшая';
+      ta.value = '';
+    }
+    if (submitBtn) submitBtn.textContent = 'Пересчитать';
+  } else {
+    if (titleEl) titleEl.textContent = 'Описание еды';
+    if (ta) {
+      ta.placeholder =
+        'Опишите то что сегодня ели, желательно подробно, чтобы точность ответа была лучше';
+      ta.value = '';
+    }
+    if (submitBtn) submitBtn.textContent = 'Отправить';
+  }
+}
+
+function openDescribeFoodModal() {
+  configureDescribeFoodModal('describe');
+  document.getElementById('describe-food-overlay')?.classList.add('visible');
+}
+
+function openDescribeFoodModalForRefine() {
+  configureDescribeFoodModal('refine');
+  document.getElementById('describe-food-overlay')?.classList.add('visible');
+}
+
+function dismissDescribeFoodModal() {
+  document.getElementById('describe-food-overlay')?.classList.remove('visible');
+}
+
+function closeDescribeFoodModal() {
+  dismissDescribeFoodModal();
+}
+
+function describeBlockFallbackFromLastMeal() {
+  const d = lastMealAnalysisData;
+  if (!d) return '';
+  const parts = [];
+  if (d.title) parts.push('Название: ' + String(d.title));
+  if (d.vision) parts.push('Как было описано/распознано: ' + String(d.vision));
+  if (d.summary) parts.push('Итог ранее: ' + String(d.summary));
+  return parts.join('\n');
+}
+
+async function submitDescribeFood() {
+  const ta = document.getElementById('describe-food-text');
+  const userText = (ta?.value || '').trim();
+  if (!userText) return;
+  if (!openaiApiKey) {
+    document.getElementById('app-init-error')?.classList.add('visible');
+    return;
+  }
+
+  if (describeFoodModalMode === 'refine') {
+    closeDescribeFoodModal();
+    if (ta) ta.value = '';
+    window.scrollTo(0, 0);
+    document.querySelector('#screen-result .result-screen-inner').scrollTo(0, 0);
+    showResultLoader('Уточняем оценку…');
+    console.log('[refine] уточнение отправлено:', userText);
+    console.log('[refine] есть фото:', !!lastMealPhotoDataUrl);
+    const loaderText = document.getElementById('result-loader-text');
+    try {
+      let data;
+      if (lastMealPhotoDataUrl) {
+        data = await analyzeFoodPhoto(lastMealPhotoDataUrl, userText);
+      } else {
+        const base =
+          (lastMealSourceDescribeText && String(lastMealSourceDescribeText).trim()) ||
+          describeBlockFallbackFromLastMeal();
+        if (!String(base).trim()) {
+          throw new Error('Нет данных для пересчёта без фото');
+        }
+        data = await analyzeFoodFromText(base, userText);
+      }
+      lastMealAnalysisData = data;
+      applyResultToUI(data);
+    } catch (err) {
+      lastMealAnalysisData = { verdict: 'error' };
+      applyResultToUI({
+        verdict: 'error',
+        title: 'Ошибка',
+        summary: String(err.message || err),
+        vision: '',
+        education: '',
+        nuances: '',
+        upgrade: '',
+        factors: []
+      });
+    } finally {
+      setResultLoading(false);
+      if (loaderText) loaderText.textContent = 'Анализируем фото…';
+      updateResultActionButtons();
+    }
+    return;
+  }
+
+  lastMealSourceDescribeText = userText;
+  dismissDescribeFoodModal();
+  if (ta) ta.value = '';
+  lastMealPhotoDataUrl = null;
+  lastMealTextOnly = true;
+  lastMealAnalysisData = null;
+  resultBackScreen = 'screen-history';
+  resultViewSource = 'fresh';
+  updateResultActionButtons();
+
+  goTo('screen-result');
+
+  const img = document.getElementById('result-photo-img');
+  const ph = document.getElementById('result-photo-placeholder');
+  const dishTitle = document.getElementById('result-dish-title');
+  const scoreRow = document.getElementById('result-score-row');
+  const scoreDisplay = document.getElementById('result-score-display');
+  const summaryEl = document.getElementById('result-summary-text');
+  const educationEl = document.getElementById('result-education-text');
+  const nuancesEl = document.getElementById('result-nuances-text');
+  const upgradeEl = document.getElementById('result-upgrade-text');
+  const factorsList = document.getElementById('result-factors-list');
+  const loaderText = document.getElementById('result-loader-text');
+
+  if (lastFoodObjectUrl) {
+    URL.revokeObjectURL(lastFoodObjectUrl);
+    lastFoodObjectUrl = null;
+  }
+  img.style.display = 'none';
+  img.removeAttribute('src');
+  img.onload = null;
+  img.onerror = null;
+  if (ph) ph.style.display = 'flex';
+
+  if (loaderText) loaderText.textContent = 'Анализируем описание…';
+
+  if (dishTitle) dishTitle.textContent = '…';
+  scoreRow?.classList.add('hidden');
+  if (scoreDisplay) scoreDisplay.textContent = '…';
+  if (summaryEl) summaryEl.textContent = '—';
+  if (educationEl) educationEl.textContent = '—';
+  if (nuancesEl) nuancesEl.textContent = '—';
+  if (upgradeEl) upgradeEl.textContent = '—';
+  if (factorsList) factorsList.innerHTML = '';
+
+  setResultLoading(true);
+  try {
+    const data = await analyzeFoodFromText(userText);
+    lastMealAnalysisData = data;
+    applyResultToUI(data);
+  } catch (err) {
+    lastMealAnalysisData = { verdict: 'error' };
+    applyResultToUI({
+      verdict: 'error',
+      title: 'Ошибка',
+      summary: String(err.message || err),
+      vision: '',
+      education: '',
+      nuances: '',
+      upgrade: '',
+      factors: []
+    });
+  } finally {
+    setResultLoading(false);
+    if (loaderText) loaderText.textContent = 'Анализируем фото…';
+    updateResultActionButtons();
+  }
+}
+
+function profileIsCompleteData(p) {
+  const email = String(p?.email || '').trim();
+  const name = String(p?.name || '').trim();
+  if (!email || !name) return false;
+  const tmp = document.createElement('input');
+  tmp.type = 'email';
+  tmp.value = email;
+  return tmp.validity.valid;
+}
+
+function profileCompleteFromStorage() {
+  try {
+    const raw = localStorage.getItem(LS_USER_PROFILE);
+    if (!raw) return false;
+    return profileIsCompleteData(JSON.parse(raw));
+  } catch (e) {
+    return false;
+  }
+}
+
+function saveProfileToStorage() {
+  const genderEl = document.querySelector('#seg-gender .seg-btn.active');
+  const unitsEl = document.querySelector('#seg-units .seg-btn.active');
+  const emailEl = document.getElementById('input-email');
+  const nameEl = document.getElementById('input-name');
+  const vTotal = document.getElementById('v-total');
+  const vLdl = document.getElementById('v-ldl');
+  const vHdl = document.getElementById('v-hdl');
+  const vTrig = document.getElementById('v-trig');
+  const ageEl = document.getElementById('input-age');
+  const heightEl = document.getElementById('input-height');
+  const weightEl = document.getElementById('input-weight');
+  const statinsEl = document.getElementById('toggle-statins');
+  const profile = {
+    email: emailEl?.value ?? '',
+    name: nameEl?.value ?? '',
+    v_total: vTotal?.value ?? '',
+    v_ldl: vLdl?.value ?? '',
+    v_hdl: vHdl?.value ?? '',
+    v_trig: vTrig?.value ?? '',
+    dontKnowOn: !!dontKnowOn,
+    gender: genderEl ? genderEl.textContent.trim() : 'Мужской',
+    units: unitsEl ? unitsEl.textContent.trim() : 'ммоль/л',
+    age: ageEl?.value ?? '',
+    height: heightEl?.value ?? '',
+    weight: weightEl?.value ?? '',
+    statins: statinsEl?.classList.contains('on') ?? false
+  };
+  try {
+    localStorage.setItem(LS_USER_PROFILE, JSON.stringify(profile));
+  } catch (e) {}
+}
+
+function setSegActiveByLabel(containerId, label) {
+  const c = document.getElementById(containerId);
+  if (!c || !label) return;
+  c.querySelectorAll('.seg-btn').forEach((btn) => {
+    btn.classList.toggle('active', btn.textContent.trim() === label);
+  });
+}
+
+function applyDontKnowVisual() {
+  const hint = document.getElementById('dontknow-hint');
+  const btn = document.getElementById('dontknow-btn');
+  const fields = ['f-total', 'f-ldl', 'f-hdl', 'f-trig'];
+  hint.classList.toggle('visible', dontKnowOn);
+  btn.classList.toggle('open', dontKnowOn);
+  fields.forEach((id) => document.getElementById(id).classList.toggle('dimmed', dontKnowOn));
+}
+
+function loadProfileFromStorage() {
+  try {
+    const raw = localStorage.getItem(LS_USER_PROFILE);
+    if (!raw) return false;
+    const p = JSON.parse(raw);
+    const emailEl = document.getElementById('input-email');
+    const nameEl = document.getElementById('input-name');
+    const vTotal = document.getElementById('v-total');
+    const vLdl = document.getElementById('v-ldl');
+    const vHdl = document.getElementById('v-hdl');
+    const vTrig = document.getElementById('v-trig');
+    const ageEl = document.getElementById('input-age');
+    const heightEl = document.getElementById('input-height');
+    const weightEl = document.getElementById('input-weight');
+    if (emailEl && p.email != null) emailEl.value = p.email;
+    if (nameEl && p.name != null) nameEl.value = p.name;
+    if (p.v_total != null && vTotal) vTotal.value = p.v_total;
+    if (p.v_ldl != null && vLdl) vLdl.value = p.v_ldl;
+    if (p.v_hdl != null && vHdl) vHdl.value = p.v_hdl;
+    if (p.v_trig != null && vTrig) vTrig.value = p.v_trig;
+    if (p.age != null && ageEl) ageEl.value = p.age;
+    if (p.height != null && heightEl) heightEl.value = p.height;
+    if (p.weight != null && weightEl) weightEl.value = p.weight;
+    dontKnowOn = !!p.dontKnowOn;
+    applyDontKnowVisual();
+    setSegActiveByLabel('seg-gender', p.gender || 'Мужской');
+    setSegActiveByLabel('seg-units', p.units || 'ммоль/л');
+    const st = document.getElementById('toggle-statins');
+    if (st) st.classList.toggle('on', !!p.statins);
+    updateName((p.name || '').trim());
+    return profileIsCompleteData(p);
+  } catch (e) {
+    return false;
+  }
+}
+
+async function saveProfileAndStart() {
+  const emailEl = document.getElementById('input-email');
+  const nameEl = document.getElementById('input-name');
+  const errEl = document.getElementById('profile-validate-error');
+  const wrapE = document.getElementById('field-wrap-email');
+  const wrapN = document.getElementById('field-wrap-name');
+  wrapE?.classList.remove('field--error');
+  wrapN?.classList.remove('field--error');
+  const name = (nameEl?.value ?? '').trim();
+  const email = (emailEl?.value ?? '').trim();
+  let msg = '';
+  if (!name) {
+    msg = 'Введите имя.';
+    wrapN?.classList.add('field--error');
+  } else if (!email) {
+    msg = 'Введите e-mail.';
+    wrapE?.classList.add('field--error');
+  } else if (emailEl) {
+    emailEl.value = email;
+    if (!emailEl.validity.valid) {
+      msg = 'Укажите корректный e-mail.';
+      wrapE?.classList.add('field--error');
+    }
+  }
+  if (msg) {
+    if (errEl) {
+      errEl.textContent = msg;
+      errEl.classList.add('visible');
+    }
+    if (!name) nameEl?.focus();
+    else emailEl?.focus();
+    return;
+  }
+  errEl?.classList.remove('visible');
+  saveProfileToStorage();
+  profileAutofillFromSupabase = false;
+  try {
+    await upsertUserToSupabase();
+  } catch (e) {
+    console.warn(e);
+  }
+  if (profileScreenMode === 'edit') {
+    captureProfileEditBaseline();
+    syncProfileCtaButton();
+    return;
+  }
+  goTo('screen-main');
+}
+
+function skipOnboardingToMain() {
+  goTo('screen-main');
+}
+
+function isMainOrLipidsScreenActive() {
+  return (
+    document.getElementById('screen-main')?.classList.contains('active') ||
+    document.getElementById('screen-lipids')?.classList.contains('active')
+  );
+}
+
+function syncBottomNavForScreen(screenId) {
+  if (screenId === 'screen-auth') {
+    document.querySelectorAll('.bottom-nav').forEach((nav) => {
+      nav.querySelectorAll('.bnav-item').forEach((item) => item.classList.remove('active'));
+    });
+    return;
+  }
+  const idx =
+    screenId === 'screen-main' || screenId === 'screen-lipids'
+      ? 0
+      : screenId === 'screen-history' || screenId === 'screen-result'
+        ? 1
+        : screenId === 'screen-profile'
+          ? 2
+          : -1;
+  if (idx < 0) return;
+  document.querySelectorAll('.bottom-nav').forEach((nav) => {
+    nav.querySelectorAll('.bnav-item').forEach((item, i) => {
+      item.classList.toggle('active', i === idx);
+    });
+  });
+}
+
+function getMealHistory() {
+  try {
+    const r = localStorage.getItem(LS_MEAL_HISTORY);
+    if (!r) return [];
+    const arr = JSON.parse(r);
+    return Array.isArray(arr) ? arr : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function setMealHistory(arr) {
+  const slim = arr.map((m) => {
+    if (m.supabaseId) {
+      const { photoBase64, ...rest } = m;
+      return rest;
+    }
+    return m;
+  });
+  try {
+    localStorage.setItem(LS_MEAL_HISTORY, JSON.stringify(slim));
+  } catch (e) {
+    console.warn('[localStorage] quota exceeded, trimming...', e);
+    const trimmed = slim.slice(-20);
+    try {
+      localStorage.setItem(LS_MEAL_HISTORY, JSON.stringify(trimmed));
+    } catch (e2) {
+      console.warn('[localStorage] still failed after trim', e2);
+    }
+  }
+}
+
+function formatHistoryDateRu(iso) {
+  try {
+    const dt = new Date(iso);
+    if (Number.isNaN(dt.getTime())) return '—';
+    const now = new Date();
+    const today0 = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    const d0 = new Date(dt.getFullYear(), dt.getMonth(), dt.getDate()).getTime();
+    const diffDays = Math.round((today0 - d0) / 864e5);
+    let dayPart;
+    if (diffDays === 0) dayPart = 'Сегодня';
+    else if (diffDays === 1) dayPart = 'Вчера';
+    else dayPart = dt.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
+    const timePart = dt.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+    return `${dayPart} в ${timePart}`;
+  } catch (e) {
+    return '—';
+  }
+}
+
+function getDateLabel(isoString) {
+  const date = new Date(isoString);
+  if (Number.isNaN(date.getTime())) return '—';
+  const today = new Date();
+  const yesterday = new Date();
+  yesterday.setDate(today.getDate() - 1);
+
+  if (date.toDateString() === today.toDateString()) return 'Сегодня';
+  if (date.toDateString() === yesterday.toDateString()) return 'Вчера';
+
+  return date
+    .toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })
+    .replace(' г.', '');
+}
+
+function profileNameForMotivation() {
+  try {
+    const raw = localStorage.getItem(LS_USER_PROFILE);
+    if (!raw) return 'друг';
+    const p = JSON.parse(raw);
+    const n = p.name != null ? String(p.name).trim() : '';
+    return n || 'друг';
+  } catch (e) {
+    return 'друг';
+  }
+}
+
+function motivationTextForAvg(avg) {
+  const n = profileNameForMotivation();
+  if (avg >= 8) return `Это очень круто!\nТак держать, ${n}!`;
+  if (avg >= 6) return `Хороший темп!\nПродолжай, ${n}!`;
+  if (avg >= 4) return `Есть куда расти — шаг за шагом, ${n}.`;
+  return `Попробуй чаще выбирать более лёгкие варианты.\nУ тебя получится, ${n}!`;
+}
+
+function updateHistorySummaryCard() {
+  const card = document.getElementById('history-summary-card');
+  if (!card) return;
+  const items = getMealHistory();
+  const scores = items.map((i) => Number(i.score)).filter((n) => Number.isFinite(n));
+  if (!scores.length) {
+    card.style.display = 'none';
+    return;
+  }
+  const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
+  card.style.display = '';
+  const numEl = document.getElementById('history-avg-num');
+  if (numEl) numEl.textContent = avg.toFixed(2);
+  const motiv = document.getElementById('history-avg-motiv');
+  if (motiv) {
+    motiv.textContent = motivationTextForAvg(avg);
+    motiv.style.whiteSpace = 'pre-line';
+  }
+}
+
+async function renderHistoryList() {
+  const histContent = document.querySelector('.history-content');
+  const skelWrap = document.getElementById('history-skeleton-wrap');
+  const uid = getStoredUserId();
+  const useSkel = !!(uid && histContent && skelWrap);
+
+  if (useSkel) {
+    histContent.classList.add('is-history-loading');
+    skelWrap.classList.remove('is-fading');
+  }
+
+  try {
+    await refreshMealsCacheFromSupabase();
+  } catch (e) {
+    console.warn(e);
+  }
+
+  const listEl = document.getElementById('history-list');
+  const emptyEl = document.getElementById('history-empty');
+  if (!listEl || !emptyEl) {
+    if (useSkel) {
+      histContent.classList.remove('is-history-loading');
+      skelWrap.classList.remove('is-fading');
+    }
+    return;
+  }
+  const items = getMealHistory().slice().reverse();
+  listEl.innerHTML = '';
+  updateHistorySummaryCard();
+  if (!items.length) {
+    emptyEl.style.display = 'block';
+    listEl.style.display = 'none';
+  } else {
+    emptyEl.style.display = 'none';
+    listEl.style.display = '';
+    let lastHistoryDayKey = null;
+    items.forEach((item) => {
+    const dayKey = (() => {
+      const d = new Date(item.at);
+      return Number.isNaN(d.getTime()) ? '' : d.toDateString();
+    })();
+    if (dayKey !== lastHistoryDayKey) {
+      lastHistoryDayKey = dayKey;
+      const heading = document.createElement('h2');
+      heading.className = 'lipid-section-title';
+      heading.textContent = getDateLabel(item.at);
+      listEl.appendChild(heading);
+    }
+    const v = item.verdict;
+    const toneClass =
+      v === 'green'
+        ? 'history-item--green'
+        : v === 'yellow'
+          ? 'history-item--yellow'
+          : v === 'red'
+            ? 'history-item--red'
+            : 'history-item--yellow';
+    const title = (item.title || 'Без названия').trim() || 'Без названия';
+    const dateStr = formatHistoryDateRu(item.at);
+    const sc =
+      item.score != null && !Number.isNaN(Number(item.score))
+        ? formatScoreDisplay(item.score)
+        : '—';
+    let starClass =
+      v === 'green' ? 'history-star--g' : v === 'red' ? 'history-star--r' : 'history-star--y';
+    const scNum = Number(item.score);
+    if (v === 'yellow' && Number.isFinite(scNum) && scNum >= 5 && scNum < 7) {
+      starClass = 'history-star--b';
+    }
+    const row = document.createElement('div');
+    row.className = 'history-item ' + toneClass;
+    const thumbWrap = document.createElement('div');
+    thumbWrap.className = 'history-thumb';
+    const imgUrl = item.textOnly ? '' : item.photoBase64 || item.photo_url || '';
+    if (imgUrl) {
+      thumbWrap.classList.add('is-loading');
+      const im = document.createElement('img');
+      im.className = 'history-thumb-img';
+      im.alt = '';
+      im.decoding = 'async';
+      im.style.opacity = '0';
+      thumbWrap.appendChild(im);
+      let doneOnce = false;
+      const onOk = () => {
+        if (doneOnce) return;
+        doneOnce = true;
+        thumbWrap.classList.remove('is-loading');
+        im.style.opacity = '1';
+      };
+      const onBad = () => {
+        if (doneOnce) return;
+        doneOnce = true;
+        fillHistoryThumbPlaceholder(thumbWrap);
+      };
+      im.onload = onOk;
+      im.onerror = onBad;
+      im.src = imgUrl;
+      if (im.complete && im.naturalWidth) onOk();
+    } else {
+      fillHistoryThumbPlaceholder(thumbWrap);
+    }
+    row.appendChild(thumbWrap);
+    const info = document.createElement('div');
+    info.className = 'history-info';
+    const dateEl = document.createElement('div');
+    dateEl.className = 'history-date';
+    dateEl.textContent = dateStr;
+    const nameEl = document.createElement('div');
+    nameEl.className = 'history-name';
+    nameEl.textContent = title;
+    const ratingEl = document.createElement('div');
+    ratingEl.className = 'history-rating';
+    ratingEl.innerHTML =
+      '<span class="history-star ' +
+      starClass +
+      '" aria-hidden="true">★</span><span class="history-score-text">' +
+      sc +
+      '/10</span>';
+    info.appendChild(dateEl);
+    info.appendChild(nameEl);
+    info.appendChild(ratingEl);
+    row.appendChild(info);
+    row.setAttribute('role', 'button');
+    row.tabIndex = 0;
+    row.addEventListener('click', () => openHistoryMealDetail(item));
+    row.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Enter' || ev.key === ' ') {
+        ev.preventDefault();
+        openHistoryMealDetail(item);
+      }
+    });
+    listEl.appendChild(row);
+    });
+  }
+
+  if (useSkel) {
+    skelWrap.classList.add('is-fading');
+    await new Promise((r) => setTimeout(r, 300));
+    histContent.classList.remove('is-history-loading');
+    skelWrap.classList.remove('is-fading');
+  }
+}
+
+async function saveMealToHistoryAndGoMain() {
+  if (saveMealToHistoryAndGoMain._running) return;
+  saveMealToHistoryAndGoMain._running = true;
+  try {
+  if (resultViewSource === 'history') return;
+  if (!lastMealAnalysisData) {
+    goTo('screen-main');
+    return;
+  }
+  if (!lastMealTextOnly && !lastMealPhotoDataUrl) {
+    goTo('screen-main');
+    return;
+  }
+  const d = lastMealAnalysisData;
+  if (d.verdict === 'error') {
+    goTo('screen-main');
+    return;
+  }
+  const verdict = d.verdict;
+  if (verdict !== 'green' && verdict !== 'yellow' && verdict !== 'red') {
+    goTo('screen-main');
+    return;
+  }
+  const atIso = new Date().toISOString();
+
+  const mealLocal = {
+    textOnly: !!lastMealTextOnly,
+    verdict: verdict,
+    score: d.score,
+    title: d.title != null ? String(d.title) : '',
+    vision: d.vision != null ? String(d.vision) : '',
+    summary: d.summary != null ? String(d.summary) : '',
+    education: d.education != null ? String(d.education) : '',
+    nuances: d.nuances != null ? String(d.nuances) : '',
+    upgrade: d.upgrade != null ? String(d.upgrade) : '',
+    factors: Array.isArray(d.factors) ? d.factors : [],
+    at: atIso
+  };
+  if (!lastMealTextOnly && lastMealPhotoDataUrl) {
+    mealLocal.photoBase64 = lastMealPhotoDataUrl;
+  }
+
+  const arr = getMealHistory();
+  arr.push(mealLocal);
+  setMealHistory(arr);
+
+  const uid = getStoredUserId();
+  if (uid) {
+    try {
+      if (lastMealTextOnly) {
+        const { data, error } = await supabaseClient
+          .from('meals')
+          .insert({
+            user_id: uid,
+            photo_url: '',
+            verdict: verdict,
+            score: d.score,
+            title: d.title != null ? String(d.title) : '',
+            vision: d.vision != null ? String(d.vision) : '',
+            summary: d.summary != null ? String(d.summary) : '',
+            education: d.education != null ? String(d.education) : '',
+            nuances: d.nuances != null ? String(d.nuances) : '',
+            upgrade: d.upgrade != null ? String(d.upgrade) : '',
+            factors: Array.isArray(d.factors) ? d.factors : [],
+            created_at: atIso
+          })
+          .select('id')
+          .single();
+
+        if (error) {
+          console.warn('[supabase] meals insert (text)', error);
+        } else if (data && data.id) {
+          const next = getMealHistory();
+          const idx = next.findIndex((m) => m.at === atIso && !m.supabaseId);
+          if (idx !== -1) {
+            const merged = { ...next[idx], supabaseId: data.id, photo_url: '' };
+            delete merged.photoBase64;
+            next[idx] = merged;
+            setMealHistory(next);
+          }
+        }
+      } else {
+        const compressed = await compressPhoto(lastMealPhotoDataUrl);
+        const fileName = `${uid}/${Date.now()}_${Math.random().toString(36).slice(2, 12)}.jpg`;
+        const publicUrl = await uploadPhotoToStorage(compressed, fileName);
+
+        const { data, error } = await supabaseClient
+          .from('meals')
+          .insert({
+            user_id: uid,
+            photo_url: publicUrl,
+            verdict: verdict,
+            score: d.score,
+            title: d.title != null ? String(d.title) : '',
+            vision: d.vision != null ? String(d.vision) : '',
+            summary: d.summary != null ? String(d.summary) : '',
+            education: d.education != null ? String(d.education) : '',
+            nuances: d.nuances != null ? String(d.nuances) : '',
+            upgrade: d.upgrade != null ? String(d.upgrade) : '',
+            factors: Array.isArray(d.factors) ? d.factors : [],
+            created_at: atIso
+          })
+          .select('id')
+          .single();
+
+        if (error) {
+          console.warn('[supabase] meals insert', error);
+        } else if (data && data.id) {
+          const next = getMealHistory();
+          const idx = next.findIndex((m) => m.at === atIso && !m.supabaseId);
+          if (idx !== -1) {
+            const merged = { ...next[idx], supabaseId: data.id, photo_url: publicUrl };
+            delete merged.photoBase64;
+            next[idx] = merged;
+            setMealHistory(next);
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('[save meal] compress/upload/insert', e);
+      const saveBtn = document.getElementById('result-btn-save-history');
+      if (saveBtn) saveBtn.disabled = false;
+    }
+  }
+
+  goTo('screen-main');
+  } finally {
+    saveMealToHistoryAndGoMain._running = false;
+  }
+}
+
+function backFromResult() {
+  goTo(resultBackScreen || 'screen-main');
+}
+
+/** Значения «я не знаю»: все в зелёной зоне по ESC/AHA (HDL ≥1.5 ммоль/л для нормы). */
+const AVG = { total: 5.0, ldl: 3.0, hdl: 1.5, trig: 1.3 };
+let dontKnowOn = false;
+let lastFoodObjectUrl = null;
+
+/** Холестерин / LDL / HDL: мг/дл ↔ ммоль/л. Триглицериды — отдельный коэффициент. */
+const CHOL_MMOL_TO_MGDL = 38.67;
+const TRIG_MMOL_TO_MGDL = 88.57;
+
+function isProfileMgDl() {
+  const u = document.querySelector('#seg-units .seg-btn.active');
+  return u && u.textContent.trim().toLowerCase() === 'мг/дл';
+}
+
+function parseMmolInput(id) {
+  const el = document.getElementById(id);
+  if (!el) return null;
+  const v = String(el.value).trim().replace(',', '.');
+  if (v === '') return null;
+  const n = parseFloat(v);
+  return Number.isFinite(n) ? n : null;
+}
+
+function formatLipidDisplay(mmol, isMg, isTrig) {
+  if (mmol == null) return '—';
+  const fac = isTrig ? TRIG_MMOL_TO_MGDL : CHOL_MMOL_TO_MGDL;
+  if (isMg) {
+    const v = mmol * fac;
+    return Number.isFinite(v) ? parseFloat(v).toFixed(2) : '—';
+  }
+  return parseFloat(mmol).toFixed(2);
+}
+
+/** Сравнение порогов всегда в ммоль/л; при вводе в мг/дл пересчитываем. */
+function getMmolLipid(id) {
+  const raw = parseMmolInput(id);
+  if (raw == null) return null;
+  if (!isProfileMgDl()) return raw;
+  if (id === 'v-trig') return raw / TRIG_MMOL_TO_MGDL;
+  return raw / CHOL_MMOL_TO_MGDL;
+}
+
+/** Значения липидов для промпта: ммоль/л, два знака; пустое поле → «не указано». */
+function getLipidMmolerForPrompt(id) {
+  const m = getMmolLipid(id);
+  if (m == null) return 'не указано';
+  return parseFloat(m).toFixed(2);
+}
+
+function profileGenderFemale() {
+  const g = document.querySelector('#seg-gender .seg-btn.active');
+  return g && g.textContent.trim() === 'Женский';
+}
+
+function statusCholTotal(m) {
+  if (m <= 5.0) return { tone: 'ok', label: 'норма' };
+  if (m < 6.2) return { tone: 'mid', label: 'погранично' };
+  return { tone: 'bad', label: 'повышен' };
+}
+
+function statusCholLdl(m) {
+  if (m <= 3.0) return { tone: 'ok', label: 'норма' };
+  if (m < 4.0) return { tone: 'mid', label: 'погранично' };
+  return { tone: 'bad', label: 'повышен' };
+}
+
+/** HDL: выше лучше; красный — низкий (порог зависит от пола). */
+function statusCholHdl(m) {
+  const female = profileGenderFemale();
+  const lowRed = female ? 1.2 : 1.0;
+  if (m < lowRed) return { tone: 'bad', label: 'ниже нормы' };
+  if (m < 1.5) return { tone: 'mid', label: 'погранично' };
+  return { tone: 'ok', label: 'норма' };
+}
+
+function statusCholTrig(m) {
+  if (m <= 1.7) return { tone: 'ok', label: 'норма' };
+  if (m < 2.3) return { tone: 'mid', label: 'погранично' };
+  return { tone: 'bad', label: 'повышен' };
+}
+
+function setCholMiniCell(cellId, numId, unitId, stId, mmol, statusFor, isTrig) {
+  const cell = document.getElementById(cellId);
+  const numEl = document.getElementById(numId);
+  const unitEl = document.getElementById(unitId);
+  const stEl = document.getElementById(stId);
+  const mg = isProfileMgDl();
+  const displayUnit = mg ? 'мг/дл' : 'ммоль/л';
+  if (!cell || !numEl || !unitEl || !stEl) return;
+  unitEl.textContent = displayUnit;
+  if (mmol == null) {
+    numEl.textContent = '—';
+    stEl.textContent = '';
+    cell.className = 'chol-mini chol-mini--empty';
+    return;
+  }
+  numEl.textContent = formatLipidDisplay(mmol, mg, isTrig);
+  const { tone, label } = statusFor(mmol);
+  stEl.textContent = label ? ' · ' + label : '';
+  cell.className = 'chol-mini chol-mini--' + tone;
+}
+
+let mainLipidsHydrateSeq = 0;
+
+async function prepareMainScreenLipids() {
+  const stack = document.getElementById('main-lipids-stack');
+  const uid = getStoredUserId();
+  if (!stack) {
+    syncMainCholCard();
+    return;
+  }
+  if (!uid) {
+    stack.classList.remove('is-loading');
+    syncMainCholCard();
+    return;
+  }
+  const seq = ++mainLipidsHydrateSeq;
+  stack.classList.add('is-loading');
+  try {
+    const { data, error } = await supabaseClient.from('users').select('*').eq('id', uid).maybeSingle();
+    if (error) console.warn('[supabase] users hydrate main', error);
+    else if (data) {
+      applySupabaseUserRowToForm(data);
+      saveProfileToStorage();
+    }
+  } catch (e) {
+    console.warn(e);
+  } finally {
+    if (seq !== mainLipidsHydrateSeq) return;
+    stack.classList.remove('is-loading');
+    syncMainCholCard();
+  }
+}
+
+function syncMainCholCard() {
+  const totalM = getMmolLipid('v-total');
+  const ldlM = getMmolLipid('v-ldl');
+  const hdlM = getMmolLipid('v-hdl');
+  const trigM = getMmolLipid('v-trig');
+
+  setCholMiniCell(
+    'main-chol-cell-total',
+    'main-chol-total-num',
+    'main-chol-total-unit',
+    'main-chol-total-st',
+    totalM,
+    statusCholTotal,
+    false
+  );
+  setCholMiniCell(
+    'main-chol-cell-ldl',
+    'main-chol-ldl-num',
+    'main-chol-ldl-unit',
+    'main-chol-ldl-st',
+    ldlM,
+    statusCholLdl,
+    false
+  );
+  setCholMiniCell(
+    'main-chol-cell-hdl',
+    'main-chol-hdl-num',
+    'main-chol-hdl-unit',
+    'main-chol-hdl-st',
+    hdlM,
+    statusCholHdl,
+    false
+  );
+  setCholMiniCell(
+    'main-chol-cell-trig',
+    'main-chol-trig-num',
+    'main-chol-trig-unit',
+    'main-chol-trig-st',
+    trigM,
+    statusCholTrig,
+    true
+  );
+}
+
+function openFoodCamera() {
+  const appInitErr = document.getElementById('app-init-error');
+  const camInput = document.getElementById('food-camera-input');
+  if (!openaiApiKey) {
+    appInitErr?.classList.add('visible');
+    return;
+  }
+  camInput?.click();
+}
+
+function updateLipidProfileCard() {
+  const nameEl = document.getElementById('input-name');
+  const hEl = document.getElementById('input-height');
+  const wEl = document.getElementById('input-weight');
+  const name = (nameEl && nameEl.value.trim()) || 'Профиль';
+  const p = getProfileForPrompt();
+  const ageStr = p.age && String(p.age).trim() && p.age !== 'не указан' ? String(p.age).trim() : '';
+  const sexStr = String(p.sex || '').trim();
+  const sexLabel =
+    sexStr === 'Мужской' || sexStr === 'male'
+      ? 'М'
+      : sexStr === 'Женский' || sexStr === 'female'
+        ? 'Ж'
+        : '—';
+  const hStr = hEl && hEl.value.trim() ? hEl.value.trim() : '—';
+  const wStr = wEl && wEl.value.trim() ? wEl.value.trim() : '—';
+  const nameElOut = document.getElementById('lipid-card-name');
+  const metaEl = document.getElementById('lipid-card-meta');
+  if (nameElOut) nameElOut.textContent = name + (ageStr ? ', ' + ageStr : '');
+  if (metaEl) metaEl.textContent = sexLabel + ' ' + hStr + '/' + wStr;
+}
+
+function getProfileForPrompt() {
+  const total = getLipidMmolerForPrompt('v-total');
+  const ldl = getLipidMmolerForPrompt('v-ldl');
+  const hdl = getLipidMmolerForPrompt('v-hdl');
+  const trig = getLipidMmolerForPrompt('v-trig');
+
+  const genderEl = document.querySelector('#seg-gender .seg-btn.active');
+  const sex = genderEl ? genderEl.textContent.trim() : 'не указан';
+
+  const ageEl = document.getElementById('input-age');
+  const age = ageEl && ageEl.value.trim() ? ageEl.value.trim() : 'не указан';
+
+  const hEl = document.getElementById('input-height');
+  const wEl = document.getElementById('input-weight');
+  const hCm = hEl && hEl.value.trim() ? parseFloat(hEl.value.replace(',', '.')) : NaN;
+  const wKg = wEl && wEl.value.trim() ? parseFloat(wEl.value.replace(',', '.')) : NaN;
+  let bmi = 'не указан';
+  if (Number.isFinite(hCm) && Number.isFinite(wKg) && hCm > 0) {
+    const b = wKg / Math.pow(hCm / 100, 2);
+    bmi = b.toFixed(1);
+  }
+
+  const statinsOn = document.getElementById('toggle-statins')?.classList.contains('on');
+  const statins = statinsOn ? 'да, принимаю' : 'нет';
+
+  return { total, ldl, hdl, trig, sex, age, bmi, statins };
+}
+
+function buildVisionPrompt() {
+  const p = getProfileForPrompt();
+  const ldlRisk = parseFloat(p.ldl) >= 4.0 ? 'высокий' : parseFloat(p.ldl) >= 3.0 ? 'погранично' : 'норма';
+  const totalRisk = parseFloat(p.total) >= 6.2 ? 'высокий' : parseFloat(p.total) >= 5.0 ? 'погранично' : 'норма';
+  const bmiRisk = parseFloat(p.bmi) >= 30 ? 'ожирение' : parseFloat(p.bmi) >= 25 ? 'избыточный вес' : 'норма';
+  const statinsNote = (p.statins === 'true' || p.statins === true)
+    ? 'принимает статины — цель LDL строже: <1.8 ммоль/л'
+    : 'без статинов — цель LDL <3.0 ммоль/л';
+  const out = `Ты опытный нутриционист-кардиолог. Анализируй фото еды строго под липидный профиль этого конкретного человека.
+
+ПРОФИЛЬ ПАЦИЕНТА:
+- Общий холестерин: ${p.total} ммоль/л → риск: ${totalRisk} (цель <5.0)
+- LDL "плохой": ${p.ldl} ммоль/л → риск: ${ldlRisk}
+- HDL "хороший": ${p.hdl} ммоль/л (цель >1.5 — чем выше тем лучше)
+- Триглицериды: ${p.trig} ммоль/л (цель <1.7)
+- Пол: ${p.sex}, возраст: ${p.age} лет, ИМТ: ${p.bmi} (${bmiRisk})
+- Медикаменты: ${statinsNote}
+
+КОНТЕКСТ: Человек активно работает над снижением холестерина через питание. Его LDL ${p.ldl} — это ${ldlRisk} уровень риска. Твои ответы должны обучать его — объясняй механизмы, а не просто давай оценки.
+
+Отвечай ТОЛЬКО валидным JSON без лишнего текста:
+{
+  "verdict": "green" | "yellow" | "red" | "error",
+  "score": 8.5,
+  "title": "Название блюда 2-4 слова",
+  "vision": "Перечисли ВСЕ что видишь: блюдо и его составляющие через запятую. Будь конкретным — не 'салат' а 'греческий салат: помидоры, огурцы, фета, оливки, оливковое масло'",
+  "summary": "2-3 предложения. Назови блюдо, дай чёткую оценку в контексте показателей этого человека. Упомяни его конкретные цифры LDL ${p.ldl} если уместно. Похвали если заслужено.",
+  "education": "3-5 предложений. Объясни механизм: какие конкретные вещества в этом блюде влияют на холестерин и КАК — что происходит в организме на уровне печени, рецепторов LDL. Интересно и понятно без медобразования.",
+  "nuances": "2-3 предложения. Только реальные нюансы если они есть. Если блюдо идеальное — так и напиши. Если есть нюанс — объясни при каком количестве это становится проблемой.",
+  "upgrade": "2-3 предложения. Одно конкретное действие для максимального эффекта именно для LDL ${p.ldl} и общего холестерина ${p.total}. Объясни механизм почему это сработает.",
+  "factors": [
+    {"name": "конкретный продукт или нутриент", "impact": "ok|mid|bad", "effect": "механизм влияния на холестерин 5-8 слов"}
+  ]
+}
+
+ПРАВИЛА ОЦЕНКИ score (1.0-10.0):
+- 9.0-10.0: активно снижает LDL (омега-3, клетчатка, фитостеролы, мононенасыщенные жиры)
+- 7.0-8.9: нейтрально или умеренно полезно
+- 5.0-6.9: смешанный эффект — есть полезное и вредное
+- 3.0-4.9: преобладают насыщенные жиры — вредно для профиля
+- 1.0-2.9: трансжиры или много насыщенных жиров — категорически плохо
+
+verdict: green = score 7.0+, yellow = 5.0-6.9, red = ниже 5.0
+factors: строго 3-4 пункта, только самые значимые для липидного профиля
+Учитывай сочетание продуктов — иногда комбинация важнее отдельных компонентов
+Если ресторанное блюдо — учитывай скрытый жир в соусах
+Если не еда или не уверен: verdict "error", title "Не уверен что это еда", vision — опиши что видишь на фото (например «вижу кожуру апельсина»), summary — скажи что не уверен что это еда и предложи уточнить словами, остальные поля пустые строки, factors []
+score всегда с одним знаком после запятой: 8.5 а не 8 или 8.50`;
+  console.log('[prompt]', out);
+  return out;
+}
+
+function fileToDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result);
+    r.onerror = reject;
+    r.readAsDataURL(file);
+  });
+}
+
+async function compressPhoto(dataUrl, maxSize = 800, quality = 0.7) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      let w = img.width;
+      let h = img.height;
+      if (w > maxSize || h > maxSize) {
+        if (w > h) {
+          h = (h * maxSize) / w;
+          w = maxSize;
+        } else {
+          w = (w * maxSize) / h;
+          h = maxSize;
+        }
+      }
+      canvas.width = w;
+      canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.onerror = () => reject(new Error('compressPhoto: image load failed'));
+    img.src = dataUrl;
+  });
+}
+
+async function uploadPhotoToStorage(base64DataUrl, fileName) {
+  const res = await fetch(base64DataUrl);
+  const blob = await res.blob();
+
+  const { error } = await supabaseClient.storage.from('meal-photos').upload(fileName, blob, {
+    contentType: 'image/jpeg',
+    upsert: true
+  });
+
+  if (error) throw error;
+
+  const { data } = supabaseClient.storage.from('meal-photos').getPublicUrl(fileName);
+
+  return data.publicUrl;
+}
+
+function parseModelJson(raw) {
+  let t = String(raw || '').trim();
+  const m = t.match(/^```(?:json)?\s*([\s\S]*?)```$/i);
+  if (m) t = m[1].trim();
+  return JSON.parse(t);
+}
+
+function formatScoreDisplay(score) {
+  if (score == null || score === '' || Number.isNaN(Number(score))) return '—';
+  const n = Number(score);
+  return Number.isInteger(n) ? String(n) : n.toFixed(1);
+}
+
+function resultFieldText(val, isError) {
+  if (isError) return '—';
+  if (val == null) return '—';
+  const s = String(val).trim();
+  return s === '' ? '—' : s;
+}
+
+function renderFactors(factors, wrap) {
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  const list = Array.isArray(factors) ? factors.slice(0, 4) : [];
+  const impactClass = { ok: 'ok', mid: 'mid', bad: 'bad' };
+  list.forEach((f) => {
+    const imp = impactClass[f.impact] || 'mid';
+    const row = document.createElement('div');
+    row.className = 'factor-row';
+    row.innerHTML =
+      '<div class="factor-dot ' + imp + '"></div>' +
+      '<div class="factor-name"></div>' +
+      '<div class="factor-value"></div>';
+    row.querySelector('.factor-name').textContent = f.name || '—';
+    row.querySelector('.factor-value').textContent = f.effect || '';
+    wrap.appendChild(row);
+  });
+  if (!list.length) {
+    const row = document.createElement('div');
+    row.className = 'result-text';
+    row.style.padding = '4px 0';
+    row.textContent = '—';
+    wrap.appendChild(row);
+  }
+}
+
+function setResultLoading(show) {
+  const el = document.getElementById('result-loader');
+  if (el) el.style.display = show ? 'flex' : 'none';
+}
+
+function showResultLoader(message) {
+  const t = document.getElementById('result-loader-text');
+  if (t) t.textContent = message;
+  setResultLoading(true);
+}
+
+async function analyzeFoodPhoto(dataUrl, userClarification) {
+  const saveBtn = document.getElementById('result-btn-save-history');
+  if (saveBtn) saveBtn.disabled = false;
+  if (!openaiApiKey) {
+    throw new Error('Не удалось загрузить настройки приложения');
+  }
+
+  let prompt = buildVisionPrompt();
+  const clar = userClarification != null ? String(userClarification).trim() : '';
+  if (clar) {
+    prompt +=
+      '\n\nПользователь уточняет детали блюда: ' +
+      clar +
+      '\nПересмотри оценку с учётом этого уточнения.';
+  }
+
+  const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: 'Bearer ' + openaiApiKey
+    },
+    body: JSON.stringify({
+      model: 'gpt-4o',
+      response_format: { type: 'json_object' },
+      max_tokens: 2500,
+      messages: [
+        {
+          role: 'user',
+          content: [
+            { type: 'text', text: prompt },
+            { type: 'image_url', image_url: { url: dataUrl } }
+          ]
+        }
+      ]
+    })
+  });
+
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const msg = body.error?.message || res.statusText || 'Ошибка API';
+    throw new Error(msg);
+  }
+  const raw = body.choices?.[0]?.message?.content;
+  try {
+    return parseModelJson(raw);
+  } catch (e) {
+    throw new Error('Не удалось разобрать ответ модели: ' + (e.message || e));
+  }
+}
+
+async function analyzeFoodFromText(userText, userClarification) {
+  const saveBtn = document.getElementById('result-btn-save-history');
+  if (saveBtn) saveBtn.disabled = false;
+  if (!openaiApiKey) {
+    throw new Error('Не удалось загрузить настройки приложения');
+  }
+  let text =
+    buildVisionPrompt() + '\n\nПользователь описал еду словами (фото нет):\n' + userText;
+  const clar = userClarification != null ? String(userClarification).trim() : '';
+  if (clar) {
+    text +=
+      '\n\nПользователь уточняет детали блюда: ' +
+      clar +
+      '\nПересмотри оценку с учётом этого уточнения.';
+  }
+  const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: 'Bearer ' + openaiApiKey
+    },
+    body: JSON.stringify({
+      model: 'gpt-4o',
+      response_format: { type: 'json_object' },
+      max_tokens: 2500,
+      messages: [
+        {
+          role: 'user',
+          content: [{ type: 'text', text: text }]
+        }
+      ]
+    })
+  });
+
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const msg = body.error?.message || res.statusText || 'Ошибка API';
+    throw new Error(msg);
+  }
+  const raw = body.choices?.[0]?.message?.content;
+  try {
+    return parseModelJson(raw);
+  } catch (e) {
+    throw new Error('Не удалось разобрать ответ модели: ' + (e.message || e));
+  }
+}
+
+function applyResultToUI(data) {
+  const v = data.verdict;
+  const err = v === 'error';
+  const scoreRow = document.getElementById('result-score-row');
+  const scoreDisplay = document.getElementById('result-score-display');
+  const dish = document.getElementById('result-dish-title');
+  const summaryEl = document.getElementById('result-summary-text');
+  const educationEl = document.getElementById('result-education-text');
+  const nuancesEl = document.getElementById('result-nuances-text');
+  const upgradeEl = document.getElementById('result-upgrade-text');
+  const factorsWrap = document.getElementById('result-factors-list');
+  const hrEl = document.querySelector('#screen-result .result-hr');
+  const detailBlocks = [nuancesEl, educationEl, upgradeEl, factorsWrap].map((el) =>
+    el ? el.closest('.result-block') : null
+  );
+
+  if (dish) dish.textContent = data.title || '—';
+
+  if (err) {
+    scoreRow?.classList.add('hidden');
+    if (scoreDisplay) scoreDisplay.textContent = '—';
+    const vis = data.vision != null ? String(data.vision).trim() : '';
+    const sum = data.summary != null ? String(data.summary).trim() : '';
+    let summaryText = '';
+    if (vis !== '') summaryText = 'Вижу на фото: ' + vis;
+    if (sum !== '') {
+      if (summaryText !== '') summaryText += '\n\n';
+      summaryText += sum;
+    }
+    if (summaryText === '') summaryText = '—';
+    if (summaryEl) {
+      summaryEl.textContent = summaryText;
+      summaryEl.style.whiteSpace = 'pre-line';
+    }
+    if (hrEl) hrEl.style.display = 'none';
+    detailBlocks.forEach((block) => {
+      if (block) block.style.display = 'none';
+    });
+  } else {
+    scoreRow?.classList.remove('hidden');
+    if (scoreDisplay) scoreDisplay.textContent = formatScoreDisplay(data.score) + '/10';
+
+    const fromSummary = data.summary != null ? String(data.summary).trim() : '';
+    const fromReason = data.reason != null ? String(data.reason).trim() : '';
+    const summaryText =
+      fromSummary !== '' ? fromSummary : fromReason !== '' ? fromReason : '—';
+    if (summaryEl) {
+      summaryEl.textContent = summaryText;
+      summaryEl.style.whiteSpace = '';
+    }
+
+    if (hrEl) hrEl.style.display = '';
+    detailBlocks.forEach((block) => {
+      if (block) block.style.display = '';
+    });
+
+    if (educationEl) educationEl.textContent = resultFieldText(data.education, false);
+    if (nuancesEl) nuancesEl.textContent = resultFieldText(data.nuances, false);
+    if (upgradeEl) upgradeEl.textContent = resultFieldText(data.upgrade, false);
+    renderFactors(data.factors, factorsWrap);
+  }
+
+  document.querySelector('#screen-result .result-screen-inner').scrollTo(0, 0);
+}
+
+document.getElementById('food-camera-input').addEventListener('change', async (e) => {
+  const file = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if (!file || !file.type.startsWith('image/')) return;
+
+  const dataUrl = await fileToDataUrl(file);
+  lastMealPhotoDataUrl = dataUrl;
+  lastMealTextOnly = false;
+  lastMealSourceDescribeText = null;
+  lastMealAnalysisData = null;
+  resultBackScreen = 'screen-main';
+  resultViewSource = 'fresh';
+  updateResultActionButtons();
+
+  goTo('screen-result');
+
+  const img = document.getElementById('result-photo-img');
+  const ph = document.getElementById('result-photo-placeholder');
+  const dishTitle = document.getElementById('result-dish-title');
+  const scoreRow = document.getElementById('result-score-row');
+  const scoreDisplay = document.getElementById('result-score-display');
+  const summaryEl = document.getElementById('result-summary-text');
+  const educationEl = document.getElementById('result-education-text');
+  const nuancesEl = document.getElementById('result-nuances-text');
+  const upgradeEl = document.getElementById('result-upgrade-text');
+  const factorsList = document.getElementById('result-factors-list');
+  const loaderText = document.getElementById('result-loader-text');
+  if (loaderText) loaderText.textContent = 'Анализируем фото…';
+  if (lastFoodObjectUrl) {
+    URL.revokeObjectURL(lastFoodObjectUrl);
+    lastFoodObjectUrl = null;
+  }
+  lastFoodObjectUrl = URL.createObjectURL(file);
+  img.src = lastFoodObjectUrl;
+  img.onload = () => {
+    img.style.display = 'block';
+    if (ph) ph.style.display = 'none';
+  };
+
+  setResultLoading(true);
+  if (dishTitle) dishTitle.textContent = '…';
+  scoreRow?.classList.add('hidden');
+  if (scoreDisplay) scoreDisplay.textContent = '…';
+  if (summaryEl) summaryEl.textContent = '—';
+  if (educationEl) educationEl.textContent = '—';
+  if (nuancesEl) nuancesEl.textContent = '—';
+  if (upgradeEl) upgradeEl.textContent = '—';
+  if (factorsList) factorsList.innerHTML = '';
+
+  try {
+    const data = await analyzeFoodPhoto(dataUrl);
+    lastMealAnalysisData = data;
+    applyResultToUI(data);
+  } catch (err) {
+    lastMealAnalysisData = { verdict: 'error' };
+    applyResultToUI({
+      verdict: 'error',
+      title: 'Ошибка',
+      summary: String(err.message || err),
+      vision: '',
+      education: '',
+      nuances: '',
+      upgrade: '',
+      factors: []
+    });
+  } finally {
+    setResultLoading(false);
+    updateResultActionButtons();
+  }
+});
+
+function goTo(id, opts) {
+  let targetId = id;
+  let forcedProfileGate = false;
+  if (
+    (id === 'screen-main' ||
+      id === 'screen-lipids' ||
+      id === 'screen-history' ||
+      id === 'screen-result') &&
+    !profileCompleteFromStorage()
+  ) {
+    targetId = 'screen-profile';
+    forcedProfileGate = true;
+    const err = document.getElementById('profile-validate-error');
+    if (err) {
+      err.textContent = 'Укажите e-mail и имя, чтобы пользоваться приложением.';
+      err.classList.add('visible');
+    }
+  }
+  const target = document.getElementById(targetId);
+  if (!target) return;
+  document.querySelectorAll('.screen').forEach((s) => s.classList.remove('active'));
+  target.classList.add('active');
+  if (targetId === 'screen-main' || targetId === 'screen-lipids') void prepareMainScreenLipids();
+  if (targetId === 'screen-lipids') updateLipidProfileCard();
+  if (targetId === 'screen-history') void renderHistoryList();
+  if (targetId === 'screen-profile') {
+    if (forcedProfileGate || !profileCompleteFromStorage()) {
+      profileScreenMode = 'onboarding';
+    } else if (opts && (opts.mode === 'edit' || opts.mode === 'onboarding')) {
+      profileScreenMode = opts.mode;
+    } else {
+      profileScreenMode = 'onboarding';
+    }
+    applyProfileScreenModeToDom();
+    profileEditBaseline = null;
+    if (profileScreenMode === 'edit') {
+      syncProfileCtaButton();
+      setTimeout(async () => {
+        await tryAutofillProfileFromSupabaseEmail();
+        captureProfileEditBaseline();
+        syncProfileCtaButton();
+      }, 0);
+    } else {
+      syncProfileCtaButton();
+      setTimeout(() => void tryAutofillProfileFromSupabaseEmail(), 0);
+    }
+  }
+  syncBottomNavForScreen(targetId);
+}
+function navTo(id, el) {
+  goTo(id, id === 'screen-profile' ? { mode: 'edit' } : undefined);
+  const actualId = document.querySelector('.phone .screen.active')?.id || id;
+  const navIdx = { 'screen-main': 0, 'screen-lipids': 0, 'screen-history': 1, 'screen-profile': 2 };
+  const idx = navIdx[actualId];
+  const nav = el?.closest('.bottom-nav');
+  if (!nav) return;
+  nav.querySelectorAll('.bnav-item').forEach((item, i) => {
+    if (idx !== undefined) item.classList.toggle('active', i === idx);
+  });
+}
+function setSeg(id, el) {
+  const container = document.getElementById(id);
+  const screenProfile = document.getElementById('screen-profile');
+  if (!container) return;
+  container.querySelectorAll('.seg-btn').forEach((b) => b.classList.remove('active'));
+  el.classList.add('active');
+  if (id === 'seg-units' && isMainOrLipidsScreenActive()) syncMainCholCard();
+  if (profileScreenMode === 'edit' && screenProfile?.classList.contains('active')) {
+    syncProfileCtaButton();
+  }
+}
+function toggleSwitch(el) {
+  const screenProfile = document.getElementById('screen-profile');
+  el.classList.toggle('on');
+  if (profileScreenMode === 'edit' && screenProfile?.classList.contains('active')) {
+    syncProfileCtaButton();
+  }
+}
+function updateName(val) {
+  const line = document.getElementById('main-greeting-line');
+  const screenProfile = document.getElementById('screen-profile');
+  if (!line) return;
+  const t = String(val || '').trim();
+  line.textContent = t ? 'Привет, ' + t + '!' : 'Привет!';
+  if (profileScreenMode === 'edit' && screenProfile?.classList.contains('active')) {
+    syncProfileCtaButton();
+  }
+}
+
+function toggleDontKnow() {
+  dontKnowOn = !dontKnowOn;
+  const vTotal = document.getElementById('v-total');
+  const vLdl = document.getElementById('v-ldl');
+  const vHdl = document.getElementById('v-hdl');
+  const vTrig = document.getElementById('v-trig');
+  const screenProfile = document.getElementById('screen-profile');
+  if (dontKnowOn) {
+    if (vTotal) vTotal.value = AVG.total.toFixed(2);
+    if (vLdl) vLdl.value = AVG.ldl.toFixed(2);
+    if (vHdl) vHdl.value = AVG.hdl.toFixed(2);
+    if (vTrig) vTrig.value = AVG.trig.toFixed(2);
+  } else {
+    if (vTotal) vTotal.value = '';
+    if (vLdl) vLdl.value = '';
+    if (vHdl) vHdl.value = '';
+    if (vTrig) vTrig.value = '';
+  }
+  applyDontKnowVisual();
+  if (isMainOrLipidsScreenActive()) syncMainCholCard();
+  if (profileScreenMode === 'edit' && screenProfile?.classList.contains('active')) {
+    syncProfileCtaButton();
+  }
+}
+
+function syncProfileCtaIfEditOpen() {
+  const screenProfile = document.getElementById('screen-profile');
+  if (profileScreenMode === 'edit' && screenProfile?.classList.contains('active')) {
+    syncProfileCtaButton();
+  }
+}
+
+['v-total', 'v-ldl', 'v-hdl', 'v-trig'].forEach((fid) => {
+  document.getElementById(fid)?.addEventListener('input', () => {
+    if (isMainOrLipidsScreenActive()) syncMainCholCard();
+    syncProfileCtaIfEditOpen();
+  });
+});
+['input-age', 'input-height', 'input-weight'].forEach((fid) => {
+  document.getElementById(fid)?.addEventListener('input', syncProfileCtaIfEditOpen);
+});
+
+document.getElementById('input-email')?.addEventListener('input', () => {
+  const wrapE = document.getElementById('field-wrap-email');
+  const errEl = document.getElementById('profile-validate-error');
+  wrapE?.classList.remove('field--error');
+  errEl?.classList.remove('visible');
+  clearTimeout(emailAutofillTimer);
+  emailAutofillTimer = setTimeout(() => void tryAutofillProfileFromSupabaseEmail(), 500);
+  syncProfileCtaIfEditOpen();
+});
+document.getElementById('input-email')?.addEventListener('blur', () => {
+  void tryAutofillProfileFromSupabaseEmail();
+});
+document.getElementById('input-name')?.addEventListener('input', () => {
+  const wrapN = document.getElementById('field-wrap-name');
+  const errEl = document.getElementById('profile-validate-error');
+  wrapN?.classList.remove('field--error');
+  errEl?.classList.remove('visible');
+  syncProfileCtaIfEditOpen();
+});
+
+async function signInWithGoogleAuth() {
+  await supabaseClient.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: 'https://cholesterol-app.vercel.app',
+      skipBrowserRedirect: false
+    }
+  });
+  console.log('[google] запускаем OAuth redirect');
+}
+
+async function submitAuthEmail() {
+  const input = document.getElementById('auth-email');
+  const email = (input?.value || '').trim();
+  const status = document.getElementById('auth-status');
+  const sendBtn = document.getElementById('auth-submit');
+  if (!email) {
+    if (status) status.textContent = 'Введите e-mail.';
+    return;
+  }
+  if (!sendBtn) return;
+  sendBtn.disabled = true;
+  let success = false;
+  try {
+    console.log('[auth] отправляем magic link на:', email);
+    const { error } = await supabaseClient.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: 'https://cholesterol-app.vercel.app' }
+    });
+    console.log('[auth] результат:', error ? 'ошибка: ' + error.message : 'успешно отправлено');
+    if (error) throw error;
+    if (status) status.textContent = 'Проверь почту — мы отправили ссылку для входа';
+    success = true;
+  } catch (e) {
+    if (status) status.textContent = String(e.message || e);
+  } finally {
+    if (!success) sendBtn.disabled = false;
+  }
+
+  if (!success) return;
+
+  if (authResendCountdownTimer) {
+    clearInterval(authResendCountdownTimer);
+    authResendCountdownTimer = null;
+  }
+  let countdown = 60;
+  sendBtn.disabled = true;
+  sendBtn.textContent = `Повторить через ${countdown}с`;
+  const timer = setInterval(() => {
+    countdown--;
+    sendBtn.textContent = `Повторить через ${countdown}с`;
+    if (countdown <= 0) {
+      clearInterval(timer);
+      authResendCountdownTimer = null;
+      sendBtn.disabled = false;
+      sendBtn.textContent = 'Войти';
+    }
+  }, 1000);
+  authResendCountdownTimer = timer;
+}
+
+async function logoutFromApp() {
+  try {
+    await supabaseClient.auth.signOut();
+  } catch (e) {
+    console.warn('[auth] signOut', e);
+  }
+  localStorage.clear();
+  goTo('screen-auth');
+}
+
+async function bootstrapApp() {
+  console.log('[bootstrap] старт');
+  const appInitErr = document.getElementById('app-init-error');
+  appInitErr?.classList.remove('visible');
+
+  const keyOk = await loadOpenAiKeyFromSupabase();
+  console.log('[bootstrap] ключ загружен:', keyOk, '| openaiApiKey:', !!openaiApiKey);
+  if (!keyOk) {
+    appInitErr?.classList.add('visible');
+    return;
+  }
+
+  const {
+    data: { session },
+    error: sessionError
+  } = await supabaseClient.auth.getSession();
+  console.log('[bootstrap] getSession result:', session?.user?.email, '| error:', sessionError);
+
+  if (session) {
+    window.history.replaceState({}, document.title, window.location.pathname);
+    setStoredUserId(session.user.id);
+    const { data: userRow } = await supabaseClient
+      .from('users')
+      .select('*')
+      .eq('id', session.user.id)
+      .maybeSingle();
+    if (userRow) {
+      applySupabaseUserRowToForm(userRow);
+      console.log('[auth] профиль найден в Supabase:', userRow.email, userRow.name);
+      saveProfileToStorage();
+      const profileLoadedComplete = loadProfileFromStorage();
+      console.log(
+        '[bootstrap] после apply+saveProfileToStorage → loadProfileFromStorage():',
+        profileLoadedComplete
+      );
+      goTo('screen-main');
+    } else {
+      goTo('screen-profile', { mode: 'onboarding' });
+    }
+    return;
+  }
+
+  setStoredUserId(null);
+  goTo('screen-auth');
+}
+
+function resizeEduIframe() {
+  const iframe = document.getElementById('main-edu-iframe');
+  if (!iframe) return;
+  try {
+    const win = iframe.contentWindow;
+    const doc = iframe.contentDocument;
+    if (!win || !doc || !doc.body) return;
+    const body = doc.body;
+    const html = doc.documentElement;
+    const last = doc.querySelector('.cards-stack .card:last-child');
+    const padBottom = parseFloat(getComputedStyle(body).paddingBottom) || 0;
+
+    let fromLast = 0;
+    if (last) {
+      const br = body.getBoundingClientRect();
+      const lr = last.getBoundingClientRect();
+      fromLast = lr.bottom - br.top + padBottom;
+    }
+
+    const h = Math.ceil(
+      Math.max(
+        fromLast,
+        body.scrollHeight,
+        html.scrollHeight,
+        body.offsetHeight,
+        html.offsetHeight
+      )
+    );
+    if (h < 1) return;
+    iframe.style.height = h + 'px';
+  } catch (e) {}
+}
+
+function scheduleResizeEduIframe() {
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      resizeEduIframe();
+      setTimeout(resizeEduIframe, 100);
+    });
+  });
+}
+
+window.addEventListener('load', scheduleResizeEduIframe);
+document.getElementById('main-edu-iframe')?.addEventListener('load', scheduleResizeEduIframe);
+
+document.getElementById('auth-google')?.addEventListener('click', () => void signInWithGoogleAuth());
+document.getElementById('auth-submit')?.addEventListener('click', () => void submitAuthEmail());
+document.getElementById('auth-email')?.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') void submitAuthEmail();
+});
+
+bootstrapApp();
+</script>
+
+</body>
+</html>
