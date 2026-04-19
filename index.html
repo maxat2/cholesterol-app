@@ -2425,8 +2425,11 @@ async function submitDescribeFood() {
   const userText = (ta?.value || '').trim();
   if (!userText) return;
   if (!openaiApiKey) {
-    document.getElementById('app-init-error')?.classList.add('visible');
-    return;
+    const ok = await loadOpenAiKeyFromSupabase();
+    if (!ok) {
+      document.getElementById('app-init-error')?.classList.add('visible');
+      return;
+    }
   }
 
   if (describeFoodModalMode === 'refine') {
@@ -2525,11 +2528,15 @@ async function submitDescribeFood() {
     applyResultToUI(data);
   } catch (err) {
     lastMealAnalysisData = { verdict: 'error' };
+    const errMsg2 = String(err.message || err);
+    const noKey2 = !openaiApiKey;
     applyResultToUI({
       verdict: 'error',
-      title: 'Ошибка',
-      summary: String(err.message || err),
-      vision: '',
+      title: noKey2 ? 'Ошибка: ключ API не загружен' : 'Ошибка анализа',
+      summary: noKey2
+        ? 'Настройки приложения не загрузились. Попробуйте закрыть и открыть приложение заново.'
+        : errMsg2,
+      vision: 'Код ошибки: ' + errMsg2,
       education: '',
       nuances: '',
       upgrade: '',
@@ -3293,13 +3300,18 @@ function syncMainCholCard() {
   );
 }
 
-function openFoodCamera() {
+async function openFoodCamera() {
   const appInitErr = document.getElementById('app-init-error');
   const camInput = document.getElementById('food-camera-input');
+  // Если ключ не загружен — пробуем загрузить ещё раз (могло не сработать при старте)
   if (!openaiApiKey) {
-    appInitErr?.classList.add('visible');
-    return;
+    const ok = await loadOpenAiKeyFromSupabase();
+    if (!ok) {
+      appInitErr?.classList.add('visible');
+      return;
+    }
   }
+  appInitErr?.classList.remove('visible');
   camInput?.click();
 }
 
@@ -3415,27 +3427,37 @@ function fileToDataUrl(file) {
 }
 
 async function compressPhoto(dataUrl, maxSize = 800, quality = 0.7) {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const img = new Image();
     img.onload = () => {
-      const canvas = document.createElement('canvas');
-      let w = img.width;
-      let h = img.height;
-      if (w > maxSize || h > maxSize) {
-        if (w > h) {
-          h = (h * maxSize) / w;
-          w = maxSize;
-        } else {
-          w = (w * maxSize) / h;
-          h = maxSize;
+      try {
+        const canvas = document.createElement('canvas');
+        let w = img.width;
+        let h = img.height;
+        if (w > maxSize || h > maxSize) {
+          if (w > h) {
+            h = (h * maxSize) / w;
+            w = maxSize;
+          } else {
+            w = (w * maxSize) / h;
+            h = maxSize;
+          }
         }
+        canvas.width = w;
+        canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      } catch (e) {
+        // Если canvas упал (iOS ограничение) — возвращаем оригинал
+        console.warn('[compress] canvas failed, using original', e);
+        resolve(dataUrl);
       }
-      canvas.width = w;
-      canvas.height = h;
-      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-      resolve(canvas.toDataURL('image/jpeg', quality));
     };
-    img.onerror = () => reject(new Error('compressPhoto: image load failed'));
+    img.onerror = () => {
+      // Если изображение не загрузилось — возвращаем оригинал
+      console.warn('[compress] image load failed, using original');
+      resolve(dataUrl);
+    };
     img.src = dataUrl;
   });
 }
@@ -3731,11 +3753,15 @@ document.getElementById('food-camera-input').addEventListener('change', async (e
     applyResultToUI(data);
   } catch (err) {
     lastMealAnalysisData = { verdict: 'error' };
+    const errMsg = String(err.message || err);
+    const noKey = !openaiApiKey;
     applyResultToUI({
       verdict: 'error',
-      title: 'Ошибка',
-      summary: String(err.message || err),
-      vision: '',
+      title: noKey ? 'Ошибка: ключ API не загружен' : 'Ошибка анализа',
+      summary: noKey
+        ? 'Настройки приложения не загрузились. Попробуйте закрыть и открыть приложение заново.'
+        : errMsg,
+      vision: 'Код ошибки: ' + errMsg,
       education: '',
       nuances: '',
       upgrade: '',
