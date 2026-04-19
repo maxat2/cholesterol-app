@@ -1699,29 +1699,39 @@ async function handleAuthSession(session) {
   if (loc.hash.includes('access_token') || loc.search.includes('access_token') || loc.hash.includes('type=')) {
     window.history.replaceState({}, document.title, loc.pathname);
   }
+
+  // Если профиль уже есть в localStorage — сразу показываем главный экран,
+  // не ждём ответа от БД. Данные подгрузятся в фоне.
+  const cachedProfile = localStorage.getItem('cholesterol_app_user_profile');
+  if (cachedProfile) {
+    console.log('[auth] handleAuthSession: профиль в кэше, сразу goTo screen-main');
+    try { loadProfileFromStorage(); } catch(e) {}
+    goTo('screen-main');
+    // Фоновое обновление профиля из БД
+    supabaseClient.from('users').select('*').eq('id', session.user.id).maybeSingle()
+      .then(({ data: userRow }) => {
+        if (userRow) { applySupabaseUserRowToForm(userRow); saveProfileToStorage(); }
+      }).catch(() => {});
+    return;
+  }
+
+  // Новый пользователь — ждём БД с таймаутом 5 секунд
   try {
-    console.log('[auth] handleAuthSession: запрос профиля для', session.user.id);
-    const { data: userRow, error } = await supabaseClient
-      .from('users')
-      .select('*')
-      .eq('id', session.user.id)
-      .maybeSingle();
-    console.log('[auth] handleAuthSession: userRow=', !!userRow, 'error=', error?.message);
+    console.log('[auth] handleAuthSession: новый пользователь, запрос профиля');
+    const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000));
+    const query = supabaseClient.from('users').select('*').eq('id', session.user.id).maybeSingle();
+    const { data: userRow, error } = await Promise.race([query, timeout]);
     if (error) throw error;
     if (userRow) {
       applySupabaseUserRowToForm(userRow);
       saveProfileToStorage();
-      console.log('[auth] handleAuthSession: goTo screen-main');
       goTo('screen-main');
     } else {
-      console.log('[auth] handleAuthSession: goTo screen-profile onboarding');
       goTo('screen-profile', { mode: 'onboarding' });
     }
   } catch (e) {
-    console.warn('[auth] DB error in handleAuthSession, navigating anyway', e);
-    const hasProfile = !!localStorage.getItem('cholesterol_app_user_profile');
-    console.log('[auth] handleAuthSession catch: hasProfile=', hasProfile);
-    goTo(hasProfile ? 'screen-main' : 'screen-profile', hasProfile ? undefined : { mode: 'onboarding' });
+    console.warn('[auth] DB timeout/error, going to onboarding', e);
+    goTo('screen-profile', { mode: 'onboarding' });
   }
 }
 
