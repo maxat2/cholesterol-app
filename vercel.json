@@ -1,5 +1,0 @@
-{
-  "rewrites": [
-    { "source": "/", "destination": "/cholesterol_app_mvp_v4.html" }
-  ]
-}
