@@ -618,13 +618,14 @@
   }
   /* Явно восстанавливаем кнопку после загрузки */
   .history-content:not(.is-history-loading) #history-describe-btn {
-    visibility: visible;
-    opacity: 1;
-    position: relative;
-    width: 100%;
-    height: 56px;
-    overflow: visible;
-    pointer-events: auto;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: static !important;
+    width: 100% !important;
+    height: 56px !important;
+    overflow: visible !important;
+    pointer-events: auto !important;
+    display: flex !important;
   }
   .history-skel-item {
     display: flex;
@@ -1670,7 +1671,7 @@
           <span class="history-summary-star" aria-hidden="true">★</span>
         </div>
       </div>
-      <button type="button" class="btn-primary" id="history-describe-btn" onclick="setBtnLoading(this);openDescribeFoodModal()" style="margin-top:0;">
+      <button type="button" class="btn-primary" id="history-describe-btn" onclick="setBtnLoading(this);openDescribeFoodModal()" style="margin-top:-4px;">
         <span class="btn-label">Описать еду словами</span>
         <span class="btn-spinner"></span>
       </button>
