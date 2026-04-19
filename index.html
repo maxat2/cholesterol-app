@@ -1590,6 +1590,7 @@ const supabaseClient = __supabaseSdk.createClient(SUPABASE_URL, SUPABASE_ANON_KE
 });
 
 let bootstrapDone = false;
+let authNavigationDone = false;
 
 supabaseClient.auth.onAuthStateChange(async (event, session) => {
   console.log('[auth]', event, session?.user?.email ?? 'no session');
@@ -1598,20 +1599,35 @@ supabaseClient.auth.onAuthStateChange(async (event, session) => {
     if (session) {
       await handleAuthSession(session);
     } else {
-      goTo('screen-auth');
+      setTimeout(() => {
+        if (!authNavigationDone) goTo('screen-auth');
+      }, 500);
     }
     bootstrapDone = true;
+    return;
   }
 
-  if (event === 'SIGNED_IN') {
-    await handleAuthSession(session);
+  if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+    if (session && !authNavigationDone) {
+      await handleAuthSession(session);
+    }
     bootstrapDone = true;
+    return;
+  }
+
+  if (event === 'SIGNED_OUT') {
+    authNavigationDone = false;
+    goTo('screen-auth');
   }
 });
 
 async function handleAuthSession(session) {
+  authNavigationDone = true;
   setStoredUserId(session.user.id);
-  window.history.replaceState({}, document.title, window.location.pathname);
+  const loc = window.location;
+  if (loc.hash.includes('access_token') || loc.search.includes('access_token') || loc.hash.includes('type=')) {
+    window.history.replaceState({}, document.title, loc.pathname);
+  }
   const { data: userRow } = await supabaseClient
     .from('users')
     .select('*')
@@ -3844,13 +3860,14 @@ async function logoutFromApp() {
 
 async function bootstrapApp() {
   console.log('[bootstrap] старт');
-  const appInitErr = document.getElementById('app-init-error');
-  appInitErr?.classList.remove('visible');
-
-  const keyOk = await loadOpenAiKeyFromSupabase();
-  if (!keyOk) {
-    appInitErr?.classList.add('visible');
-  }
+  loadOpenAiKeyFromSupabase().then((keyOk) => {
+    if (!keyOk) {
+      const active = document.querySelector('.screen.active')?.id;
+      if (active && active !== 'screen-auth' && active !== 'screen-profile') {
+        document.getElementById('app-init-error')?.classList.add('visible');
+      }
+    }
+  });
 }
 
 function resizeEduIframe() {
