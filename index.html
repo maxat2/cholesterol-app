@@ -836,7 +836,7 @@
 
   .history-describe-btn {
     width: 100%;
-    height: 56px;
+    min-height: 56px;
     margin-top: -8px;
     padding: 0 16px;
     border: none;
@@ -849,6 +849,7 @@
     cursor: pointer;
     box-sizing: border-box;
     display: flex;
+    flex-shrink: 0;
     align-items: center;
     justify-content: center;
     transition: transform 0.12s ease, opacity 0.12s ease;
