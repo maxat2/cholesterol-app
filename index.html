@@ -2103,6 +2103,16 @@ function buildFullUserRow(profile, emailNormalized) {
   const ldlSrc = profile.ldl != null ? profile.ldl : profile.v_ldl;
   const hdlSrc = profile.hdl != null ? profile.hdl : profile.v_hdl;
   const trigSrc = profile.trig != null ? profile.trig : profile.v_trig;
+  const isMg = profileUnitsToDb(profile.units) === 'mgdl';
+  const rawTotal = parseFloatProfile(totalSrc);
+  const rawLdl   = parseFloatProfile(ldlSrc);
+  const rawHdl   = parseFloatProfile(hdlSrc);
+  const rawTrig  = parseFloatProfile(trigSrc);
+  // Если ввод в мг/дл — конвертируем в ммоль/л для старых столбцов
+  const totalMmol = isMg ? toMmol(rawTotal, false) : rawTotal;
+  const ldlMmol   = isMg ? toMmol(rawLdl,   false) : rawLdl;
+  const hdlMmol   = isMg ? toMmol(rawHdl,   false) : rawHdl;
+  const trigMmol  = isMg ? toMmol(rawTrig,   true)  : rawTrig;
   return {
     email: emailNormalized,
     name: String(profile.name ?? '').trim(),
@@ -2111,10 +2121,18 @@ function buildFullUserRow(profile, emailNormalized) {
     height_cm: parseIntProfile(profile.height),
     weight_kg: parseFloatProfile(profile.weight),
     statins: profile.statins === true,
-    cholesterol: parseFloatProfile(totalSrc),
-    ldl: parseFloatProfile(ldlSrc),
-    hdl: parseFloatProfile(hdlSrc),
-    triglycerides: parseFloatProfile(trigSrc),
+    cholesterol: totalMmol,
+    ldl: ldlMmol,
+    hdl: hdlMmol,
+    triglycerides: trigMmol,
+    cholesterol_mmol: totalMmol,
+    cholesterol_mgdl: isMg ? rawTotal : toMgdl(rawTotal, false),
+    ldl_mmol: ldlMmol,
+    ldl_mgdl: isMg ? rawLdl : toMgdl(rawLdl, false),
+    hdl_mmol: hdlMmol,
+    hdl_mgdl: isMg ? rawHdl : toMgdl(rawHdl, false),
+    trig_mmol: trigMmol,
+    trig_mgdl: isMg ? rawTrig : toMgdl(rawTrig, true),
     units: profileUnitsToDb(profile.units) || 'mmol',
     profile_json: profile,
     updated_at: new Date().toISOString(),
@@ -2130,6 +2148,15 @@ function buildMergedUserUpdate(existing, profile) {
   const trigSrc = profile.trig != null ? profile.trig : profile.v_trig;
   const nameNew = String(profile.name ?? '').trim();
   const sexNew = profileToSex(profile);
+  const isMg = profileUnitsToDb(profile.units) === 'mgdl';
+  const rawTotal = parseFloatProfile(totalSrc);
+  const rawLdl   = parseFloatProfile(ldlSrc);
+  const rawHdl   = parseFloatProfile(hdlSrc);
+  const rawTrig  = parseFloatProfile(trigSrc);
+  const totalMmol = rawTotal != null ? (isMg ? toMmol(rawTotal, false) : rawTotal) : existing.cholesterol ?? null;
+  const ldlMmol   = rawLdl   != null ? (isMg ? toMmol(rawLdl,   false) : rawLdl)   : existing.ldl ?? null;
+  const hdlMmol   = rawHdl   != null ? (isMg ? toMmol(rawHdl,   false) : rawHdl)   : existing.hdl ?? null;
+  const trigMmol  = rawTrig  != null ? (isMg ? toMmol(rawTrig,  true)  : rawTrig)  : existing.triglycerides ?? null;
   return {
     name: nameNew !== '' ? nameNew : existing.name ?? null,
     age: parseIntProfile(profile.age) ?? existing.age ?? null,
@@ -2137,10 +2164,18 @@ function buildMergedUserUpdate(existing, profile) {
     height_cm: parseIntProfile(profile.height) ?? existing.height_cm ?? null,
     weight_kg: parseFloatProfile(profile.weight) ?? existing.weight_kg ?? null,
     statins: profile.statins === true,
-    cholesterol: parseFloatProfile(totalSrc) ?? existing.cholesterol ?? null,
-    ldl: parseFloatProfile(ldlSrc) ?? existing.ldl ?? null,
-    hdl: parseFloatProfile(hdlSrc) ?? existing.hdl ?? null,
-    triglycerides: parseFloatProfile(trigSrc) ?? existing.triglycerides ?? null,
+    cholesterol: totalMmol,
+    ldl: ldlMmol,
+    hdl: hdlMmol,
+    triglycerides: trigMmol,
+    cholesterol_mmol: totalMmol,
+    cholesterol_mgdl: totalMmol != null ? toMgdl(totalMmol, false) : (existing.cholesterol_mgdl ?? null),
+    ldl_mmol: ldlMmol,
+    ldl_mgdl: ldlMmol != null ? toMgdl(ldlMmol, false) : (existing.ldl_mgdl ?? null),
+    hdl_mmol: hdlMmol,
+    hdl_mgdl: hdlMmol != null ? toMgdl(hdlMmol, false) : (existing.hdl_mgdl ?? null),
+    trig_mmol: trigMmol,
+    trig_mgdl: trigMmol != null ? toMgdl(trigMmol, true) : (existing.trig_mgdl ?? null),
     units: profileUnitsToDb(profile.units) || existing.units || 'mmol',
     profile_json: profile,
     updated_at: new Date().toISOString(),
@@ -2193,12 +2228,26 @@ function applySupabaseUserRowToForm(row) {
   if (row.age != null && ageEl) ageEl.value = formatNumberForProfileInput(row.age);
   if (row.height_cm != null && heightEl) heightEl.value = formatNumberForProfileInput(row.height_cm);
   if (row.weight_kg != null && weightEl) weightEl.value = formatNumberForProfileInput(row.weight_kg);
-  if (row.cholesterol != null && vTotal) vTotal.value = formatLipidInputFromNumber(row.cholesterol);
-  if (row.ldl != null && vLdl) vLdl.value = formatLipidInputFromNumber(row.ldl);
-  if (row.hdl != null && vHdl) vHdl.value = formatLipidInputFromNumber(row.hdl);
-  if (row.triglycerides != null && vTrig) vTrig.value = formatLipidInputFromNumber(row.triglycerides);
+  // Сначала устанавливаем единицы, потом подставляем нужные значения
   setSegActiveByLabel('seg-gender', dbSexToGenderLabel(row.sex));
   setSegActiveByLabel('seg-units', dbUnitsToLabel(row.units));
+  const isMgRow = row.units === 'mgdl';
+  const totalVal = isMgRow
+    ? (row.cholesterol_mgdl ?? (row.cholesterol != null ? toMgdl(row.cholesterol, false) : null))
+    : (row.cholesterol_mmol ?? row.cholesterol);
+  const ldlVal = isMgRow
+    ? (row.ldl_mgdl ?? (row.ldl != null ? toMgdl(row.ldl, false) : null))
+    : (row.ldl_mmol ?? row.ldl);
+  const hdlVal = isMgRow
+    ? (row.hdl_mgdl ?? (row.hdl != null ? toMgdl(row.hdl, false) : null))
+    : (row.hdl_mmol ?? row.hdl);
+  const trigVal = isMgRow
+    ? (row.trig_mgdl ?? (row.triglycerides != null ? toMgdl(row.triglycerides, true) : null))
+    : (row.trig_mmol ?? row.triglycerides);
+  if (totalVal != null && vTotal) vTotal.value = formatLipidInputFromNumber(totalVal);
+  if (ldlVal != null && vLdl) vLdl.value = formatLipidInputFromNumber(ldlVal);
+  if (hdlVal != null && vHdl) vHdl.value = formatLipidInputFromNumber(hdlVal);
+  if (trigVal != null && vTrig) vTrig.value = formatLipidInputFromNumber(trigVal);
   const st = document.getElementById('toggle-statins');
   if (st) st.classList.toggle('on', row.statins === true);
   dontKnowOn = false;
@@ -3303,6 +3352,34 @@ let lastFoodObjectUrl = null;
 const CHOL_MMOL_TO_MGDL = 38.67;
 const TRIG_MMOL_TO_MGDL = 88.57;
 
+/** Конвертация: ммоль/л → мг/дл */
+function toMgdl(mmol, isTrig) {
+  if (mmol == null || !Number.isFinite(Number(mmol))) return null;
+  return Math.round(Number(mmol) * (isTrig ? TRIG_MMOL_TO_MGDL : CHOL_MMOL_TO_MGDL) * 100) / 100;
+}
+/** Конвертация: мг/дл → ммоль/л */
+function toMmol(mgdl, isTrig) {
+  if (mgdl == null || !Number.isFinite(Number(mgdl))) return null;
+  return Math.round(Number(mgdl) / (isTrig ? TRIG_MMOL_TO_MGDL : CHOL_MMOL_TO_MGDL) * 10000) / 10000;
+}
+/** Пересчёт полей формы при смене единиц */
+function convertLipidInputs(fromMgdl) {
+  const fields = [
+    { id: 'v-total', isTrig: false },
+    { id: 'v-ldl',   isTrig: false },
+    { id: 'v-hdl',   isTrig: false },
+    { id: 'v-trig',  isTrig: true  },
+  ];
+  fields.forEach(({ id, isTrig }) => {
+    const el = document.getElementById(id);
+    if (!el || el.value.trim() === '') return;
+    const val = parseFloat(el.value.replace(',', '.'));
+    if (!Number.isFinite(val)) return;
+    const converted = fromMgdl ? toMmol(val, isTrig) : toMgdl(val, isTrig);
+    if (converted != null) el.value = parseFloat(converted).toFixed(2);
+  });
+}
+
 function isProfileMgDl() {
   const u = document.querySelector('#seg-units .seg-btn.active');
   return u && u.textContent.trim().toLowerCase() === 'мг/дл';
@@ -4023,9 +4100,21 @@ function setSeg(id, el) {
   const container = document.getElementById(id);
   const screenProfile = document.getElementById('screen-profile');
   if (!container) return;
+  // Определяем текущие единицы ДО переключения
+  const wasMgdl = id === 'seg-units'
+    ? container.querySelector('.seg-btn.active')?.textContent.trim() === 'мг/дл'
+    : false;
   container.querySelectorAll('.seg-btn').forEach((b) => b.classList.remove('active'));
   el.classList.add('active');
-  if (id === 'seg-units' && isMainOrLipidsScreenActive()) syncMainCholCard();
+  // При смене единиц — пересчитываем инпуты
+  if (id === 'seg-units') {
+    const nowMgdl = el.textContent.trim() === 'мг/дл';
+    if (wasMgdl !== nowMgdl) {
+      convertLipidInputs(wasMgdl); // конвертируем из старых в новые
+    }
+    if (isMainOrLipidsScreenActive()) syncMainCholCard();
+    syncMyProfileScreen();
+  }
   if (profileScreenMode === 'edit' && screenProfile?.classList.contains('active')) {
     syncProfileCtaButton();
   }
