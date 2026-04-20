@@ -2271,6 +2271,7 @@ let authResendCountdownTimer = null;
 /** 'onboarding' — первый вход / гейт без профиля; 'edit' — вкладка «Профиль» из нижней навигации */
 let profileScreenMode = 'onboarding';
 let profileEditBaseline = null;
+let profileUnitsDirty = false;
 
 function getProfileFormSnapshot() {
   const genderEl = document.querySelector('#seg-gender .seg-btn.active');
@@ -2304,6 +2305,7 @@ function getProfileFormSnapshot() {
 
 function captureProfileEditBaseline() {
   profileEditBaseline = getProfileFormSnapshot();
+  profileUnitsDirty = false;
 }
 
 function isProfileFormDirty() {
@@ -2379,6 +2381,12 @@ function syncProfileCtaButton() {
   }
 
   btn.textContent = 'Сохранить изменения';
+  // baseline === null означает что форма ещё не "устаканилась" после загрузки — скрываем
+  // baseline === 'dirty' означает принудительно показать (например после смены единиц)
+  if (profileEditBaseline === 'dirty') {
+    btn.classList.remove('profile-cta--hidden');
+    return;
+  }
   if (profileEditBaseline === null) {
     btn.classList.add('profile-cta--hidden');
     return;
@@ -4164,6 +4172,10 @@ function setSeg(id, el) {
     const nowMgdl = el.textContent.trim() === 'мг/дл';
     if (wasMgdl !== nowMgdl) {
       convertLipidInputs(wasMgdl); // конвертируем из старых в новые
+      // Смена единиц — помечаем форму как "грязную" чтобы кнопка показалась
+      if (profileScreenMode === 'edit' && screenProfile?.classList.contains('active')) {
+        profileEditBaseline = 'dirty';
+      }
     }
     if (isMainOrLipidsScreenActive()) syncMainCholCard();
     syncMyProfileScreen();
