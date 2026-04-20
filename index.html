@@ -1282,28 +1282,28 @@
         <div class="field-label">Общий холестерин</div>
         <div class="field-row">
           <input type="number" id="v-total" placeholder="5.2" />
-          <span class="field-unit">ммоль/л</span>
+          <span class="field-unit" id="field-unit-total">ммоль/л</span>
         </div>
       </div>
       <div class="field" id="f-ldl">
         <div class="field-label">Липопротеины низкой плотности (ЛПНП, «плохой» холестерин)</div>
         <div class="field-row">
           <input type="number" id="v-ldl" placeholder="3.3" />
-          <span class="field-unit">ммоль/л</span>
+          <span class="field-unit" id="field-unit-ldl">ммоль/л</span>
         </div>
       </div>
       <div class="field" id="f-hdl">
         <div class="field-label">Липопротеины высокой плотности (ЛПВП, «хороший» холестерин)</div>
         <div class="field-row">
           <input type="number" id="v-hdl" placeholder="1.3" />
-          <span class="field-unit">ммоль/л</span>
+          <span class="field-unit" id="field-unit-hdl">ммоль/л</span>
         </div>
       </div>
       <div class="field" id="f-trig">
         <div class="field-label">Триглицериды</div>
         <div class="field-row">
           <input type="number" id="v-trig" placeholder="1.5" />
-          <span class="field-unit">ммоль/л</span>
+          <span class="field-unit" id="field-unit-trig">ммоль/л</span>
         </div>
       </div>
 
@@ -1510,7 +1510,7 @@
           </div>
           <div class="chol-mini chol-mini--empty" id="mp-chol-cell-trig">
             <div>
-              <div class="chol-mini-name">Триглицериды</div>
+              <div class="chol-mini-name" style="word-break:break-word;">Тригли-цериды</div>
               <div class="chol-mini-val" id="mp-chol-trig-num">—</div>
             </div>
             <div class="chol-mini-foot"><span id="mp-chol-trig-unit">ммоль/л</span><span class="st" id="mp-chol-trig-st"></span></div>
@@ -1526,36 +1526,36 @@
           <div class="ref-row">
             <span class="ref-row-name">Холестерин</span>
             <div class="ref-row-right">
-              <span class="ref-row-val">2.80 – 5.90</span>
-              <span class="ref-row-unit">ммоль/л</span>
+              <span class="ref-row-val" id="ref-val-total">2.80 – 5.90</span>
+              <span class="ref-row-unit" id="ref-unit-total">ммоль/л</span>
             </div>
           </div>
           <div class="ref-row">
             <span class="ref-row-name">Холестерин-ЛПВП</span>
             <div class="ref-row-right">
-              <span class="ref-row-val">0.70 – 1.73</span>
-              <span class="ref-row-unit">ммоль/л</span>
+              <span class="ref-row-val" id="ref-val-hdl">0.70 – 1.73</span>
+              <span class="ref-row-unit" id="ref-unit-hdl">ммоль/л</span>
             </div>
           </div>
           <div class="ref-row">
             <span class="ref-row-name">Холестерин-ЛПНП</span>
             <div class="ref-row-right">
-              <span class="ref-row-val">2.25 – 4.82</span>
-              <span class="ref-row-unit">ммоль/л</span>
+              <span class="ref-row-val" id="ref-val-ldl">2.25 – 4.82</span>
+              <span class="ref-row-unit" id="ref-unit-ldl">ммоль/л</span>
             </div>
           </div>
           <div class="ref-row">
             <span class="ref-row-name">Холестерин-ЛПОНП</span>
             <div class="ref-row-right">
-              <span class="ref-row-val">0.05 – 1.04</span>
-              <span class="ref-row-unit">ммоль/л</span>
+              <span class="ref-row-val" id="ref-val-vldl">0.05 – 1.04</span>
+              <span class="ref-row-unit" id="ref-unit-vldl">ммоль/л</span>
             </div>
           </div>
           <div class="ref-row">
             <span class="ref-row-name">Триглицериды</span>
             <div class="ref-row-right">
-              <span class="ref-row-val">0.62 – 3.61</span>
-              <span class="ref-row-unit">ммоль/л</span>
+              <span class="ref-row-val" id="ref-val-trig">0.62 – 3.61</span>
+              <span class="ref-row-unit" id="ref-unit-trig">ммоль/л</span>
             </div>
           </div>
           <div class="ref-card-note">Среднестатистические значения</div>
@@ -2253,6 +2253,7 @@ function applySupabaseUserRowToForm(row) {
   dontKnowOn = false;
   applyDontKnowVisual();
   updateName((nameEl?.value || '').trim());
+  syncUnitsUI();
 }
 
 let profileAutofillFromSupabase = false;
@@ -2861,6 +2862,7 @@ function loadProfileFromStorage() {
     const st = document.getElementById('toggle-statins');
     if (st) st.classList.toggle('on', !!p.statins);
     updateName((p.name || '').trim());
+    syncUnitsUI();
     return profileIsCompleteData(p);
   } catch (e) {
     return false;
@@ -3351,6 +3353,38 @@ let lastFoodObjectUrl = null;
 /** Холестерин / LDL / HDL: мг/дл ↔ ммоль/л. Триглицериды — отдельный коэффициент. */
 const CHOL_MMOL_TO_MGDL = 38.67;
 const TRIG_MMOL_TO_MGDL = 88.57;
+
+/** Обновляет все лейблы единиц и референсные значения на экране */
+function syncUnitsUI() {
+  const isMg = isProfileMgDl();
+  const label = isMg ? 'мг/дл' : 'ммоль/л';
+
+  // Лейблы в инпутах профиля
+  ['field-unit-total','field-unit-ldl','field-unit-hdl','field-unit-trig'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = label;
+  });
+
+  // Плейсхолдеры инпутов
+  const placeholders = isMg
+    ? { 'v-total': '201', 'v-ldl': '128', 'v-hdl': '50', 'v-trig': '133' }
+    : { 'v-total': '5.2', 'v-ldl': '3.3', 'v-hdl': '1.3', 'v-trig': '1.5' };
+  Object.entries(placeholders).forEach(([id, ph]) => {
+    const el = document.getElementById(id);
+    if (el) el.placeholder = ph;
+  });
+
+  // Референсные значения
+  const refs = isMg
+    ? { total: '108 – 228', hdl: '27 – 67', ldl: '87 – 186', vldl: '2 – 40', trig: '55 – 320' }
+    : { total: '2.80 – 5.90', hdl: '0.70 – 1.73', ldl: '2.25 – 4.82', vldl: '0.05 – 1.04', trig: '0.62 – 3.61' };
+  Object.entries(refs).forEach(([key, val]) => {
+    const valEl = document.getElementById('ref-val-' + key);
+    const unitEl = document.getElementById('ref-unit-' + key);
+    if (valEl) valEl.textContent = val;
+    if (unitEl) unitEl.textContent = label;
+  });
+}
 
 /** Конвертация: ммоль/л → мг/дл */
 function toMgdl(mmol, isTrig) {
@@ -4114,6 +4148,7 @@ function setSeg(id, el) {
     }
     if (isMainOrLipidsScreenActive()) syncMainCholCard();
     syncMyProfileScreen();
+    syncUnitsUI();
   }
   if (profileScreenMode === 'edit' && screenProfile?.classList.contains('active')) {
     syncProfileCtaButton();
