@@ -1228,12 +1228,7 @@
         <svg width="10" height="17" viewBox="0 0 10 17" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M8.5 15.5L1.5 8.5L8.5 1.5" stroke="#1C1B1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
       <div class="history-nav-title">Профиль</div>
-      <button type="button" class="history-nav-side" onclick="showPurchaseModal()" aria-label="Настройки">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <path d="M12 15a3 3 0 100-6 3 3 0 000 6z" stroke="#1C1B1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" stroke="#1C1B1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </button>
+      <span class="history-nav-side" aria-hidden="true"></span>
     </div>
     <div class="content">
       <div class="h2-section">Личные данные</div>
@@ -1627,7 +1622,7 @@
       </div>
       <div class="result-actions" id="result-actions">
         <button type="button" class="btn-primary" id="result-btn-save-history" onclick="setBtnLoading(this);saveMealToHistoryAndGoMain()"><span class="btn-label">Сохранить в историю</span><span class="btn-spinner"></span></button>
-        <button type="button" class="btn-primary" id="result-btn-refine" style="display:none" onclick="openDescribeFoodModalForRefine()">Уточнить</button>
+        <button type="button" class="btn-primary" id="result-btn-refine" style="display:none" onclick="setBtnLoading(this);openDescribeFoodModalForRefine()"><span class="btn-label">Уточнить</span><span class="btn-spinner"></span></button>
         <button type="button" class="btn-secondary" onclick="backFromResult()">← Назад</button>
       </div>
     </div>
@@ -2474,6 +2469,7 @@ function updateResultActionButtons() {
   if (refineBtn) {
     const ok = resultViewSource === 'fresh' && lastMealAnalysisData;
     refineBtn.style.display = ok ? '' : 'none';
+    if (ok) clearBtnLoading(refineBtn);
   }
 }
 
@@ -2571,6 +2567,7 @@ function openDescribeFoodModal() {
 function openDescribeFoodModalForRefine() {
   configureDescribeFoodModal('refine');
   document.getElementById('describe-food-overlay')?.classList.add('visible');
+  clearBtnLoading(document.getElementById('result-btn-refine'));
 }
 
 function dismissDescribeFoodModal() {
