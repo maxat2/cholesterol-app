@@ -1524,41 +1524,48 @@
           <div class="ref-card-title">Референсные значения</div>
           <div class="ref-divider"></div>
           <div class="ref-row">
-            <span class="ref-row-name">Холестерин</span>
+            <span class="ref-row-name">Холестерин общий</span>
             <div class="ref-row-right">
-              <span class="ref-row-val" id="ref-val-total">2.80 – 5.90</span>
+              <span class="ref-row-val" id="ref-val-total">3.10 – 5.20</span>
               <span class="ref-row-unit" id="ref-unit-total">ммоль/л</span>
             </div>
           </div>
           <div class="ref-row">
-            <span class="ref-row-name">Холестерин-ЛПВП</span>
+            <span class="ref-row-name">ЛПВП (муж.)</span>
             <div class="ref-row-right">
-              <span class="ref-row-val" id="ref-val-hdl">0.70 – 1.73</span>
-              <span class="ref-row-unit" id="ref-unit-hdl">ммоль/л</span>
+              <span class="ref-row-val" id="ref-val-hdl-m">1.00 – 1.55</span>
+              <span class="ref-row-unit" id="ref-unit-hdl-m">ммоль/л</span>
             </div>
           </div>
           <div class="ref-row">
-            <span class="ref-row-name">Холестерин-ЛПНП</span>
+            <span class="ref-row-name">ЛПВП (жен.)</span>
             <div class="ref-row-right">
-              <span class="ref-row-val" id="ref-val-ldl">2.25 – 4.82</span>
+              <span class="ref-row-val" id="ref-val-hdl-f">1.20 – 1.80</span>
+              <span class="ref-row-unit" id="ref-unit-hdl-f">ммоль/л</span>
+            </div>
+          </div>
+          <div class="ref-row">
+            <span class="ref-row-name">ЛПНП</span>
+            <div class="ref-row-right">
+              <span class="ref-row-val" id="ref-val-ldl">0.00 – 3.30</span>
               <span class="ref-row-unit" id="ref-unit-ldl">ммоль/л</span>
             </div>
           </div>
           <div class="ref-row">
-            <span class="ref-row-name">Холестерин-ЛПОНП</span>
+            <span class="ref-row-name">ЛПОНП</span>
             <div class="ref-row-right">
-              <span class="ref-row-val" id="ref-val-vldl">0.05 – 1.04</span>
+              <span class="ref-row-val" id="ref-val-vldl">0.13 – 1.04</span>
               <span class="ref-row-unit" id="ref-unit-vldl">ммоль/л</span>
             </div>
           </div>
           <div class="ref-row">
             <span class="ref-row-name">Триглицериды</span>
             <div class="ref-row-right">
-              <span class="ref-row-val" id="ref-val-trig">0.62 – 3.61</span>
+              <span class="ref-row-val" id="ref-val-trig">0.41 – 1.70</span>
               <span class="ref-row-unit" id="ref-unit-trig">ммоль/л</span>
             </div>
           </div>
-          <div class="ref-card-note">Среднестатистические значения</div>
+          <div class="ref-card-note">Источники: Helix, KDL, ESC/EAS, Mayo Clinic, AHA. Разные лаборатории могут использовать немного разные диапазоны — это зависит от оборудования и реагентов. Точный диапазон всегда смотрите в бланке своей лаборатории. Конверсия: холестерин ммоль/л × 38.67 = мг/дл, триглицериды × 88.57 = мг/дл.</div>
         </div>
       </section>
     </div>
@@ -3375,9 +3382,21 @@ function syncUnitsUI() {
   });
 
   // Референсные значения
-  const refs = isMg
-    ? { total: '108 – 228', hdl: '27 – 67', ldl: '87 – 186', vldl: '2 – 40', trig: '55 – 320' }
-    : { total: '2.80 – 5.90', hdl: '0.70 – 1.73', ldl: '2.25 – 4.82', vldl: '0.05 – 1.04', trig: '0.62 – 3.61' };
+  const refs = isMg ? {
+    'total':  '120 – 200',
+    'hdl-m':  '40 – 60',
+    'hdl-f':  '46 – 70',
+    'ldl':    '0 – 130',
+    'vldl':   '5 – 40',
+    'trig':   '36 – 150'
+  } : {
+    'total':  '3.10 – 5.20',
+    'hdl-m':  '1.00 – 1.55',
+    'hdl-f':  '1.20 – 1.80',
+    'ldl':    '0.00 – 3.30',
+    'vldl':   '0.13 – 1.04',
+    'trig':   '0.41 – 1.70'
+  };
   Object.entries(refs).forEach(([key, val]) => {
     const valEl = document.getElementById('ref-val-' + key);
     const unitEl = document.getElementById('ref-unit-' + key);
