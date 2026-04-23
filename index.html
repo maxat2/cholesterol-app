@@ -1233,10 +1233,13 @@
     </div>
     <div class="content">
       <div class="h2-section">Личные данные</div>
-      <div class="field" id="field-wrap-email">
-        <div class="field-label">E-mail <span style="color:#DC2626">*</span></div>
+      <div class="field" id="field-wrap-email" style="opacity:0.6; pointer-events:none;">
+        <div class="field-label" style="display:flex;justify-content:space-between;align-items:center;">
+          E-mail
+          <span style="font-size:11px;color:var(--muted2);font-weight:400;">не изменяется</span>
+        </div>
         <div class="field-row">
-          <input type="email" id="input-email" placeholder="you@example.com" required autocomplete="email" inputmode="email" aria-required="true" />
+          <input type="email" id="input-email" placeholder="you@example.com" readonly tabindex="-1" style="color:var(--muted);" />
         </div>
       </div>
       <div class="field" id="field-wrap-name">
@@ -2895,27 +2898,18 @@ async function saveProfileAndStart() {
   wrapN?.classList.remove('field--error');
   const name = (nameEl?.value ?? '').trim();
   const email = (emailEl?.value ?? '').trim();
+  // Email readonly — не валидируем, только имя обязательно
   let msg = '';
   if (!name) {
     msg = 'Введите имя.';
     wrapN?.classList.add('field--error');
-  } else if (!email) {
-    msg = 'Введите e-mail.';
-    wrapE?.classList.add('field--error');
-  } else if (emailEl) {
-    emailEl.value = email;
-    if (!emailEl.validity.valid) {
-      msg = 'Укажите корректный e-mail.';
-      wrapE?.classList.add('field--error');
-    }
   }
   if (msg) {
     if (errEl) {
       errEl.textContent = msg;
       errEl.classList.add('visible');
     }
-    if (!name) nameEl?.focus();
-    else emailEl?.focus();
+    nameEl?.focus();
     return;
   }
   errEl?.classList.remove('visible');
