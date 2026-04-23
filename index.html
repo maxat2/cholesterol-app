@@ -659,13 +659,13 @@
     position: relative;
   }
   .result-photo {
-    width: auto;
-    margin: 0 var(--main-pad-x);
-    height: 240px;
+    width: 100%;
+    margin: 0;
+    height: 300px;
     background: #F0F0F0;
     overflow: hidden;
     position: relative;
-    border-radius: var(--chol-card-radius);
+    border-radius: 0;
   }
   .result-photo-placeholder {
     width: 100%;
@@ -686,13 +686,14 @@
   .result-photo-img { width: 100%; height: 100%; object-fit: cover; display: none; }
   .result-gpt-line {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 6px;
     padding: 10px var(--main-pad-x);
     font-size: 12px;
     color: var(--muted2);
     background: #FAFAFA;
     border-bottom: 1px solid #F0F0F0;
+    line-height: 1.4;
   }
   .result-body { padding: 20px var(--main-pad-x) 8px; }
   .result-dish-title { font-size: 26px; font-weight: 700; color: var(--accent); line-height: 1.2; margin-bottom: 12px; }
@@ -1601,7 +1602,7 @@
         </div>
         <img class="result-photo-img" id="result-photo-img" alt="" />
       </div>
-      <div class="result-gpt-line">ⓘ Ответ подготовлен на основе GPT-4o</div>
+      <div class="result-gpt-line">ⓘ Приведённая информация носит справочный характер. В ответах искусственного интеллекта могут быть ошибки.</div>
       <div class="result-body">
         <div class="result-dish-title" id="result-dish-title">—</div>
         <div class="result-summary-text" id="result-summary-text">—</div>
