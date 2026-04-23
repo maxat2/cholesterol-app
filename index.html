@@ -1243,9 +1243,9 @@
         </div>
       </div>
       <div class="field" id="field-wrap-name">
-        <div class="field-label">Имя <span style="color:#DC2626">*</span></div>
+        <div class="field-label">Имя</div>
         <div class="field-row">
-          <input type="text" id="input-name" placeholder="Имя" required autocomplete="name" aria-required="true" oninput="updateName(this.value)" />
+          <input type="text" id="input-name" placeholder="Имя" autocomplete="name" oninput="updateName(this.value)" />
         </div>
       </div>
       <div class="field-row-2">
@@ -1334,7 +1334,7 @@
         <div class="seg-btn" onclick="setSeg('seg-units',this)">мг/дл</div>
       </div>
 
-      <div class="inline-error" id="profile-validate-error" role="alert">Укажите e-mail и имя.</div>
+      <div class="inline-error" id="profile-validate-error" role="alert"></div>
       <button type="button" class="btn-primary" id="profile-cta-btn" onclick="setBtnLoading(this);saveProfileAndStart()"><span class="btn-label">Продолжить</span><span class="btn-spinner"></span></button>
 
       <div class="profile-logout-wrap">
@@ -2782,9 +2782,9 @@ async function submitDescribeFood() {
 }
 
 function profileIsCompleteData(p) {
+  // Достаточно только email — имя необязательно
   const email = String(p?.email || '').trim();
-  const name = String(p?.name || '').trim();
-  if (!email || !name) return false;
+  if (!email) return false;
   const tmp = document.createElement('input');
   tmp.type = 'email';
   tmp.value = email;
@@ -2898,20 +2898,7 @@ async function saveProfileAndStart() {
   wrapN?.classList.remove('field--error');
   const name = (nameEl?.value ?? '').trim();
   const email = (emailEl?.value ?? '').trim();
-  // Email readonly — не валидируем, только имя обязательно
-  let msg = '';
-  if (!name) {
-    msg = 'Введите имя.';
-    wrapN?.classList.add('field--error');
-  }
-  if (msg) {
-    if (errEl) {
-      errEl.textContent = msg;
-      errEl.classList.add('visible');
-    }
-    nameEl?.focus();
-    return;
-  }
+  // Имя и email не обязательны — просто сохраняем что есть
   errEl?.classList.remove('visible');
   saveProfileToStorage();
   profileAutofillFromSupabase = false;
