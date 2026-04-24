@@ -1053,6 +1053,52 @@
   .history-score-line { font-size: 13px; color: var(--muted); margin-top: 6px; display: flex; align-items: center; gap: 4px; }
   .history-empty { text-align: center; padding: 40px 16px; color: var(--muted); font-size: 15px; line-height: 1.5; }
 
+  /* Итог дня */
+  .daily-summary-card {
+    background: #E7EDFF;
+    border-radius: 20px;
+    padding: 20px;
+    color: var(--accent);
+    margin-bottom: 4px;
+    cursor: pointer;
+    transition: transform 0.12s ease, opacity 0.12s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .daily-summary-card:active { opacity: 0.85; transform: scale(0.98); }
+  .daily-summary-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .daily-summary-badge {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; opacity: 0.5; color: var(--accent);
+  }
+  .daily-summary-score {
+    font-size: 28px; font-weight: 800; line-height: 1; color: var(--accent);
+  }
+  .daily-summary-score span { font-size: 14px; font-weight: 500; opacity: 0.5; margin-left: 2px; }
+  .daily-summary-meals {
+    font-size: 13px; opacity: 0.55; margin-bottom: 14px; line-height: 1.4; color: var(--accent);
+  }
+  .daily-summary-rows { display: flex; flex-direction: column; gap: 8px; }
+  .daily-summary-row {
+    display: flex; gap: 8px; align-items: flex-start;
+    font-size: 14px; line-height: 1.4; color: var(--accent);
+  }
+  .daily-summary-row-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+  .daily-summary-generating {
+    display: flex; align-items: center; gap: 10px;
+    background: #E7EDFF; border-radius: 20px; padding: 20px;
+    color: var(--accent); font-size: 15px; font-weight: 500;
+  }
+  .daily-summary-spinner {
+    width: 20px; height: 20px; border-radius: 50%;
+    border: 2.5px solid rgba(28,27,31,0.2);
+    border-top-color: var(--accent);
+    animation: btn-spin 0.65s linear infinite;
+    flex-shrink: 0;
+  }
+
   .bottom-nav {
     display: flex;
     background: var(--bg);
@@ -1174,6 +1220,62 @@
   .ref-row-val { font-size: 14px; font-weight: 600; color: var(--accent); }
   .ref-row-unit { font-size: 12px; color: var(--muted); }
   .ref-card-note { font-size: 11px; color: var(--muted2); margin-top: 12px; text-align: center; }
+
+
+  /* ===== Итог дня ===== */
+  .history-summary-day {
+    background: var(--accent);
+    border-radius: 16px;
+    padding: 16px;
+    color: #fff;
+    cursor: pointer;
+    transition: transform 0.12s ease, opacity 0.12s ease;
+    -webkit-tap-highlight-color: transparent;
+    margin-bottom: 4px;
+  }
+  .history-summary-day:active { transform: scale(0.97); opacity: 0.9; }
+  .history-summary-day-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .history-summary-day-title {
+    font-size: 13px;
+    font-weight: 600;
+    opacity: 0.75;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .history-summary-day-score {
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1;
+  }
+  .history-summary-day-score span {
+    font-size: 13px;
+    font-weight: 500;
+    opacity: 0.75;
+  }
+  .history-summary-day-meals {
+    font-size: 13px;
+    opacity: 0.8;
+    margin-bottom: 10px;
+    line-height: 1.4;
+  }
+  .history-summary-day-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .history-summary-day-tag {
+    font-size: 13px;
+    line-height: 1.4;
+    opacity: 0.92;
+  }
+  .history-summary-day-tag--good::before { content: "✅ "; }
+  .history-summary-day-tag--warn::before { content: "⚠️ "; }
+  .history-summary-day-tag--tip::before  { content: "💡 "; }
 
 </style>
 </head>
@@ -2042,6 +2144,25 @@ function setStoredUserId(id) {
 }
 
 function mealRowToLocal(row) {
+  // Итог дня — особый маппинг
+  if (row.is_daily_summary) {
+    let parsed = {};
+    try { parsed = JSON.parse(row.summary || '{}'); } catch {}
+    return {
+      supabaseId: row.id,
+      at: row.eaten_at || row.created_at,
+      is_daily_summary: true,
+      summary_date: row.summary_date,
+      verdict: 'summary',
+      score: row.score,
+      title: row.title || 'Итог дня',
+      meals_line: parsed.meals_line || '',
+      good: parsed.good || '',
+      bad: parsed.bad || '',
+      tip: parsed.tip || '',
+      vision: '', summary: '', education: '', nuances: '', upgrade: '', factors: []
+    };
+  }
   let factors = row.factors;
   if (factors == null) factors = [];
   else if (typeof factors === 'string') {
@@ -2063,7 +2184,7 @@ function mealRowToLocal(row) {
     nuances: row.nuances != null ? String(row.nuances) : '',
     upgrade: row.upgrade != null ? String(row.upgrade) : '',
     factors: Array.isArray(factors) ? factors : [],
-    at: row.created_at || row.at || new Date().toISOString()
+    at: row.eaten_at || row.created_at || row.at || new Date().toISOString()
   };
 }
 
@@ -2494,6 +2615,129 @@ async function upsertUserToSupabase() {
   return null;
 }
 
+
+/** Проверяет нужно ли генерировать итог дня и запускает генерацию */
+async function checkAndGenerateDailySummary() {
+  const uid = getStoredUserId();
+  if (!uid) return;
+
+  const now = new Date();
+  if (now.getHours() < 22) return; // только после 22:00
+
+  const todayKey = now.toISOString().slice(0, 10); // "2026-04-23"
+
+  // Проверяем есть ли уже итог за сегодня
+  const all = getMealHistory();
+  const alreadyDone = all.some(m => m.isDailySummary && m.summaryDate === todayKey);
+  if (alreadyDone) return;
+
+  // Собираем обычные записи за сегодня
+  const todayMeals = all.filter(m => {
+    if (m.isDailySummary) return false;
+    if (!m.at) return false;
+    const d = new Date(m.at);
+    return d.toISOString().slice(0, 10) === todayKey && m.verdict !== 'error';
+  });
+
+  if (todayMeals.length < 2) return; // минимум 2 записи
+
+  console.log('[daily] генерируем итог дня, блюд:', todayMeals.length);
+  await generateDailySummary(todayMeals, todayKey, uid);
+}
+
+/** Генерирует итог дня через API и сохраняет в БД */
+async function generateDailySummary(meals, dateKey, uid) {
+  const p = getProfileForPrompt();
+  const mealsList = meals.map((m, i) =>
+    `${i + 1}. ${m.title || 'блюдо'} (оценка ${m.score || '?'}/10, вердикт: ${m.verdict})`
+  ).join('\n');
+
+  const prompt = `Ты нутриционист-кардиолог. Составь краткий итог питания за день для пациента.
+
+ПРОФИЛЬ: LDL ${p.ldl} ммоль/л, общий холестерин ${p.total} ммоль/л, пол: ${p.sex}, возраст: ${p.age} лет.
+
+БЛЮДА ЗА ДЕНЬ:
+${mealsList}
+
+Ответь ТОЛЬКО валидным JSON:
+{
+  "score": 7.5,
+  "meals_line": "греческий салат, куриный суп, творог",
+  "good": "одно предложение что было хорошего в питании сегодня",
+  "warn": "одно предложение чего не хватало или что было лишним",
+  "tip": "один конкретный совет на завтра с механизмом почему это поможет LDL"
+}
+
+score — средняя взвешенная оценка дня 1.0-10.0, одна цифра после запятой.`;
+
+  try {
+    const res = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'gpt-4o',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const json = await res.json();
+    const raw = json?.choices?.[0]?.message?.content || '';
+    let parsed;
+    try { parsed = parseModelJson(raw); } catch { return; }
+
+    const summaryItem = {
+      at: new Date(dateKey + 'T22:00:00').toISOString(),
+      isDailySummary: true,
+      summaryDate: dateKey,
+      score: parsed.score,
+      mealsLine: parsed.meals_line || '',
+      good: parsed.good || '',
+      warn: parsed.warn || '',
+      tip: parsed.tip || '',
+      verdict: 'summary'
+    };
+
+    // Сохраняем в localStorage
+    const all = getMealHistory();
+    all.push(summaryItem);
+    setMealHistory(all);
+
+    // Сохраняем в Supabase
+    const { data, error } = await supabaseClient.from('meals').insert({
+      user_id: uid,
+      verdict: 'summary',
+      score: parsed.score,
+      title: `Итог дня — ${formatDateRuShort(dateKey)}`,
+      summary: parsed.good || '',
+      nuances: parsed.warn || '',
+      upgrade: parsed.tip || '',
+      vision: parsed.meals_line || '',
+      factors: [],
+      is_daily_summary: true,
+      summary_date: dateKey,
+      eaten_at: summaryItem.at,
+      created_at: summaryItem.at
+    }).select('id').single();
+
+    if (!error && data?.id) {
+      const updated = getMealHistory();
+      const idx = updated.findIndex(m => m.isDailySummary && m.summaryDate === dateKey);
+      if (idx !== -1) { updated[idx].supabaseId = data.id; setMealHistory(updated); }
+      console.log('[daily] итог дня сохранён:', data.id);
+    }
+
+    // Перерендериваем список
+    renderHistoryList();
+  } catch(e) {
+    console.warn('[daily] ошибка генерации итога', e);
+  }
+}
+
+function formatDateRuShort(dateKey) {
+  const d = new Date(dateKey + 'T12:00:00');
+  return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
+}
+
 async function refreshMealsCacheFromSupabase() {
   const uid = getStoredUserId();
   if (!uid) return;
@@ -2514,6 +2758,153 @@ async function refreshMealsCacheFromSupabase() {
   setMealHistory(merged);
   // Фоновая синхронизация несинхронизированных записей
   syncPendingMeals().catch(e => console.warn('[sync] фоновая ошибка', e));
+}
+
+
+// ===== ИТОГ ДНЯ =====
+
+function getTodayDateStr() {
+  const d = new Date();
+  return d.toISOString().slice(0, 10); // "2026-04-23"
+}
+
+function getMealsForDate(dateStr) {
+  const all = getMealHistory();
+  return all.filter(m => {
+    if (m.is_daily_summary) return false;
+    if (!m.at) return false;
+    return m.at.slice(0, 10) === dateStr;
+  });
+}
+
+function hasDailySummaryForDate(dateStr) {
+  return getMealHistory().some(m => m.is_daily_summary && m.summary_date === dateStr);
+}
+
+function buildDailySummaryPrompt(meals, profile) {
+  const p = profile || getProfileForPrompt();
+  const mealsList = meals.map((m, i) =>
+    `${i + 1}. ${m.title || 'Без названия'} — оценка ${m.score ?? '?'}/10 (${m.verdict})
+   Состав: ${m.vision || '—'}
+   Резюме: ${m.summary || '—'}`
+  ).join('\n\n');
+
+  return `Ты опытный нутриционист-кардиолог. Составь итог питания за день для пациента.
+
+ПРОФИЛЬ ПАЦИЕНТА:
+- Общий холестерин: ${p.total} ммоль/л
+- LDL: ${p.ldl} ммоль/л
+- HDL: ${p.hdl} ммоль/л
+- Триглицериды: ${p.trig} ммоль/л
+- Пол: ${p.sex}, возраст: ${p.age} лет
+
+БЛЮДА ЗА ДЕНЬ:
+${mealsList}
+
+Отвечай ТОЛЬКО валидным JSON:
+{
+  "score": 7.5,
+  "title": "Итог дня — краткая оценка 3-5 слов",
+  "meals_line": "перечисли блюда через запятую одной строкой",
+  "good": "что было хорошего в питании сегодня — 1-2 предложения",
+  "bad": "чего не хватало или что стоит улучшить — 1-2 предложения",
+  "tip": "один конкретный совет на завтра исходя из липидного профиля — 1 предложение"
+}
+
+score — средняя оценка с учётом всех блюд и липидного профиля. Одно число с одним знаком после запятой.`;
+}
+
+async function generateDailySummary() {
+  const uid = getStoredUserId();
+  if (!uid) return;
+
+  const today = getTodayDateStr();
+
+  // Проверяем условия: после 22:00, есть 2+ блюда, итог ещё не создан
+  const hour = new Date().getHours();
+  if (hour < 22) return;
+  if (hasDailySummaryForDate(today)) return;
+
+  const meals = getMealsForDate(today);
+  if (meals.length < 2) return;
+
+  console.log('[daily] генерируем итог дня, блюд:', meals.length);
+
+  // Показываем временную карточку-заглушку
+  const listEl = document.getElementById('history-list');
+  let genCard = null;
+  if (listEl) {
+    genCard = document.createElement('div');
+    genCard.className = 'daily-summary-generating';
+    genCard.id = 'daily-summary-generating';
+    genCard.innerHTML = '<div class="daily-summary-spinner"></div><span>Готовим итог дня…</span>';
+    listEl.insertBefore(genCard, listEl.firstChild);
+  }
+
+  try {
+    const prompt = buildDailySummaryPrompt(meals);
+    const res = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'gpt-4o',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const json = await res.json();
+    const raw = json.choices?.[0]?.message?.content || '';
+    let parsed;
+    try { parsed = parseModelJson(raw); } catch { return; }
+
+    const summaryRecord = {
+      at: new Date().toISOString(),
+      is_daily_summary: true,
+      summary_date: today,
+      verdict: 'summary',
+      score: parsed.score,
+      title: parsed.title || 'Итог дня',
+      meals_line: parsed.meals_line || '',
+      good: parsed.good || '',
+      bad: parsed.bad || '',
+      tip: parsed.tip || '',
+      vision: '', summary: '', education: '', nuances: '', upgrade: '',
+      factors: []
+    };
+
+    // Сохраняем локально
+    const history = getMealHistory();
+    history.push(summaryRecord);
+    setMealHistory(history);
+
+    // Сохраняем в Supabase
+    const { data, error } = await supabaseClient.from('meals').insert({
+      user_id: uid,
+      verdict: 'summary',
+      score: parsed.score,
+      title: parsed.title || 'Итог дня',
+      summary: JSON.stringify({ meals_line: parsed.meals_line, good: parsed.good, bad: parsed.bad, tip: parsed.tip }),
+      is_daily_summary: true,
+      summary_date: today,
+      eaten_at: new Date().toISOString(),
+      created_at: new Date().toISOString(),
+      factors: []
+    }).select('id').single();
+
+    if (!error && data?.id) {
+      const hist = getMealHistory();
+      const idx = hist.findIndex(m => m.is_daily_summary && m.summary_date === today && !m.supabaseId);
+      if (idx !== -1) { hist[idx].supabaseId = data.id; setMealHistory(hist); }
+      console.log('[daily] итог дня сохранён → ' + data.id);
+    }
+
+    // Перерисовываем историю
+    await renderHistoryList();
+
+  } catch(e) {
+    console.warn('[daily] ошибка генерации итога', e);
+    if (genCard) genCard.remove();
+  }
 }
 
 async function syncPendingMeals() {
@@ -3139,6 +3530,7 @@ async function renderHistoryList() {
 
   try {
     await refreshMealsCacheFromSupabase();
+    generateDailySummary().catch(e => console.warn('[daily]', e));
   } catch (e) {
     console.warn(e);
   }
@@ -3174,6 +3566,46 @@ async function renderHistoryList() {
       heading.textContent = getDateLabel(item.at);
       listEl.appendChild(heading);
     }
+    // Итог дня — особая карточка
+    if (item.isDailySummary || item.verdict === 'summary') {
+      const card = document.createElement('div');
+      card.className = 'history-summary-day';
+      const sc = item.score != null ? parseFloat(item.score).toFixed(1) : '—';
+      card.innerHTML = `
+        <div class="history-summary-day-header">
+          <div class="history-summary-day-title">📊 Итог дня</div>
+          <div class="history-summary-day-score">${sc}<span>/10</span></div>
+        </div>
+        <div class="history-summary-day-meals">${item.mealsLine || item.vision || ''}</div>
+        <div class="history-summary-day-row">
+          ${item.good ? `<div class="history-summary-day-tag history-summary-day-tag--good">${item.good}</div>` : ''}
+          ${item.warn ? `<div class="history-summary-day-tag history-summary-day-tag--warn">${item.warn}</div>` : ''}
+          ${item.tip  ? `<div class="history-summary-day-tag history-summary-day-tag--tip">${item.tip}</div>`  : ''}
+        </div>`;
+      listEl.appendChild(card);
+      return;
+    }
+
+    // Карточка итога дня
+    if (item.is_daily_summary) {
+      const card = document.createElement('div');
+      card.className = 'daily-summary-card';
+      const sc = item.score != null ? parseFloat(item.score).toFixed(1) : '—';
+      card.innerHTML = `
+        <div class="daily-summary-header">
+          <span class="daily-summary-badge">📊 Итог дня</span>
+          <div class="daily-summary-score">${sc}<span>/ 10</span></div>
+        </div>
+        <div class="daily-summary-meals">${item.meals_line || ''}</div>
+        <div class="daily-summary-rows">
+          ${item.good ? `<div class="daily-summary-row"><span class="daily-summary-row-icon">✅</span><span>${item.good}</span></div>` : ''}
+          ${item.bad ? `<div class="daily-summary-row"><span class="daily-summary-row-icon">⚠️</span><span>${item.bad}</span></div>` : ''}
+          ${item.tip ? `<div class="daily-summary-row"><span class="daily-summary-row-icon">💡</span><span>${item.tip}</span></div>` : ''}
+        </div>`;
+      listEl.appendChild(card);
+      return;
+    }
+
     const v = item.verdict;
     const toneClass =
       v === 'green'
