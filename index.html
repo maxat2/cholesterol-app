@@ -3012,6 +3012,12 @@ function updateResultActionButtons() {
   }
 }
 
+function fillResultPhotoPlaceholder(ph) {
+  if (!ph) return;
+  // Просто показываем стандартный placeholder — no_image_big.svg уже внутри
+  ph.style.display = 'flex';
+}
+
 function openHistoryMealDetail(item) {
   if (!item) return;
   const verdict = item.verdict;
