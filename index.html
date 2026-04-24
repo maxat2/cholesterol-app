@@ -661,12 +661,31 @@
   .result-photo {
     width: 100%;
     margin: 0;
-    height: 300px;
+    height: 360px;
     background: #F0F0F0;
     overflow: hidden;
     position: relative;
     border-radius: 0;
   }
+  .result-back-btn {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    z-index: 10;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #fff;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+    -webkit-tap-highlight-color: transparent;
+    transition: opacity 0.12s ease, transform 0.12s ease;
+  }
+  .result-back-btn:active { opacity: 0.8; transform: scale(0.93); }
   .result-photo-placeholder {
     width: 100%;
     height: 100%;
@@ -1694,14 +1713,10 @@
         <div class="result-loader-spinner"></div>
         <div class="result-loader-text" id="result-loader-text">Анализируем фото…</div>
       </div>
-      <div class="nav history-top-nav">
-        <button type="button" class="history-nav-side" onclick="backFromResult()" aria-label="Назад" title="Назад">
+      <div class="result-photo" id="result-photo-wrap" style="position:relative;">
+        <button type="button" class="result-back-btn" onclick="backFromResult()" aria-label="Назад" title="Назад">
           <svg width="10" height="17" viewBox="0 0 10 17" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M8.5 15.5L1.5 8.5L8.5 1.5" stroke="#1C1B1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
-        <div class="history-nav-title">Фотография</div>
-        <span class="history-nav-side" aria-hidden="true"></span>
-      </div>
-      <div class="result-photo" id="result-photo-wrap">
         <div class="result-photo-placeholder" id="result-photo-placeholder" aria-hidden="true">
           <img class="result-photo-placeholder-img" src="no_image_big.svg" alt="" />
         </div>
