@@ -2996,6 +2996,7 @@ let describeFoodModalMode = 'describe';
 let resultBackScreen = 'screen-main';
 /** fresh — можно сохранить в историю; history — только просмотр */
 let resultViewSource = 'fresh';
+let historyScrollRestore = false;
 
 function updateResultActionButtons() {
   const saveBtn = document.getElementById('result-btn-save-history');
@@ -3019,6 +3020,9 @@ function fillResultPhotoPlaceholder(ph) {
 }
 
 function openHistoryMealDetail(item) {
+  // Запоминаем позицию скролла
+  const histContent = document.querySelector('.history-content');
+  if (histContent) histContent.dataset.scrollPos = histContent.scrollTop;
   if (!item) return;
   const verdict = item.verdict;
   if (verdict === 'error') return;
@@ -3544,6 +3548,16 @@ async function renderHistoryList() {
   const uid = getStoredUserId();
   const useSkel = !!(uid && histContent && skelWrap);
 
+  // Если возвращаемся из детали — просто восстанавливаем скролл, не перерисовываем
+  if (historyScrollRestore) {
+    historyScrollRestore = false;
+    const savedPos = parseInt(histContent?.dataset.scrollPos || '0', 10);
+    if (savedPos > 0 && histContent) {
+      requestAnimationFrame(() => { histContent.scrollTop = savedPos; });
+    }
+    return;
+  }
+
   if (useSkel) {
     histContent.classList.add('is-history-loading');
     skelWrap.classList.remove('is-fading');
@@ -3856,6 +3870,7 @@ async function saveMealToHistoryAndGoMain() {
 }
 
 function backFromResult() {
+  historyScrollRestore = true;
   goTo(resultBackScreen || 'screen-main');
 }
 
