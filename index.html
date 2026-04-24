@@ -2512,6 +2512,70 @@ async function refreshMealsCacheFromSupabase() {
   const merged = fromServer.concat(pending);
   merged.sort((a, b) => new Date(a.at).getTime() - new Date(b.at).getTime());
   setMealHistory(merged);
+  // Фоновая синхронизация несинхронизированных записей
+  syncPendingMeals().catch(e => console.warn('[sync] фоновая ошибка', e));
+}
+
+async function syncPendingMeals() {
+  const uid = getStoredUserId();
+  if (!uid) return;
+  const all = getMealHistory();
+  const pending = all.filter(m => !m.supabaseId && m.verdict && m.verdict !== 'error');
+  if (!pending.length) return;
+  console.log(`[sync] найдено ${pending.length} несинхронизированных записей`);
+
+  for (const meal of pending) {
+    try {
+      let photo_url = '';
+
+      // Если есть фото — сначала загружаем в Storage
+      if (meal.photoBase64) {
+        const compressed = await compressPhoto(meal.photoBase64);
+        const fileName = `${uid}/${Date.now()}_${Math.random().toString(36).slice(2, 12)}.jpg`;
+        photo_url = await uploadPhotoToStorage(compressed, fileName);
+      }
+
+      const { data, error } = await supabaseClient
+        .from('meals')
+        .insert({
+          user_id: uid,
+          photo_url,
+          verdict: meal.verdict,
+          score: meal.score,
+          title: meal.title || '',
+          vision: meal.vision || '',
+          summary: meal.summary || '',
+          education: meal.education || '',
+          nuances: meal.nuances || '',
+          upgrade: meal.upgrade || '',
+          factors: Array.isArray(meal.factors) ? meal.factors : [],
+          eaten_at: meal.at || new Date().toISOString(),
+          created_at: meal.at || new Date().toISOString()
+        })
+        .select('id')
+        .single();
+
+      if (error) {
+        console.warn('[sync] ошибка вставки', error.message, error.details);
+        continue;
+      }
+
+      if (data && data.id) {
+        // Обновляем запись в localStorage
+        const next = getMealHistory();
+        const idx = next.findIndex(m => m.at === meal.at && !m.supabaseId);
+        if (idx !== -1) {
+          const updated = { ...next[idx], supabaseId: data.id, photo_url };
+          delete updated.photoBase64;
+          next[idx] = updated;
+          setMealHistory(next);
+          console.log(`[sync] запись ${meal.title} синхронизирована → ${data.id}`);
+        }
+      }
+    } catch (e) {
+      console.warn('[sync] ошибка при синхронизации записи', meal.title, e);
+    }
+  }
 }
 
 let lastMealPhotoDataUrl = null;
