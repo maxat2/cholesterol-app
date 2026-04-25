@@ -478,23 +478,23 @@
     border-radius: 16px;
     padding: 20px;
     position: relative;
-    overflow: visible;
-    min-height: 170px;
+    overflow: hidden;
+    min-height: 140px;
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     margin-bottom: 20px;
   }
-  .lipid-profile-info { flex: 1; z-index: 1; padding-bottom: 4px; }
+  .lipid-profile-info { flex: 1; z-index: 1; }
   .lipid-profile-name { font-size: 20px; font-weight: 700; color: #1a1a1a; margin-bottom: 6px; }
   .lipid-profile-meta { font-size: 16px; color: #1a1a1a; opacity: 0.8; }
   .lipid-profile-emoji {
     position: absolute;
-    right: 0;
+    right: -20px;
     bottom: -10px;
-    width: 200px;
-    height: 240px;
+    width: 220px;
+    height: 220px;
     object-fit: contain;
-    object-position: bottom right;
+    object-position: bottom center;
   }
 
   .main-lipids { display: flex; flex-direction: column; gap: 12px; flex-shrink: 0; }
