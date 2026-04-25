@@ -762,7 +762,7 @@
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    gap: 12px;
+    gap: 10px;
     box-sizing: border-box;
   }
   .nav.history-top-nav {
@@ -800,9 +800,9 @@
 
 
   .history-summary {
-    background: linear-gradient(180deg, #EDFAEE 0%, #FFFFFF 100%);
+    background: transparent;
     border-radius: 16px;
-    padding: 16px;
+    padding: 4px 0 0;
   }
   .history-summary-top {
     display: flex;
@@ -829,14 +829,14 @@
     letter-spacing: -0.02em;
   }
   .history-summary-motiv {
-    font-size: 13px;
+    font-size: 10px;
     color: var(--muted);
     line-height: 1.4;
     margin: 0;
     flex: 1;
     text-align: right;
     padding-top: 4px;
-    max-width: 160px;
+    max-width: 140px;
   }
   .history-week-chart {
     display: block;
@@ -870,18 +870,18 @@
   .history-item-arrow {
     position: absolute;
     right: 12px;
-    bottom: 10px;
-    width: 7px;
-    height: 12px;
-    opacity: 0.2;
+    bottom: 12px;
+    width: 8px;
+    height: 13px;
+    opacity: 0.35;
     flex-shrink: 0;
   }
   /* Контейнер превью — квадрат на всю высоту карточки */
   .history-thumb {
     position: relative;
-    width: 80px;
-    min-width: 80px;
-    max-width: 80px;
+    width: 112px;
+    min-width: 112px;
+    max-width: 112px;
     align-self: stretch;
     border-radius: 0;
     background: #EEE;
@@ -991,6 +991,11 @@
   .history-empty { text-align: center; padding: 40px 16px; color: var(--muted); font-size: 15px; line-height: 1.5; }
 
   /* Итог дня */
+  /* Заголовки групп в истории */
+  #history-list .lipid-section-title {
+    margin-top: 8px;
+    margin-bottom: 15px;
+  }
   /* Итог дня — сворачиваемая карточка */
   .daily-summary-card {
     background: #fff;
@@ -3678,28 +3683,8 @@ async function renderHistoryList() {
       heading.textContent = getDateLabel(item.at);
       listEl.appendChild(heading);
     }
-    // Итог дня — особая карточка
-    if (item.isDailySummary || item.verdict === 'summary') {
-      const card = document.createElement('div');
-      card.className = 'history-summary-day';
-      const sc = item.score != null ? parseFloat(item.score).toFixed(1) : '—';
-      card.innerHTML = `
-        <div class="history-summary-day-header">
-          <div class="history-summary-day-title">📊 Итог дня</div>
-          <div class="history-summary-day-score">${sc}<span>/10</span></div>
-        </div>
-        <div class="history-summary-day-meals">${item.mealsLine || item.vision || ''}</div>
-        <div class="history-summary-day-row">
-          ${item.good ? `<div class="history-summary-day-tag history-summary-day-tag--good">${item.good}</div>` : ''}
-          ${item.warn ? `<div class="history-summary-day-tag history-summary-day-tag--warn">${item.warn}</div>` : ''}
-          ${item.tip  ? `<div class="history-summary-day-tag history-summary-day-tag--tip">${item.tip}</div>`  : ''}
-        </div>`;
-      listEl.appendChild(card);
-      return;
-    }
-
     // Карточка итога дня
-    if (item.is_daily_summary) {
+    if (item.is_daily_summary || item.isDailySummary || item.verdict === 'summary') {
       const sc = item.score != null ? parseFloat(item.score).toFixed(1) : '—';
       const card = document.createElement('div');
       card.className = 'daily-summary-card';
