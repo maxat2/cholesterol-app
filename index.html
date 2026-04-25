@@ -822,11 +822,11 @@
     font-weight: 500;
   }
   .history-summary-num {
-    font-size: 52px;
+    font-size: 60px;
     font-weight: 800;
     line-height: 1;
     color: var(--accent);
-    letter-spacing: -0.02em;
+    letter-spacing: -0.03em;
   }
   .history-summary-motiv {
     font-size: 10px;
@@ -841,7 +841,8 @@
   .history-week-chart {
     display: block;
     width: 100%;
-    height: 100px;
+    height: 120px;
+    margin-bottom: 4px;
   }
 
     .history-item {
@@ -961,10 +962,10 @@
     overflow: hidden;
   }
   .history-card-arrow {
-    width: 7px;
-    height: 12px;
+    width: 8px;
+    height: 14px;
     margin-left: auto;
-    opacity: 0.25;
+    opacity: 0.4;
     flex-shrink: 0;
   }
   .history-rating {
@@ -997,8 +998,8 @@
   /* Итог дня */
   /* Заголовки групп в истории */
   #history-list .lipid-section-title {
-    margin-top: 8px;
-    margin-bottom: 15px;
+    margin-top: 20px;
+    margin-bottom: 12px;
   }
   /* Итог дня — сворачиваемая карточка */
   .daily-summary-card {
@@ -3555,8 +3556,8 @@ function drawWeekChart(meals) {
 
   const barW = Math.floor((W - 40) / 9);
   const gap = Math.floor((W - 40 - 7 * barW) / 6);
-  const maxH = 48;
-  const baseY = 64;
+  const maxH = H - 20;
+  const baseY = H - 14;
   const startX = 4;
 
   ctx.clearRect(0, 0, W, H);
@@ -3567,11 +3568,11 @@ function drawWeekChart(meals) {
   [0.5, 1].forEach(f => {
     ctx.beginPath();
     ctx.moveTo(startX, baseY - maxH * f);
-    ctx.lineTo(W - 30, baseY - maxH * f);
+    ctx.lineTo(W - 28, baseY - maxH * f);
     ctx.stroke();
   });
   ctx.fillStyle = 'rgba(0,0,0,0.3)';
-  ctx.font = `${9 * dpr / dpr}px -apple-system,sans-serif`;
+  ctx.font = '9px -apple-system,sans-serif';
   ctx.textAlign = 'right';
   ctx.fillText('10', W - 2, baseY - maxH + 4);
   ctx.fillText('5', W - 2, baseY - maxH * 0.5 + 4);
@@ -3583,7 +3584,7 @@ function drawWeekChart(meals) {
     ctx.fillStyle = 'rgba(0,0,0,0.35)';
     ctx.font = `${10 * dpr / dpr}px -apple-system,sans-serif`;
     ctx.textAlign = 'center';
-    ctx.fillText(dow[dayDate.getDay()], x + barW / 2, H - 1);
+    ctx.fillText(dow[dayDate.getDay()], x + barW / 2, H - 2);
 
     if (score === null) return;
 
