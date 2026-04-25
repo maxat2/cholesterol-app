@@ -822,8 +822,8 @@
     gap: 2px;
   }
   .history-summary-label {
-    font-size: 13px;
-    color: var(--muted);
+    font-size: 16px;
+    color: var(--accent);
     font-weight: 500;
   }
   .history-summary-num {
@@ -1783,7 +1783,7 @@
             <span class="history-summary-label">Средняя оценка питания</span>
             <span class="history-summary-num" id="history-avg-num">—</span>
           </div>
-          <p class="history-summary-motiv" id="history-avg-motiv"></p>
+
         </div>
         <canvas id="history-week-chart" class="history-week-chart" width="280" height="100"></canvas>
       </div>
@@ -3559,11 +3559,11 @@ function drawWeekChart(meals) {
     return dayMeals.reduce((s, m) => s + Number(m.score), 0) / dayMeals.length;
   });
 
-  const barW = Math.floor((W - 40) / 9);
-  const gap = Math.floor((W - 40 - 7 * barW) / 6);
+  const barW = Math.floor((W - 8) / 9);
+  const gap = Math.floor((W - 8 - 7 * barW) / 6);
   const maxH = H - 20;
   const baseY = H - 14;
-  const startX = 4;
+  const startX = 0;
 
   ctx.clearRect(0, 0, W, H);
 
@@ -3573,14 +3573,10 @@ function drawWeekChart(meals) {
   [0.5, 1].forEach(f => {
     ctx.beginPath();
     ctx.moveTo(startX, baseY - maxH * f);
-    ctx.lineTo(W - 28, baseY - maxH * f);
+    ctx.lineTo(W, baseY - maxH * f);
     ctx.stroke();
   });
-  ctx.fillStyle = 'rgba(0,0,0,0.3)';
-  ctx.font = '9px -apple-system,sans-serif';
-  ctx.textAlign = 'right';
-  ctx.fillText('10', W - 2, baseY - maxH + 4);
-  ctx.fillText('5', W - 2, baseY - maxH * 0.5 + 4);
+
 
   days.forEach((dateStr, i) => {
     const score = dayScores[i];
@@ -3625,11 +3621,7 @@ function updateHistorySummaryCard() {
   card.style.display = '';
   const numEl = document.getElementById('history-avg-num');
   if (numEl) numEl.textContent = avg.toFixed(2);
-  const motiv = document.getElementById('history-avg-motiv');
-  if (motiv) {
-    motiv.textContent = motivationTextForAvg(avg);
-    motiv.style.whiteSpace = 'pre-line';
-  }
+
   // График 7 дней
   requestAnimationFrame(() => drawWeekChart(getMealHistory()));
 }
