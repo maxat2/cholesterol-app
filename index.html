@@ -748,16 +748,21 @@
   .factor-value { font-size: 13px; color: var(--muted); }
 
   /* История: карточки на всю ширину контента (как блоки на главной) */
+  .history-header-gradient {
+    flex-shrink: 0;
+    background: linear-gradient(180deg, #EDFAEE 0%, #FFFFFF 100%);
+    padding-bottom: 12px;
+  }
   #screen-history .content.history-content {
     flex: 1;
     min-height: 0;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    padding: 0 var(--main-pad-x) 16px;
+    padding: 16px var(--main-pad-x) 32px;
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    gap: 16px;
+    gap: 12px;
     box-sizing: border-box;
   }
   .nav.history-top-nav {
@@ -793,177 +798,88 @@
     font-family: var(--sans);
   }
 
+
   .history-summary {
-    width: 100%;
-    box-sizing: border-box;
-    min-height: 132px;
-    background: var(--card-blue);
-    border-radius: 16px;
-    padding: 14px 16px 12px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    gap: 8px;
+    padding: 0 20px 4px;
   }
   .history-summary-top {
     display: flex;
-    justify-content: space-between;
     align-items: flex-start;
-    gap: 12px;
-  }
-  .history-summary-label {
-    flex: 1;
-    min-width: 0;
-    font-size: 15.24px;
-    font-weight: 400;
-    line-height: 1.25;
-    color: #000000;
-    font-family: var(--sans);
-  }
-  .history-summary-num {
-    flex-shrink: 0;
-    font-size: 50.75px;
-    font-weight: 700;
-    line-height: 0.95;
-    color: #000000;
-    font-family: var(--sans);
-    letter-spacing: -0.03em;
-  }
-  .history-summary-bottom {
-    display: flex;
     justify-content: space-between;
-    align-items: flex-end;
-    gap: 8px;
-    padding-right: 2px;
-  }
-  .history-summary-motiv {
-    margin: 0;
-    flex: 1;
-    min-width: 0;
-    font-size: 11px;
-    font-weight: 400;
-    line-height: 1.35;
-    color: #000000;
-    font-family: var(--sans);
-    white-space: pre-line;
-  }
-  .history-summary-star {
-    font-size: 15px;
-    line-height: 1;
-    color: #000000;
-    flex-shrink: 0;
-  }
-
-  .history-describe-btn {
-    width: 100%;
-    min-height: 56px;
-    margin-top: -8px;
-    padding: 0 16px;
-    border: none;
-    border-radius: 16px;
-    background: var(--accent);
-    font-family: var(--sans);
-    font-size: 16px;
-    font-weight: 600;
-    color: #fff;
-    cursor: pointer;
-    box-sizing: border-box;
-    display: flex;
-    flex-shrink: 0;
-    align-items: center;
-    justify-content: center;
-    transition: transform 0.12s ease, opacity 0.12s ease;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .history-describe-btn:active {
-    opacity: 0.82;
-    transform: scale(0.97);
-  }
-
-  .describe-food-overlay {
-    display: none;
-    position: absolute;
-    inset: 0;
-    z-index: 300;
-    background: rgba(0, 0, 0, 0.45);
-    align-items: flex-end;
-    justify-content: center;
-  }
-  .describe-food-overlay.visible {
-    display: flex;
-  }
-  .describe-food-sheet {
-    width: 100%;
-    background: var(--bg);
-    border-radius: 24px 24px 0 0;
-    padding: 12px 20px max(28px, env(safe-area-inset-bottom));
-    max-height: 85%;
-    animation: sheetUp 0.28s ease;
-    box-sizing: border-box;
-  }
-  .describe-food-title {
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--accent);
-    margin-bottom: 14px;
-    font-family: var(--sans);
-  }
-  .describe-food-textarea {
-    width: 100%;
-    min-height: 160px;
-    padding: 14px;
     margin-bottom: 16px;
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    font-family: var(--sans);
-    font-size: 16px;
-    line-height: 1.45;
-    color: var(--text);
-    resize: vertical;
-    box-sizing: border-box;
   }
-  .describe-food-textarea:focus {
-    outline: none;
-    border-color: #bbb;
-  }
-
-  #history-list {
-    width: 100%;
-    box-sizing: border-box;
+  .history-summary-left {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 4px;
+  }
+  .history-summary-label {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 500;
+  }
+  .history-summary-num {
+    font-size: 48px;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--accent);
+    letter-spacing: -0.02em;
+  }
+  .history-summary-motiv {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.4;
+    margin: 0;
+    max-width: 180px;
+  }
+  /* График 7 дней */
+  .history-week-chart {
+    display: block;
+    width: 100%;
+    height: 80px;
   }
 
-  .history-item {
+    .history-item {
     width: 100%;
     box-sizing: border-box;
-    min-height: 132px;
+    min-height: 96px;
     border-radius: 16px;
-    padding: 16px 12px;
+    padding: 0;
     display: flex;
     flex-direction: row;
-    align-items: center;
-    gap: 12px;
+    align-items: stretch;
+    gap: 0;
     overflow: hidden;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
     user-select: none;
+    background: #FFFFFF;
+    border: 1px solid rgba(0,0,0,0.08);
+    position: relative;
+    transition: transform 0.12s ease, opacity 0.12s ease;
   }
-  .history-item:active { opacity: 0.94; }
-  .history-item--green { background: var(--history-green-card); }
-  .history-item--yellow { background: var(--history-yellow); }
-  .history-item--red { background: var(--bad-bg); }
-  /* Контейнер превью — фиксированный квадрат; картинка не может раздуть карточку */
+  .history-item:active { opacity: 0.92; transform: scale(0.98); }
+  .history-item--green { background: #FFFFFF; }
+  .history-item--yellow { background: #FFFFFF; }
+  .history-item--red { background: #FFFFFF; }
+  .history-item-arrow {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 7px;
+    height: 12px;
+    opacity: 0.25;
+    flex-shrink: 0;
+  }
+  /* Контейнер превью — квадрат на всю высоту карточки */
   .history-thumb {
     position: relative;
-    width: 100px;
-    height: 100px;
-    min-width: 100px;
-    max-width: 100px;
-    min-height: 100px;
-    max-height: 100px;
-    border-radius: 22.87px;
+    width: 96px;
+    min-width: 96px;
+    max-width: 96px;
+    align-self: stretch;
+    border-radius: 0;
     background: #EEE;
     flex-shrink: 0;
     overflow: hidden;
@@ -1018,11 +934,11 @@
   .history-info {
     flex: 1;
     min-width: 0;
-    min-height: 100px;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
-    padding-top: 0;
+    justify-content: center;
+    gap: 4px;
+    padding: 12px 36px 12px 14px;
   }
   .history-date {
     font-size: 12.2px;
@@ -1073,41 +989,55 @@
   .history-empty { text-align: center; padding: 40px 16px; color: var(--muted); font-size: 15px; line-height: 1.5; }
 
   /* Итог дня */
+  /* Итог дня — сворачиваемая карточка */
   .daily-summary-card {
-    background: #E7EDFF;
-    border-radius: 20px;
-    padding: 20px;
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.08);
+    border-radius: 16px;
+    overflow: hidden;
     color: var(--accent);
-    margin-bottom: 4px;
-    cursor: pointer;
-    transition: transform 0.12s ease, opacity 0.12s ease;
-    -webkit-tap-highlight-color: transparent;
   }
-  .daily-summary-card:active { opacity: 0.85; transform: scale(0.98); }
   .daily-summary-header {
     display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 12px;
+    padding: 14px 16px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    gap: 8px;
+    user-select: none;
   }
-  .daily-summary-badge {
+  .daily-summary-header:active { opacity: 0.7; }
+  .daily-summary-header-left {
+    display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0;
+  }
+  .daily-summary-score-inline {
+    font-size: 16px; font-weight: 800; color: var(--accent);
+  }
+  .daily-summary-label-text {
     font-size: 11px; font-weight: 700; letter-spacing: 0.06em;
-    text-transform: uppercase; opacity: 0.5; color: var(--accent);
+    color: var(--muted); text-transform: uppercase;
   }
-  .daily-summary-score {
-    font-size: 28px; font-weight: 800; line-height: 1; color: var(--accent);
+  .daily-summary-body {
+    padding: 12px 16px 16px;
+    border-top: 1px solid rgba(0,0,0,0.06);
+    display: flex; flex-direction: column; gap: 0;
   }
-  .daily-summary-score span { font-size: 14px; font-weight: 500; opacity: 0.5; margin-left: 2px; }
-  .daily-summary-meals {
-    font-size: 13px; opacity: 0.55; margin-bottom: 14px; line-height: 1.4; color: var(--accent);
+  .daily-summary-section-label {
+    font-size: 12px; color: var(--muted); font-weight: 500;
+    margin-bottom: 8px; margin-top: 12px;
   }
+  .daily-summary-section-label:first-child { margin-top: 0; }
   .daily-summary-rows { display: flex; flex-direction: column; gap: 8px; }
   .daily-summary-row {
     display: flex; gap: 8px; align-items: flex-start;
-    font-size: 14px; line-height: 1.4; color: var(--accent);
+    font-size: 14px; line-height: 1.5; color: var(--text);
   }
-  .daily-summary-row-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+  .daily-summary-row-icon { flex-shrink: 0; margin-top: 1px; font-style: normal; }
+  .daily-summary-conclusion {
+    font-size: 14px; line-height: 1.5; color: var(--text); margin-top: 4px;
+  }
   .daily-summary-generating {
     display: flex; align-items: center; gap: 10px;
-    background: #E7EDFF; border-radius: 20px; padding: 20px;
+    background: #F5F7FF; border-radius: 16px; padding: 16px;
     color: var(--accent); font-size: 15px; font-weight: 500;
   }
   .daily-summary-spinner {
@@ -1143,6 +1073,11 @@
   .bnav-item .bnav-icon .bnav-svg { display: block; width: 24px; height: 24px; }
   .bnav-item.active .bnav-icon { color: var(--accent); }
 
+  .describe-food-overlay {
+    display: none; position: absolute; inset: 0; z-index: 300; background: rgba(0,0,0,0.45);
+    align-items: flex-end; justify-content: center;
+  }
+  .describe-food-overlay.visible { display: flex; }
   .purchase-overlay {
     display: none; position: absolute; inset: 0; z-index: 300; background: rgba(0,0,0,0.45);
     align-items: flex-end; justify-content: center;
@@ -1768,24 +1703,26 @@
   </div>
 
   <div class="screen" id="screen-history">
-    <div class="nav history-top-nav">
-      <button type="button" class="history-nav-side" onclick="goTo('screen-main')" aria-label="Назад" title="Назад">
-        <svg width="10" height="17" viewBox="0 0 10 17" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M8.5 15.5L1.5 8.5L8.5 1.5" stroke="#1C1B1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </button>
-      <div class="history-nav-title">История</div>
-      <span class="history-nav-side" aria-hidden="true"></span>
-    </div>
-    <div class="content history-content">
+    <div class="history-header-gradient">
+      <div class="nav history-top-nav" style="background:transparent;">
+        <button type="button" class="history-nav-side" onclick="goTo('screen-main')" aria-label="Назад" title="Назад">
+          <svg width="10" height="17" viewBox="0 0 10 17" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M8.5 15.5L1.5 8.5L8.5 1.5" stroke="#1C1B1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="history-nav-title">История</div>
+        <span class="history-nav-side" aria-hidden="true"></span>
+      </div>
       <div id="history-summary-card" class="history-summary" style="display:none;">
         <div class="history-summary-top">
-          <span class="history-summary-label">Средняя оценка питания</span>
-          <span class="history-summary-num" id="history-avg-num">—</span>
+          <div class="history-summary-left">
+            <span class="history-summary-label">Средняя оценка питания</span>
+            <span class="history-summary-num" id="history-avg-num">—</span>
+            <p class="history-summary-motiv" id="history-avg-motiv">Так держать!</p>
+          </div>
         </div>
-        <div class="history-summary-bottom">
-          <p class="history-summary-motiv" id="history-avg-motiv">Это очень круто! Так держать!</p>
-          <span class="history-summary-star" aria-hidden="true">★</span>
-        </div>
+        <canvas id="history-week-chart" class="history-week-chart" width="280" height="80"></canvas>
       </div>
+    </div>
+    <div class="content history-content">
       <button type="button" class="history-describe-btn" id="history-describe-btn" onclick="openDescribeFoodModal()">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="flex-shrink:0;">
           <path d="M1 21.98C1 22.54 1.45 22.99 2.01 22.99H15C15.56 22.99 16.01 22.54 16.01 21.98V21H1V21.98ZM8.5 8.99C4.75 8.99 1 11 1 15H16C16 11 12.25 8.99 8.5 8.99ZM3.62 13C4.73 11.45 7.09 10.99 8.5 10.99C9.91 10.99 12.27 11.45 13.38 13H3.62ZM1 17H16V19H1V17ZM18 5V1H16V5H11L11.23 7H20.79L19.39 21H18V23H19.72C20.56 23 21.25 22.35 21.35 21.53L23 5H18Z" fill="white"/>
@@ -2175,6 +2112,7 @@ function mealRowToLocal(row) {
       good: parsed.good || '',
       bad: parsed.bad || '',
       tip: parsed.tip || '',
+      extended: parsed.extended || null,
       vision: '', summary: '', education: '', nuances: '', upgrade: '', factors: []
     };
   }
@@ -2799,34 +2737,38 @@ function hasDailySummaryForDate(dateStr) {
 function buildDailySummaryPrompt(meals, profile) {
   const p = profile || getProfileForPrompt();
   const mealsList = meals.map((m, i) =>
-    `${i + 1}. ${m.title || 'Без названия'} — оценка ${m.score ?? '?'}/10 (${m.verdict})
-   Состав: ${m.vision || '—'}
-   Резюме: ${m.summary || '—'}`
+    (i+1) + '. ' + (m.title || 'Без названия') + ' — оценка ' + (m.score ?? '?') + '/10\n' +
+    '   Состав: ' + (m.vision || '—') + '\n' +
+    '   Резюме: ' + (m.summary || '—')
   ).join('\n\n');
 
-  return `Ты опытный нутриционист-кардиолог. Составь итог питания за день для пациента.
-
-ПРОФИЛЬ ПАЦИЕНТА:
-- Общий холестерин: ${p.total} ммоль/л
-- LDL: ${p.ldl} ммоль/л
-- HDL: ${p.hdl} ммоль/л
-- Триглицериды: ${p.trig} ммоль/л
-- Пол: ${p.sex}, возраст: ${p.age} лет
-
-БЛЮДА ЗА ДЕНЬ:
-${mealsList}
-
-Отвечай ТОЛЬКО валидным JSON:
-{
-  "score": 7.5,
-  "title": "Итог дня — краткая оценка 3-5 слов",
-  "meals_line": "перечисли блюда через запятую одной строкой",
-  "good": "что было хорошего в питании сегодня — 1-2 предложения",
-  "bad": "чего не хватало или что стоит улучшить — 1-2 предложения",
-  "tip": "один конкретный совет на завтра исходя из липидного профиля — 1 предложение"
-}
-
-score — средняя оценка с учётом всех блюд и липидного профиля. Одно число с одним знаком после запятой.`;
+  return 'Ты опытный нутриционист-кардиолог. Составь структурированный итог питания за день.\n\n' +
+    'ПРОФИЛЬ: холестерин ' + p.total + ' ммоль/л, LDL ' + p.ldl + ', HDL ' + p.hdl + ', триглицериды ' + p.trig + ', ' + p.sex + ', ' + p.age + ' лет.\n\n' +
+    'БЛЮДА ЗА ДЕНЬ:\n' + mealsList + '\n\n' +
+    'Отвечай ТОЛЬКО валидным JSON без пояснений:\n' +
+    '{\n' +
+    '  "score": 7.2,\n' +
+    '  "meals_line": "названия блюд через запятую",\n' +
+    '  "extended": {\n' +
+    '    "good_items": [\n' +
+    '      "Конкретный позитивный факт 1 с объяснением пользы для липидного профиля",\n' +
+    '      "Конкретный позитивный факт 2",\n' +
+    '      "Конкретный позитивный факт 3 если есть"\n' +
+    '    ],\n' +
+    '    "bad_items": [\n' +
+    '      "Конкретная проблема 1 с объяснением механизма влияния",\n' +
+    '      "Конкретная проблема 2",\n' +
+    '      "Итоговый вывод о паттерне питания"\n' +
+    '    ],\n' +
+    '    "conclusion": "2-3 предложения: общая оценка дня и значение для здоровья сердца",\n' +
+    '    "tip": "Один конкретный совет на завтра — что добавить или убрать"\n' +
+    '  }\n' +
+    '}\n\n' +
+    'Правила:\n' +
+    '- good_items: 3-4 конкретных пункта, не общие слова\n' +
+    '- bad_items: 3-5 пунктов, последний — итоговый вывод о паттерне\n' +
+    '- conclusion: честная оценка без лести\n' +
+    '- score: взвешенная оценка с учётом липидного профиля пациента';
 }
 
 async function generateDailySummary() {
@@ -2872,17 +2814,19 @@ async function generateDailySummary() {
     let parsed;
     try { parsed = parseModelJson(raw); } catch { return; }
 
+    const ext = parsed.extended || {};
     const summaryRecord = {
       at: new Date().toISOString(),
       is_daily_summary: true,
       summary_date: today,
       verdict: 'summary',
       score: parsed.score,
-      title: parsed.title || 'Итог дня',
+      title: 'Итог дня',
       meals_line: parsed.meals_line || '',
-      good: parsed.good || '',
-      bad: parsed.bad || '',
-      tip: parsed.tip || '',
+      good: (ext.good_items || []).join(' | '),
+      bad: (ext.bad_items || []).join(' | '),
+      tip: ext.tip || '',
+      extended: ext,
       vision: '', summary: '', education: '', nuances: '', upgrade: '',
       factors: []
     };
@@ -2898,7 +2842,7 @@ async function generateDailySummary() {
       verdict: 'summary',
       score: parsed.score,
       title: parsed.title || 'Итог дня',
-      summary: JSON.stringify({ meals_line: parsed.meals_line, good: parsed.good, bad: parsed.bad, tip: parsed.tip }),
+      summary: JSON.stringify({ meals_line: parsed.meals_line, extended: parsed.extended || {}, good: (parsed.extended?.good_items||[]).join(' | '), bad: (parsed.extended?.bad_items||[]).join(' | '), tip: parsed.extended?.tip || '' }),
       is_daily_summary: true,
       summary_date: today,
       eaten_at: new Date().toISOString(),
@@ -3522,6 +3466,88 @@ function motivationLabelForAvg(avg) {
   return 'Средняя оценка питания';
 }
 
+function drawWeekChart(meals) {
+  const canvas = document.getElementById('history-week-chart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.offsetWidth || 300;
+  const H = 80;
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  ctx.scale(dpr, dpr);
+
+  const today = new Date();
+  const days = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    days.push(d.toISOString().slice(0, 10));
+  }
+  const dow = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
+
+  const dayScores = days.map(dateStr => {
+    const dayMeals = (meals || []).filter(m =>
+      !m.is_daily_summary && m.at && m.at.slice(0,10) === dateStr &&
+      m.score != null && Number.isFinite(Number(m.score))
+    );
+    if (!dayMeals.length) return null;
+    return dayMeals.reduce((s, m) => s + Number(m.score), 0) / dayMeals.length;
+  });
+
+  const barW = Math.floor((W - 40) / 9);
+  const gap = Math.floor((W - 40 - 7 * barW) / 6);
+  const maxH = 48;
+  const baseY = 64;
+  const startX = 4;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Линии сетки
+  ctx.strokeStyle = 'rgba(0,0,0,0.07)';
+  ctx.lineWidth = 1;
+  [0.5, 1].forEach(f => {
+    ctx.beginPath();
+    ctx.moveTo(startX, baseY - maxH * f);
+    ctx.lineTo(W - 30, baseY - maxH * f);
+    ctx.stroke();
+  });
+  ctx.fillStyle = 'rgba(0,0,0,0.3)';
+  ctx.font = `${9 * dpr / dpr}px -apple-system,sans-serif`;
+  ctx.textAlign = 'right';
+  ctx.fillText('10', W - 2, baseY - maxH + 4);
+  ctx.fillText('5', W - 2, baseY - maxH * 0.5 + 4);
+
+  days.forEach((dateStr, i) => {
+    const score = dayScores[i];
+    const x = startX + i * (barW + gap);
+    const dayDate = new Date(dateStr + 'T12:00:00');
+    ctx.fillStyle = 'rgba(0,0,0,0.35)';
+    ctx.font = `${10 * dpr / dpr}px -apple-system,sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.fillText(dow[dayDate.getDay()], x + barW / 2, H - 1);
+
+    if (score === null) return;
+
+    const h = Math.max(5, (score / 10) * maxH);
+    const y = baseY - h;
+    const r = 4;
+    let color = score >= 7 ? '#4CAF50' : score >= 5 ? '#D4C090' : '#E8834A';
+
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + barW - r, y);
+    ctx.quadraticCurveTo(x + barW, y, x + barW, y + r);
+    ctx.lineTo(x + barW, baseY);
+    ctx.lineTo(x, baseY);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+    ctx.fill();
+  });
+}
+
 function updateHistorySummaryCard() {
   const card = document.getElementById('history-summary-card');
   if (!card) return;
@@ -3540,6 +3566,8 @@ function updateHistorySummaryCard() {
     motiv.textContent = motivationTextForAvg(avg);
     motiv.style.whiteSpace = 'pre-line';
   }
+  // График 7 дней
+  requestAnimationFrame(() => drawWeekChart(getMealHistory()));
 }
 
 async function renderHistoryList() {
@@ -3623,19 +3651,44 @@ async function renderHistoryList() {
 
     // Карточка итога дня
     if (item.is_daily_summary) {
+      const sc = item.score != null ? parseFloat(item.score).toFixed(1) : '—';
       const card = document.createElement('div');
       card.className = 'daily-summary-card';
-      const sc = item.score != null ? parseFloat(item.score).toFixed(1) : '—';
+      card.setAttribute('data-expanded', 'false');
+
+      // Парсим расширенный отчёт
+      let goodItems = [], badItems = [], conclusion = '', tip = '';
+      try {
+        const ext = item.extended || {};
+        goodItems = Array.isArray(ext.good_items) ? ext.good_items : (item.good ? [item.good] : []);
+        badItems = Array.isArray(ext.bad_items) ? ext.bad_items : (item.bad ? [item.bad] : []);
+        conclusion = ext.conclusion || '';
+        tip = ext.tip || item.tip || '';
+      } catch(e) {}
+
       card.innerHTML = `
-        <div class="daily-summary-header">
-          <span class="daily-summary-badge">📊 Итог дня</span>
-          <div class="daily-summary-score">${sc}<span>/ 10</span></div>
+        <div class="daily-summary-header" onclick="this.closest('.daily-summary-card').querySelector('.daily-summary-body').style.display === 'none' ? (this.closest('.daily-summary-card').querySelector('.daily-summary-body').style.display='block', this.querySelector('.daily-summary-chevron').style.transform='rotate(180deg)') : (this.closest('.daily-summary-card').querySelector('.daily-summary-body').style.display='none', this.querySelector('.daily-summary-chevron').style.transform='rotate(0deg)')">
+          <div class="daily-summary-header-left">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;opacity:0.6"><rect x="3" y="3" width="4" height="18" rx="2" fill="#1C1B1F"/><rect x="10" y="8" width="4" height="13" rx="2" fill="#1C1B1F"/><rect x="17" y="5" width="4" height="16" rx="2" fill="#1C1B1F"/></svg>
+            <span class="daily-summary-score-inline">${sc}/10</span>
+            <span class="daily-summary-label-text">ОТЧЕТ ЗА ДЕНЬ</span>
+          </div>
+          <svg class="daily-summary-chevron" width="16" height="16" viewBox="0 0 16 16" fill="none" style="transition:transform 0.2s;flex-shrink:0;"><path d="M4 6L8 10L12 6" stroke="#1C1B1F" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
-        <div class="daily-summary-meals">${item.meals_line || ''}</div>
-        <div class="daily-summary-rows">
-          ${item.good ? `<div class="daily-summary-row"><span class="daily-summary-row-icon">✅</span><span>${item.good}</span></div>` : ''}
-          ${item.bad ? `<div class="daily-summary-row"><span class="daily-summary-row-icon">⚠️</span><span>${item.bad}</span></div>` : ''}
-          ${item.tip ? `<div class="daily-summary-row"><span class="daily-summary-row-icon">💡</span><span>${item.tip}</span></div>` : ''}
+        <div class="daily-summary-body" style="display:none;">
+          ${goodItems.length ? `
+            <div class="daily-summary-section-label">Что хорошо</div>
+            ${goodItems.map(t => `<div class="daily-summary-row"><span class="daily-summary-row-icon good">✓</span><span>${t}</span></div>`).join('')}
+          ` : ''}
+          ${badItems.length ? `
+            <div class="daily-summary-section-label" style="margin-top:12px;">Что неочень</div>
+            ${badItems.map(t => `<div class="daily-summary-row"><span class="daily-summary-row-icon bad">❗</span><span>${t}</span></div>`).join('')}
+          ` : ''}
+          ${conclusion ? `
+            <div class="daily-summary-section-label" style="margin-top:12px;">Итог</div>
+            <div class="daily-summary-conclusion">${conclusion}</div>
+          ` : ''}
+          ${tip ? `<div class="daily-summary-row tip"><span class="daily-summary-row-icon tip">📌</span><span>${tip}</span></div>` : ''}
         </div>`;
       listEl.appendChild(card);
       return;
@@ -3714,7 +3767,14 @@ async function renderHistoryList() {
     info.appendChild(dateEl);
     info.appendChild(nameEl);
     info.appendChild(ratingEl);
+    // Стрелка
+    const arrow = document.createElement('svg');
+    arrow.className = 'history-item-arrow';
+    arrow.setAttribute('viewBox', '0 0 7 12');
+    arrow.setAttribute('fill', 'none');
+    arrow.innerHTML = '<path d="M1 1L6 6L1 11" stroke="#1C1B1F" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>';
     row.appendChild(info);
+    row.appendChild(arrow);
     row.setAttribute('role', 'button');
     row.tabIndex = 0;
     row.addEventListener('click', () => openHistoryMealDetail(item));
