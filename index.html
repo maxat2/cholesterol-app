@@ -490,10 +490,11 @@
   .lipid-profile-emoji {
     position: absolute;
     right: -10px;
-    bottom: -44px;
-    width: 200px;
-    height: 200px;
-    object-fit: contain;
+    bottom: -20px;
+    width: 160px;
+    height: 190px;
+    object-fit: cover;
+    object-position: top center;
   }
 
   .main-lipids { display: flex; flex-direction: column; gap: 12px; flex-shrink: 0; }
@@ -518,9 +519,9 @@
     flex-direction: column;
     justify-content: space-between;
   }
-  .chol-mini--bad { background: #FFF0F0; }
-  .chol-mini--ok { background: #F0FFF4; }
-  .chol-mini--mid { background: #FFFBF0; }
+  .chol-mini--bad { background: #FFBFA8; }
+  .chol-mini--ok  { background: #B8E8C0; }
+  .chol-mini--mid { background: #FFE5C2; }
   .chol-mini--empty { background: #FAFAFA; border: 1px dashed #E5E5E5; }
   .chol-mini > div:first-child { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
   .chol-mini-name {
@@ -1535,7 +1536,7 @@
           <div class="lipid-profile-name" id="lipid-card-name">—</div>
           <div class="lipid-profile-meta" id="lipid-card-meta">—</div>
         </div>
-        <img src="emoji_animated.svg" class="lipid-profile-emoji" alt="" />
+        <img src="profile_illustration.png" class="lipid-profile-emoji" alt="" />
       </div>
       <section class="main-lipids" aria-labelledby="lipid-heading">
         <h2 class="lipid-section-title" id="lipid-heading">Твой липидный профиль</h2>
@@ -1613,7 +1614,7 @@
           <div class="lipid-profile-name" id="my-profile-card-name">—</div>
           <div class="lipid-profile-meta" id="my-profile-card-meta">—</div>
         </div>
-        <img src="emoji_animated.svg" class="lipid-profile-emoji" alt="" />
+        <img src="profile_illustration.png" class="lipid-profile-emoji" alt="" />
       </div>
 
       <!-- Липидный профиль -->
