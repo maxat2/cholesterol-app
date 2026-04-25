@@ -3567,14 +3567,21 @@ function drawWeekChart(meals) {
 
   ctx.clearRect(0, 0, W, H);
 
-  // Линии сетки
+  // Линии сетки + метки над ними
   ctx.strokeStyle = 'rgba(0,0,0,0.07)';
   ctx.lineWidth = 1;
-  [0.5, 1].forEach(f => {
+  const gridLabels = { 1: '10', 0.5: '5' };
+  Object.entries(gridLabels).forEach(([f, label]) => {
+    const y = baseY - maxH * Number(f);
     ctx.beginPath();
-    ctx.moveTo(startX, baseY - maxH * f);
-    ctx.lineTo(W, baseY - maxH * f);
+    ctx.moveTo(startX, y);
+    ctx.lineTo(W, y);
     ctx.stroke();
+    // Метка над линией справа
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    ctx.font = '9px -apple-system,sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText(label, W - 1, y - 3);
   });
 
 
