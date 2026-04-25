@@ -847,7 +847,7 @@
     .history-item {
     width: 100%;
     box-sizing: border-box;
-    min-height: 80px;
+    min-height: 130px;
     border-radius: 10px;
     padding: 0;
     display: flex;
@@ -867,14 +867,10 @@
   .history-item--green { background: #FFFFFF; }
   .history-item--yellow { background: #FFFFFF; }
   .history-item--red { background: #FFFFFF; }
+  .history-item { margin-bottom: 10px; }
+  .daily-summary-card { margin-bottom: 10px; }
   .history-item-arrow {
-    position: absolute;
-    right: 12px;
-    bottom: 12px;
-    width: 8px;
-    height: 13px;
-    opacity: 0.35;
-    flex-shrink: 0;
+    display: none; /* стрелка теперь внутри info */
   }
   /* Контейнер превью — квадрат на всю высоту карточки */
   .history-thumb {
@@ -942,7 +938,7 @@
     flex-direction: column;
     justify-content: center;
     gap: 4px;
-    padding: 12px 36px 12px 14px;
+    padding: 12px 14px;
   }
   .history-date {
     font-size: 12.2px;
@@ -962,6 +958,13 @@
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+  }
+  .history-card-arrow {
+    width: 7px;
+    height: 12px;
+    margin-left: auto;
+    opacity: 0.25;
+    flex-shrink: 0;
   }
   .history-rating {
     display: flex;
@@ -3806,18 +3809,12 @@ async function renderHistoryList() {
       starClass +
       '" aria-hidden="true">★</span><span class="history-score-text">' +
       sc +
-      '/10</span>';
+      '/10</span>' +
+      '<svg class="history-card-arrow" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M1 1L6 6L1 11" stroke="#1C1B1F" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
     info.appendChild(dateEl);
     info.appendChild(nameEl);
     info.appendChild(ratingEl);
-    // Стрелка
-    const arrow = document.createElement('svg');
-    arrow.className = 'history-item-arrow';
-    arrow.setAttribute('viewBox', '0 0 7 12');
-    arrow.setAttribute('fill', 'none');
-    arrow.innerHTML = '<path d="M1 1L6 6L1 11" stroke="#1C1B1F" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>';
     row.appendChild(info);
-    row.appendChild(arrow);
     row.setAttribute('role', 'button');
     row.tabIndex = 0;
     row.addEventListener('click', () => openHistoryMealDetail(item));
