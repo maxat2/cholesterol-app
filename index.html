@@ -474,27 +474,28 @@
   .btn-camera-wide .cam-svg { flex-shrink: 0; display: block; }
 
   .lipid-profile-card {
-    background: #C7E1B2;
+    background: #DCE6EC;
     border-radius: 16px;
     padding: 20px;
     position: relative;
-    overflow: hidden;
-    min-height: 120px;
+    overflow: visible;
+    min-height: 140px;
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     margin-bottom: 20px;
   }
-  .lipid-profile-info { flex: 1; z-index: 1; }
+  .lipid-profile-info { flex: 1; z-index: 1; padding-bottom: 4px; }
   .lipid-profile-name { font-size: 20px; font-weight: 700; color: #1a1a1a; margin-bottom: 6px; }
   .lipid-profile-meta { font-size: 16px; color: #1a1a1a; opacity: 0.8; }
   .lipid-profile-emoji {
     position: absolute;
-    right: -10px;
-    bottom: -20px;
-    width: 160px;
-    height: 190px;
-    object-fit: cover;
-    object-position: top center;
+    right: 0;
+    bottom: 0;
+    width: 150px;
+    height: auto;
+    max-height: 200px;
+    object-fit: contain;
+    object-position: bottom right;
   }
 
   .main-lipids { display: flex; flex-direction: column; gap: 12px; flex-shrink: 0; }
