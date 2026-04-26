@@ -551,7 +551,42 @@
   .chol-tip-box strong { font-weight: 600; display: block; margin-bottom: 3px; font-size: 12px; }
   .chol-tip.tip-open .chol-tip-box { display: block; }
 
-  /* Карточки ApoB и TG/HDL (расчётные) */
+  .lmhr-banner {
+    display: none;
+    background: #FFF8E6;
+    border: 1px solid #F5C842;
+    border-radius: 12px;
+    padding: 12px 14px;
+    gap: 10px;
+    align-items: flex-start;
+    margin-bottom: 2px;
+  }
+  .lmhr-banner.visible { display: flex; }
+  .lmhr-banner-icon { font-size: 18px; flex-shrink: 0; line-height: 1; margin-top: 1px; }
+  .lmhr-banner-body { flex: 1; }
+  .lmhr-banner-title { font-size: 13px; font-weight: 700; color: #633806; margin-bottom: 3px; }
+  .lmhr-banner-text { font-size: 12px; color: #854F0B; line-height: 1.5; }
+  .lmhr-mode-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0 4px;
+  }
+  .lmhr-mode-label { font-size: 13px; color: var(--muted); }
+  .lmhr-badge {
+    display: none;
+    align-items: center;
+    gap: 5px;
+    background: #FFF3CD;
+    border: 1px solid #F5C842;
+    border-radius: 20px;
+    padding: 3px 10px 3px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #854F0B;
+  }
+  .lmhr-badge.visible { display: inline-flex; }
+  .lmhr-badge-dot { width: 6px; height: 6px; border-radius: 50%; background: #F5C842; flex-shrink: 0; }
   .chol-mini--calc { background: #F5F0FF; }
   .chol-mini--calc-ok { background: #B8E8C0; }
   .chol-mini--calc-bad { background: #FFBFA8; }
@@ -1445,6 +1480,30 @@
         </div>
       </div>
 
+      <div class="h2-section">Образ жизни</div>
+
+      <div class="field-label" style="margin-bottom:6px;">Телосложение</div>
+      <div class="seg" id="seg-body-type">
+        <div class="seg-btn active" onclick="setSeg('seg-body-type',this);checkLmhr()">Худощавый</div>
+        <div class="seg-btn" onclick="setSeg('seg-body-type',this);checkLmhr()">Среднее</div>
+        <div class="seg-btn" onclick="setSeg('seg-body-type',this);checkLmhr()">Плотное</div>
+      </div>
+
+      <div class="field-label" style="margin-bottom:6px;">Физическая активность</div>
+      <div class="seg" id="seg-activity">
+        <div class="seg-btn" onclick="setSeg('seg-activity',this);checkLmhr()">Низкая</div>
+        <div class="seg-btn active" onclick="setSeg('seg-activity',this);checkLmhr()">Средняя</div>
+        <div class="seg-btn" onclick="setSeg('seg-activity',this);checkLmhr()">Высокая</div>
+      </div>
+
+      <div class="lmhr-banner" id="lmhr-banner">
+        <div class="lmhr-banner-icon">⚡</div>
+        <div class="lmhr-banner-body">
+          <div class="lmhr-banner-title">Включён режим LMHR</div>
+          <div class="lmhr-banner-text">Худощавый + активный + высокий LDL — особый профиль. Кето и низкоуглеводные диеты могут ПОВЫСИТЬ твой LDL. ИИ учтёт это при анализе еды.</div>
+        </div>
+      </div>
+
       <div class="h2-section">Твой липидный профиль</div>
       <div class="field" id="f-total">
         <div class="field-label">ОХ — Общий холестерин (Total Cholesterol)</div>
@@ -1497,6 +1556,11 @@
       <div class="toggle-row-plain">
         <span class="toggle-label">Принимаю статины</span>
         <div class="toggle-switch" id="toggle-statins" onclick="toggleSwitch(this)"></div>
+      </div>
+
+      <div class="lmhr-mode-row" id="lmhr-mode-row">
+        <span class="lmhr-mode-label">Режим анализа еды</span>
+        <span class="lmhr-badge" id="lmhr-badge"><span class="lmhr-badge-dot"></span>LMHR активен</span>
       </div>
 
       <div class="field-label units-mini">Единицы измерения анализов</div>
@@ -2369,6 +2433,8 @@ function buildFullUserRow(profile, emailNormalized) {
     trig_mmol: trigMmol,
     trig_mgdl: isMg ? rawTrig : toMgdl(rawTrig, true),
     apob: rawApob,
+    body_type: profile.body_type ?? null,
+    activity_level: profile.activity ?? null,
     units: profileUnitsToDb(profile.units) || 'mmol',
     profile_json: profile,
     updated_at: new Date().toISOString(),
@@ -2415,6 +2481,8 @@ function buildMergedUserUpdate(existing, profile) {
     trig_mmol: trigMmol,
     trig_mgdl: trigMmol != null ? toMgdl(trigMmol, true) : (existing.trig_mgdl ?? null),
     apob: rawApob != null ? rawApob : (existing.apob ?? null),
+    body_type: profile.body_type ?? existing.body_type ?? null,
+    activity_level: profile.activity ?? existing.activity_level ?? null,
     units: profileUnitsToDb(profile.units) || existing.units || 'mmol',
     profile_json: profile,
     updated_at: new Date().toISOString(),
@@ -2491,6 +2559,9 @@ function applySupabaseUserRowToForm(row) {
   if (vApob && row.apob != null && Number.isFinite(Number(row.apob))) {
     vApob.value = parseFloat(row.apob).toFixed(2);
   }
+  if (row.body_type) setSegActiveByLabel('seg-body-type', row.body_type);
+  if (row.activity_level) setSegActiveByLabel('seg-activity', row.activity_level);
+  checkLmhr();
   const st = document.getElementById('toggle-statins');
   if (st) st.classList.toggle('on', row.statins === true);
   dontKnowOn = false;
@@ -2536,7 +2607,9 @@ function getProfileFormSnapshot() {
     age: ageEl?.value ?? '',
     height: heightEl?.value ?? '',
     weight: weightEl?.value ?? '',
-    statins: statinsEl?.classList.contains('on') ?? false
+    statins: statinsEl?.classList.contains('on') ?? false,
+    body_type: (document.querySelector('#seg-body-type .seg-btn.active')?.textContent.trim() ?? ''),
+    activity: (document.querySelector('#seg-activity .seg-btn.active')?.textContent.trim() ?? '')
   });
 }
 
@@ -3411,7 +3484,9 @@ function saveProfileToStorage() {
     height: heightEl?.value ?? '',
     weight: weightEl?.value ?? '',
     statins: statinsEl?.classList.contains('on') ?? false,
-    v_apob: (document.getElementById('v-apob')?.value ?? '')
+    v_apob: (document.getElementById('v-apob')?.value ?? ''),
+    body_type: (document.querySelector('#seg-body-type .seg-btn.active')?.textContent.trim() ?? 'Среднее'),
+    activity: (document.querySelector('#seg-activity .seg-btn.active')?.textContent.trim() ?? 'Средняя')
   };
   try {
     localStorage.setItem(LS_USER_PROFILE, JSON.stringify(profile));
@@ -3457,6 +3532,9 @@ function loadProfileFromStorage() {
     if (p.v_trig != null && vTrig) vTrig.value = p.v_trig;
     const vApob = document.getElementById('v-apob');
     if (p.v_apob != null && vApob) vApob.value = p.v_apob;
+    if (p.body_type) setSegActiveByLabel('seg-body-type', p.body_type);
+    if (p.activity) setSegActiveByLabel('seg-activity', p.activity);
+    checkLmhr();
     if (p.age != null && ageEl) ageEl.value = p.age;
     if (p.height != null && heightEl) heightEl.value = p.height;
     if (p.weight != null && weightEl) weightEl.value = p.weight;
@@ -4279,6 +4357,21 @@ async function prepareMainScreenLipids() {
   }
 }
 
+function isLmhrProfile() {
+  const bodyEl = document.querySelector('#seg-body-type .seg-btn.active');
+  const actEl = document.querySelector('#seg-activity .seg-btn.active');
+  const body = bodyEl ? bodyEl.textContent.trim() : '';
+  const act = actEl ? actEl.textContent.trim() : '';
+  return body === 'Худощавый' && (act === 'Средняя' || act === 'Высокая');
+}
+
+function checkLmhr() {
+  const on = isLmhrProfile();
+  document.getElementById('lmhr-banner')?.classList.toggle('visible', on);
+  document.getElementById('lmhr-badge')?.classList.toggle('visible', on);
+  syncProfileCtaIfEditOpen();
+}
+
 function toggleTip(el) {
   const allTips = document.querySelectorAll('.chol-tip.tip-open');
   allTips.forEach(t => { if (t !== el) t.classList.remove('tip-open'); });
@@ -4514,7 +4607,14 @@ function getProfileForPrompt() {
   const tgHdl = (Number.isFinite(trigNum) && Number.isFinite(hdlNum) && hdlNum > 0)
     ? (trigNum / hdlNum).toFixed(2) : 'не рассчитан';
 
-  return { total, ldl, hdl, trig, sex, age, bmi, statins, apob, tgHdl };
+  // Образ жизни
+  const bodyEl2 = document.querySelector('#seg-body-type .seg-btn.active');
+  const actEl2 = document.querySelector('#seg-activity .seg-btn.active');
+  const bodyType = bodyEl2 ? bodyEl2.textContent.trim() : 'не указано';
+  const activity = actEl2 ? actEl2.textContent.trim() : 'не указано';
+  const lmhr = isLmhrProfile();
+
+  return { total, ldl, hdl, trig, sex, age, bmi, statins, apob, tgHdl, bodyType, activity, lmhr };
 }
 
 function buildVisionPrompt() {
@@ -4531,9 +4631,11 @@ function buildVisionPrompt() {
   const tgHdlNote = p.tgHdl
     ? `ТГ/HDL индекс: ${p.tgHdl} (норма <2.0, идеал <1.0) — маркер инсулинорезистентности`
     : 'ТГ/HDL индекс: нет данных';
-  const lmhrWarning = parseFloat(p.bmi) < 23 && parseFloat(p.ldl) >= 3.5
-    ? '\n⚠️ LMHR-профиль (худощавый + высокий LDL): низкоуглеводная и кето-диета могут ПОВЫСИТЬ LDL у этого человека — учитывай при рекомендациях.'
-    : '';
+  const lmhrWarning = p.lmhr
+    ? '\n\n⚠️ LMHR-РЕЖИМ АКТИВЕН: Этот человек — худощавый + физически активный с высоким LDL. Это феномен LMHR (lean mass hyper-responder). НИКОГДА не рекомендуй кето, карнивор или низкоуглеводные диеты — они ПОВЫСЯТ его LDL. Акцент на растительный белок, клетчатку, средиземноморский подход.'
+    : (parseFloat(p.bmi) < 23 && parseFloat(p.ldl) >= 3.5
+        ? '\n⚠️ Возможный LMHR-профиль (низкий ИМТ + высокий LDL): с осторожностью рекомендуй низкоуглеводные диеты.'
+        : '');
   const out = `Ты опытный нутриционист-кардиолог. Анализируй фото еды строго под липидный профиль этого конкретного человека.
 
 ПРОФИЛЬ ПАЦИЕНТА:
@@ -4544,6 +4646,7 @@ function buildVisionPrompt() {
 - ${apobNote}
 - ${tgHdlNote}
 - Пол: ${p.sex}, возраст: ${p.age} лет, ИМТ: ${p.bmi} (${bmiRisk})
+- Телосложение: ${p.bodyType}, активность: ${p.activity}
 - Медикаменты: ${statinsNote}${lmhrWarning}
 
 КОНТЕКСТ: Человек активно работает над снижением холестерина через питание. Его LDL ${p.ldl} — это ${ldlRisk} уровень риска. Твои ответы должны обучать его — объясняй механизмы, а не просто давай оценки.
