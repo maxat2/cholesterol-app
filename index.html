@@ -535,31 +535,20 @@
   }
   .chol-tip-box {
     display: none;
-    position: absolute;
-    bottom: calc(100% + 8px);
-    left: 50%;
-    transform: translateX(-50%);
+    position: fixed;
     background: #1a1a1a;
     color: #fff;
     font-size: 12px;
-    line-height: 1.45;
-    padding: 8px 10px;
+    line-height: 1.5;
+    padding: 9px 11px;
     border-radius: 8px;
-    width: 190px;
-    z-index: 999;
+    width: 200px;
+    z-index: 9999;
     pointer-events: none;
     white-space: normal;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.28);
   }
-  .chol-tip-box strong { font-weight: 600; display: block; margin-bottom: 2px; font-size: 12px; }
-  .chol-tip-box::after {
-    content: '';
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    border: 5px solid transparent;
-    border-top-color: #1a1a1a;
-  }
+  .chol-tip-box strong { font-weight: 600; display: block; margin-bottom: 3px; font-size: 12px; }
   .chol-tip.tip-open .chol-tip-box { display: block; }
 
   /* Карточки ApoB и TG/HDL (расчётные) */
@@ -1284,13 +1273,14 @@
   .ref-divider { height: 1px; background: rgba(0,0,0,0.08); margin-bottom: 14px; }
   .ref-row {
     display: flex; align-items: center; justify-content: space-between;
-    padding: 8px 0; border-bottom: 1px solid rgba(0,0,0,0.06);
+    padding: 8px 0; border-bottom: 1px solid rgba(0,0,0,0.06); gap: 6px;
   }
   .ref-row:last-child { border-bottom: none; }
-  .ref-row-name { font-size: 14px; color: var(--text); font-weight: 500; }
-  .ref-row-right { display: flex; align-items: center; gap: 8px; }
-  .ref-row-val { font-size: 14px; font-weight: 600; color: var(--accent); }
-  .ref-row-unit { font-size: 12px; color: var(--muted); }
+  .ref-row-name { font-size: 13px; color: var(--text); font-weight: 500; flex: 1; min-width: 0; overflow: hidden; }
+  .ref-row-name > .chol-tip { display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; border-bottom: none; text-decoration: underline; text-decoration-style: dashed; text-underline-offset: 3px; text-decoration-color: currentColor; opacity: 0.75; }
+  .ref-row-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .ref-row-val { font-size: 13px; font-weight: 600; color: var(--accent); white-space: nowrap; }
+  .ref-row-unit { font-size: 11px; color: var(--muted); white-space: nowrap; }
   .ref-card-note { font-size: 11px; color: var(--muted2); margin-top: 12px; text-align: center; }
 
 
@@ -4282,13 +4272,26 @@ function toggleTip(el) {
   const allTips = document.querySelectorAll('.chol-tip.tip-open');
   allTips.forEach(t => { if (t !== el) t.classList.remove('tip-open'); });
   el.classList.toggle('tip-open');
-  const closeHandler = (e) => {
-    if (!el.contains(e.target)) {
-      el.classList.remove('tip-open');
-      document.removeEventListener('click', closeHandler, true);
-    }
-  };
   if (el.classList.contains('tip-open')) {
+    const box = el.querySelector('.chol-tip-box');
+    if (box) {
+      const rect = el.getBoundingClientRect();
+      const boxW = 200;
+      const margin = 10;
+      let left = rect.left + rect.width / 2 - boxW / 2;
+      if (left < margin) left = margin;
+      if (left + boxW > window.innerWidth - margin) left = window.innerWidth - boxW - margin;
+      const top = rect.top - 8;
+      box.style.left = left + 'px';
+      box.style.top = top + 'px';
+      box.style.transform = 'translateY(-100%)';
+    }
+    const closeHandler = (e) => {
+      if (!el.contains(e.target)) {
+        el.classList.remove('tip-open');
+        document.removeEventListener('click', closeHandler, true);
+      }
+    };
     setTimeout(() => document.addEventListener('click', closeHandler, true), 0);
   }
 }
