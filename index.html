@@ -524,6 +524,50 @@
   .chol-mini--mid { background: #FFE5C2; }
   .chol-mini--empty { background: #FAFAFA; border: 1px dashed #E5E5E5; }
   .chol-mini > div:first-child { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  /* Тултип на названиях показателей */
+  .chol-tip {
+    position: relative;
+    display: inline-block;
+    border-bottom: 1.5px dashed currentColor;
+    opacity: 0.75;
+    cursor: default;
+    line-height: 1.2;
+  }
+  .chol-tip-box {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1a1a1a;
+    color: #fff;
+    font-size: 12px;
+    line-height: 1.45;
+    padding: 8px 10px;
+    border-radius: 8px;
+    width: 190px;
+    z-index: 999;
+    pointer-events: none;
+    white-space: normal;
+  }
+  .chol-tip-box strong { font-weight: 600; display: block; margin-bottom: 2px; font-size: 12px; }
+  .chol-tip-box::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: #1a1a1a;
+  }
+  .chol-tip.tip-open .chol-tip-box { display: block; }
+
+  /* Карточки ApoB и TG/HDL (расчётные) */
+  .chol-mini--calc { background: #F5F0FF; }
+  .chol-mini--calc-ok { background: #B8E8C0; }
+  .chol-mini--calc-bad { background: #FFBFA8; }
+  .chol-mini--calc-mid { background: #FFE5C2; }
+
   .chol-mini-name {
     font-size: 12px;
     font-weight: 600;
@@ -1413,31 +1457,38 @@
 
       <div class="h2-section">Твой липидный профиль</div>
       <div class="field" id="f-total">
-        <div class="field-label">Общий холестерин</div>
+        <div class="field-label">ОХ — Общий холестерин (Total Cholesterol)</div>
         <div class="field-row">
           <input type="number" id="v-total" placeholder="5.2" />
           <span class="field-unit" id="field-unit-total">ммоль/л</span>
         </div>
       </div>
       <div class="field" id="f-ldl">
-        <div class="field-label">Липопротеины низкой плотности (ЛПНП, «плохой» холестерин)</div>
+        <div class="field-label">LDL — «плохой» холестерин (ЛПНП)</div>
         <div class="field-row">
           <input type="number" id="v-ldl" placeholder="3.3" />
           <span class="field-unit" id="field-unit-ldl">ммоль/л</span>
         </div>
       </div>
       <div class="field" id="f-hdl">
-        <div class="field-label">Липопротеины высокой плотности (ЛПВП, «хороший» холестерин)</div>
+        <div class="field-label">HDL — «хороший» холестерин (ЛПВП)</div>
         <div class="field-row">
           <input type="number" id="v-hdl" placeholder="1.3" />
           <span class="field-unit" id="field-unit-hdl">ммоль/л</span>
         </div>
       </div>
       <div class="field" id="f-trig">
-        <div class="field-label">Триглицериды</div>
+        <div class="field-label">Триглицериды (TG)</div>
         <div class="field-row">
           <input type="number" id="v-trig" placeholder="1.5" />
           <span class="field-unit" id="field-unit-trig">ммоль/л</span>
+        </div>
+      </div>
+      <div class="field" id="f-apob">
+        <div class="field-label">Аполипопротеин B (ApoB) — необязательно</div>
+        <div class="field-row">
+          <input type="number" id="v-apob" placeholder="0.9" step="0.01" oninput="onApobInput()" />
+          <span class="field-unit">г/л</span>
         </div>
       </div>
 
@@ -1553,31 +1604,45 @@
         <div class="chol-grid" id="main-chol-grid">
         <div class="chol-mini chol-mini--empty" id="main-chol-cell-total">
           <div>
-            <div class="chol-mini-name">Общий холестерин</div>
+            <div class="chol-mini-name"><span class="chol-tip" onclick="toggleTip(this)">ОХ<span class="chol-tip-box"><strong>Общий холестерин (TC)</strong>Сумма всех фракций. Смотри не на цифру, а на соотношение LDL/HDL.</span></span></div>
             <div class="chol-mini-val" id="main-chol-total-num">—</div>
           </div>
           <div class="chol-mini-foot"><span id="main-chol-total-unit">ммоль/л</span><span class="st" id="main-chol-total-st"></span></div>
         </div>
         <div class="chol-mini chol-mini--empty" id="main-chol-cell-ldl">
           <div>
-            <div class="chol-mini-name">LDL</div>
+            <div class="chol-mini-name"><span class="chol-tip" onclick="toggleTip(this)">LDL<span class="chol-tip-box"><strong>LDL — «плохой» холестерин</strong>Липопротеины низкой плотности. Оседает в артериях. Чем ниже — тем лучше.</span></span></div>
             <div class="chol-mini-val" id="main-chol-ldl-num">—</div>
           </div>
           <div class="chol-mini-foot"><span id="main-chol-ldl-unit">ммоль/л</span><span class="st" id="main-chol-ldl-st"></span></div>
         </div>
         <div class="chol-mini chol-mini--empty" id="main-chol-cell-hdl">
           <div>
-            <div class="chol-mini-name">HDL</div>
+            <div class="chol-mini-name"><span class="chol-tip" onclick="toggleTip(this)">HDL<span class="chol-tip-box"><strong>HDL — «хороший» холестерин</strong>Липопротеины высокой плотности. Выводит холестерин из артерий. Чем выше — тем лучше.</span></span></div>
             <div class="chol-mini-val" id="main-chol-hdl-num">—</div>
           </div>
           <div class="chol-mini-foot"><span id="main-chol-hdl-unit">ммоль/л</span><span class="st" id="main-chol-hdl-st"></span></div>
         </div>
         <div class="chol-mini chol-mini--empty" id="main-chol-cell-trig">
           <div>
-            <div class="chol-mini-name">Триглицер</div>
+            <div class="chol-mini-name"><span class="chol-tip" onclick="toggleTip(this)">ТГ<span class="chol-tip-box"><strong>Триглицериды (TG)</strong>Жиры в крови. Растут от сахара и алкоголя. Сдавать строго натощак.</span></span></div>
             <div class="chol-mini-val" id="main-chol-trig-num">—</div>
           </div>
           <div class="chol-mini-foot"><span id="main-chol-trig-unit">ммоль/л</span><span class="st" id="main-chol-trig-st"></span></div>
+        </div>
+        <div class="chol-mini chol-mini--empty" id="main-chol-cell-apob">
+          <div>
+            <div class="chol-mini-name"><span class="chol-tip" onclick="toggleTip(this)">ApoB<span class="chol-tip-box"><strong>Аполипопротеин B</strong>Считает число опасных частиц в крови. Точнее LDL. Цель: &lt;0.9 г/л (идеал &lt;0.7).</span></span></div>
+            <div class="chol-mini-val" id="main-chol-apob-num">—</div>
+          </div>
+          <div class="chol-mini-foot"><span id="main-chol-apob-unit">г/л</span><span class="st" id="main-chol-apob-st"></span></div>
+        </div>
+        <div class="chol-mini chol-mini--empty" id="main-chol-cell-tghdl">
+          <div>
+            <div class="chol-mini-name"><span class="chol-tip" onclick="toggleTip(this)">ТГ/HDL<span class="chol-tip-box"><strong>Индекс ТГ / HDL</strong>Простой маркер инсулинорезистентности. &lt;1.0 — отлично, &lt;2.0 — норма, &gt;3.0 — риск.</span></span></div>
+            <div class="chol-mini-val" id="main-chol-tghdl-num">—</div>
+          </div>
+          <div class="chol-mini-foot"><span class="st" id="main-chol-tghdl-st"></span></div>
         </div>
         </div>
         </div>
@@ -1623,31 +1688,45 @@
         <div class="chol-grid">
           <div class="chol-mini chol-mini--empty" id="mp-chol-cell-total">
             <div>
-              <div class="chol-mini-name">Общий холестерин</div>
+              <div class="chol-mini-name"><span class="chol-tip" onclick="toggleTip(this)">ОХ<span class="chol-tip-box"><strong>Общий холестерин (TC)</strong>Сумма всех фракций. Смотри не на цифру, а на соотношение LDL/HDL.</span></span></div>
               <div class="chol-mini-val" id="mp-chol-total-num">—</div>
             </div>
             <div class="chol-mini-foot"><span id="mp-chol-total-unit">ммоль/л</span><span class="st" id="mp-chol-total-st"></span></div>
           </div>
           <div class="chol-mini chol-mini--empty" id="mp-chol-cell-ldl">
             <div>
-              <div class="chol-mini-name">LDL</div>
+              <div class="chol-mini-name"><span class="chol-tip" onclick="toggleTip(this)">LDL<span class="chol-tip-box"><strong>LDL — «плохой» холестерин</strong>Липопротеины низкой плотности. Оседает в артериях. Чем ниже — тем лучше.</span></span></div>
               <div class="chol-mini-val" id="mp-chol-ldl-num">—</div>
             </div>
             <div class="chol-mini-foot"><span id="mp-chol-ldl-unit">ммоль/л</span><span class="st" id="mp-chol-ldl-st"></span></div>
           </div>
           <div class="chol-mini chol-mini--empty" id="mp-chol-cell-hdl">
             <div>
-              <div class="chol-mini-name">HDL</div>
+              <div class="chol-mini-name"><span class="chol-tip" onclick="toggleTip(this)">HDL<span class="chol-tip-box"><strong>HDL — «хороший» холестерин</strong>Липопротеины высокой плотности. Выводит холестерин из артерий. Чем выше — тем лучше.</span></span></div>
               <div class="chol-mini-val" id="mp-chol-hdl-num">—</div>
             </div>
             <div class="chol-mini-foot"><span id="mp-chol-hdl-unit">ммоль/л</span><span class="st" id="mp-chol-hdl-st"></span></div>
           </div>
           <div class="chol-mini chol-mini--empty" id="mp-chol-cell-trig">
             <div>
-              <div class="chol-mini-name" style="word-break:break-word;">Тригли-цериды</div>
+              <div class="chol-mini-name"><span class="chol-tip" onclick="toggleTip(this)">ТГ<span class="chol-tip-box"><strong>Триглицериды (TG)</strong>Жиры в крови. Растут от сахара и алкоголя. Сдавать строго натощак.</span></span></div>
               <div class="chol-mini-val" id="mp-chol-trig-num">—</div>
             </div>
             <div class="chol-mini-foot"><span id="mp-chol-trig-unit">ммоль/л</span><span class="st" id="mp-chol-trig-st"></span></div>
+          </div>
+          <div class="chol-mini chol-mini--empty" id="mp-chol-cell-apob">
+            <div>
+              <div class="chol-mini-name"><span class="chol-tip" onclick="toggleTip(this)">ApoB<span class="chol-tip-box"><strong>Аполипопротеин B</strong>Считает число опасных частиц в крови. Точнее LDL. Цель: &lt;0.9 г/л (идеал &lt;0.7).</span></span></div>
+              <div class="chol-mini-val" id="mp-chol-apob-num">—</div>
+            </div>
+            <div class="chol-mini-foot"><span id="mp-chol-apob-unit">г/л</span><span class="st" id="mp-chol-apob-st"></span></div>
+          </div>
+          <div class="chol-mini chol-mini--empty" id="mp-chol-cell-tghdl">
+            <div>
+              <div class="chol-mini-name"><span class="chol-tip" onclick="toggleTip(this)">ТГ/HDL<span class="chol-tip-box"><strong>Индекс ТГ / HDL</strong>Простой маркер инсулинорезистентности. &lt;1.0 — отлично, &lt;2.0 — норма, &gt;3.0 — риск.</span></span></div>
+              <div class="chol-mini-val" id="mp-chol-tghdl-num">—</div>
+            </div>
+            <div class="chol-mini-foot"><span class="st" id="mp-chol-tghdl-st"></span></div>
           </div>
         </div>
       </section>
@@ -1658,48 +1737,55 @@
           <div class="ref-card-title">Референсные значения</div>
           <div class="ref-divider"></div>
           <div class="ref-row">
-            <span class="ref-row-name">Холестерин общий</span>
+            <span class="ref-row-name"><span class="chol-tip" onclick="toggleTip(this)">ОХ — Общий холестерин<span class="chol-tip-box"><strong>Total Cholesterol (TC)</strong>Сумма всех фракций. Важен не сам по себе — смотри соотношение LDL и HDL.</span></span></span>
             <div class="ref-row-right">
               <span class="ref-row-val" id="ref-val-total">3.10 – 5.20</span>
               <span class="ref-row-unit" id="ref-unit-total">ммоль/л</span>
             </div>
           </div>
           <div class="ref-row">
-            <span class="ref-row-name">ЛПВП (муж.)</span>
+            <span class="ref-row-name"><span class="chol-tip" onclick="toggleTip(this)">HDL — «хороший» холестерин (муж.)<span class="chol-tip-box"><strong>HDL (ЛПВП) — мужчины</strong>Выводит холестерин из артерий. Чем выше — тем лучше.</span></span></span>
             <div class="ref-row-right">
               <span class="ref-row-val" id="ref-val-hdl-m">1.00 – 1.55</span>
               <span class="ref-row-unit" id="ref-unit-hdl-m">ммоль/л</span>
             </div>
           </div>
           <div class="ref-row">
-            <span class="ref-row-name">ЛПВП (жен.)</span>
+            <span class="ref-row-name"><span class="chol-tip" onclick="toggleTip(this)">HDL — «хороший» холестерин (жен.)<span class="chol-tip-box"><strong>HDL (ЛПВП) — женщины</strong>Норма выше, чем у мужчин. Чем выше — тем лучше.</span></span></span>
             <div class="ref-row-right">
               <span class="ref-row-val" id="ref-val-hdl-f">1.20 – 1.80</span>
               <span class="ref-row-unit" id="ref-unit-hdl-f">ммоль/л</span>
             </div>
           </div>
           <div class="ref-row">
-            <span class="ref-row-name">ЛПНП</span>
+            <span class="ref-row-name"><span class="chol-tip" onclick="toggleTip(this)">LDL — «плохой» холестерин<span class="chol-tip-box"><strong>LDL (ЛПНП)</strong>Основная цель лечения. Оседает в артериях. При риске ССЗ цель &lt;1.8 ммоль/л.</span></span></span>
             <div class="ref-row-right">
               <span class="ref-row-val" id="ref-val-ldl">0.00 – 3.30</span>
               <span class="ref-row-unit" id="ref-unit-ldl">ммоль/л</span>
             </div>
           </div>
           <div class="ref-row">
-            <span class="ref-row-name">ЛПОНП</span>
-            <div class="ref-row-right">
-              <span class="ref-row-val" id="ref-val-vldl">0.13 – 1.04</span>
-              <span class="ref-row-unit" id="ref-unit-vldl">ммоль/л</span>
-            </div>
-          </div>
-          <div class="ref-row">
-            <span class="ref-row-name">Триглицериды</span>
+            <span class="ref-row-name"><span class="chol-tip" onclick="toggleTip(this)">ТГ — Триглицериды<span class="chol-tip-box"><strong>Triglycerides (TG)</strong>Жиры в крови. Растут от сахара и алкоголя. Сдавать только натощак.</span></span></span>
             <div class="ref-row-right">
               <span class="ref-row-val" id="ref-val-trig">0.41 – 1.70</span>
               <span class="ref-row-unit" id="ref-unit-trig">ммоль/л</span>
             </div>
           </div>
-          <div class="ref-card-note">Источники: Helix, KDL, ESC/EAS, Mayo Clinic, AHA. Разные лаборатории могут использовать немного разные диапазоны — это зависит от оборудования и реагентов. Точный диапазон всегда смотрите в бланке своей лаборатории. Конверсия: холестерин ммоль/л × 38.67 = мг/дл, триглицериды × 88.57 = мг/дл.</div>
+          <div class="ref-row">
+            <span class="ref-row-name"><span class="chol-tip" onclick="toggleTip(this)">ApoB — Аполипопротеин B<span class="chol-tip-box"><strong>Apolipoprotein B</strong>Считает число опасных частиц. Точнее LDL. Цель по Attia: &lt;0.7 г/л.</span></span></span>
+            <div class="ref-row-right">
+              <span class="ref-row-val">&lt; 0.9</span>
+              <span class="ref-row-unit">г/л</span>
+            </div>
+          </div>
+          <div class="ref-row">
+            <span class="ref-row-name"><span class="chol-tip" onclick="toggleTip(this)">ТГ/HDL — индекс риска<span class="chol-tip-box"><strong>TG/HDL ratio</strong>Маркер инсулинорезистентности. Считается автоматически из твоих данных.</span></span></span>
+            <div class="ref-row-right">
+              <span class="ref-row-val">&lt; 2.0</span>
+              <span class="ref-row-unit">(идеал &lt;1.0)</span>
+            </div>
+          </div>
+          <div class="ref-card-note">Источники: Helix, KDL, ESC/EAS, Mayo Clinic, AHA 2026. Разные лаборатории могут использовать немного разные диапазоны. Точный диапазон всегда смотрите в бланке своей лаборатории. Конверсия: холестерин ммоль/л × 38.67 = мг/дл, триглицериды × 88.57 = мг/дл.</div>
         </div>
       </section>
     </div>
@@ -3323,7 +3409,8 @@ function saveProfileToStorage() {
     age: ageEl?.value ?? '',
     height: heightEl?.value ?? '',
     weight: weightEl?.value ?? '',
-    statins: statinsEl?.classList.contains('on') ?? false
+    statins: statinsEl?.classList.contains('on') ?? false,
+    v_apob: (document.getElementById('v-apob')?.value ?? '')
   };
   try {
     localStorage.setItem(LS_USER_PROFILE, JSON.stringify(profile));
@@ -3367,6 +3454,8 @@ function loadProfileFromStorage() {
     if (p.v_ldl != null && vLdl) vLdl.value = p.v_ldl;
     if (p.v_hdl != null && vHdl) vHdl.value = p.v_hdl;
     if (p.v_trig != null && vTrig) vTrig.value = p.v_trig;
+    const vApob = document.getElementById('v-apob');
+    if (p.v_apob != null && vApob) vApob.value = p.v_apob;
     if (p.age != null && ageEl) ageEl.value = p.age;
     if (p.height != null && heightEl) heightEl.value = p.height;
     if (p.weight != null && weightEl) weightEl.value = p.weight;
@@ -4020,14 +4109,12 @@ function syncUnitsUI() {
     'hdl-m':  '40 – 60',
     'hdl-f':  '46 – 70',
     'ldl':    '0 – 130',
-    'vldl':   '5 – 40',
     'trig':   '36 – 150'
   } : {
     'total':  '3.10 – 5.20',
     'hdl-m':  '1.00 – 1.55',
     'hdl-f':  '1.20 – 1.80',
     'ldl':    '0.00 – 3.30',
-    'vldl':   '0.13 – 1.04',
     'trig':   '0.41 – 1.70'
   };
   Object.entries(refs).forEach(([key, val]) => {
@@ -4191,11 +4278,87 @@ async function prepareMainScreenLipids() {
   }
 }
 
+function toggleTip(el) {
+  const allTips = document.querySelectorAll('.chol-tip.tip-open');
+  allTips.forEach(t => { if (t !== el) t.classList.remove('tip-open'); });
+  el.classList.toggle('tip-open');
+  const closeHandler = (e) => {
+    if (!el.contains(e.target)) {
+      el.classList.remove('tip-open');
+      document.removeEventListener('click', closeHandler, true);
+    }
+  };
+  if (el.classList.contains('tip-open')) {
+    setTimeout(() => document.addEventListener('click', closeHandler, true), 0);
+  }
+}
+
+function statusCholApob(v) {
+  if (v < 0.7) return { tone: 'ok', label: 'отлично' };
+  if (v <= 0.9) return { tone: 'mid', label: 'норма' };
+  return { tone: 'bad', label: 'повышен' };
+}
+
+function statusTgHdl(v) {
+  if (v < 1.0) return { tone: 'ok', label: 'отлично' };
+  if (v <= 2.0) return { tone: 'mid', label: 'норма' };
+  return { tone: 'bad', label: 'риск' };
+}
+
+function getApobValue() {
+  const el = document.getElementById('v-apob');
+  if (!el || el.value.trim() === '') return null;
+  const v = parseFloat(el.value.replace(',', '.'));
+  return Number.isFinite(v) ? v : null;
+}
+
+function onApobInput() {
+  if (isMainOrLipidsScreenActive()) syncMainCholCard();
+  syncMyProfileScreen();
+  syncProfileCtaIfEditOpen();
+}
+
+function setCholTgHdlCell(cellId, numId, stId, trigM, hdlM) {
+  const cell = document.getElementById(cellId);
+  const numEl = document.getElementById(numId);
+  const stEl = document.getElementById(stId);
+  if (!cell || !numEl || !stEl) return;
+  if (trigM == null || hdlM == null || hdlM === 0) {
+    numEl.textContent = '—';
+    stEl.textContent = '';
+    cell.className = 'chol-mini chol-mini--empty';
+    return;
+  }
+  const ratio = trigM / hdlM;
+  numEl.textContent = ratio.toFixed(2);
+  const { tone, label } = statusTgHdl(ratio);
+  stEl.textContent = label ? ' · ' + label : '';
+  cell.className = 'chol-mini chol-mini--' + tone;
+}
+
+function setCholApobCell(cellId, numId, stId, apob) {
+  const cell = document.getElementById(cellId);
+  const numEl = document.getElementById(numId);
+  const stEl = document.getElementById(stId);
+  if (!cell || !numEl || !stEl) return;
+  if (apob == null) {
+    numEl.textContent = '—';
+    stEl.textContent = '';
+    cell.className = 'chol-mini chol-mini--empty';
+    return;
+  }
+  numEl.textContent = apob.toFixed(2);
+  const { tone, label } = statusCholApob(apob);
+  stEl.textContent = label ? ' · ' + label : '';
+  cell.className = 'chol-mini chol-mini--' + tone;
+}
+
 function syncMainCholCard() {
   const totalM = getMmolLipid('v-total');
   const ldlM = getMmolLipid('v-ldl');
   const hdlM = getMmolLipid('v-hdl');
   const trigM = getMmolLipid('v-trig');
+  const apobV = getApobValue();
 
   setCholMiniCell(
     'main-chol-cell-total',
@@ -4233,6 +4396,8 @@ function syncMainCholCard() {
     statusCholTrig,
     true
   );
+  setCholApobCell('main-chol-cell-apob', 'main-chol-apob-num', 'main-chol-apob-st', apobV);
+  setCholTgHdlCell('main-chol-cell-tghdl', 'main-chol-tghdl-num', 'main-chol-tghdl-st', trigM, hdlM);
 }
 
 async function syncMyProfileScreen() {
@@ -4267,6 +4432,9 @@ async function syncMyProfileScreen() {
   pairs.forEach(([cellId, numId, unitId, stId, mmol, statusFor, isTrig]) => {
     setCholMiniCell(cellId, numId, unitId, stId, mmol, statusFor, isTrig);
   });
+  const apobV = getApobValue();
+  setCholApobCell('mp-chol-cell-apob', 'mp-chol-apob-num', 'mp-chol-apob-st', apobV);
+  setCholTgHdlCell('mp-chol-cell-tghdl', 'mp-chol-tghdl-num', 'mp-chol-tghdl-st', getMmolLipid('v-trig'), getMmolLipid('v-hdl'));
 }
 
 function openFoodCamera() {
@@ -4323,7 +4491,16 @@ function getProfileForPrompt() {
   const statinsOn = document.getElementById('toggle-statins')?.classList.contains('on');
   const statins = statinsOn ? 'да, принимаю' : 'нет';
 
-  return { total, ldl, hdl, trig, sex, age, bmi, statins };
+  const apobEl = document.getElementById('v-apob');
+  const apobRaw = apobEl && apobEl.value.trim() ? parseFloat(apobEl.value.replace(',', '.')) : null;
+  const apob = (apobRaw != null && Number.isFinite(apobRaw)) ? apobRaw.toFixed(2) : 'не сдавал';
+
+  const trigNum = parseFloat(trig);
+  const hdlNum = parseFloat(hdl);
+  const tgHdl = (Number.isFinite(trigNum) && Number.isFinite(hdlNum) && hdlNum > 0)
+    ? (trigNum / hdlNum).toFixed(2) : 'не рассчитан';
+
+  return { total, ldl, hdl, trig, sex, age, bmi, statins, apob, tgHdl };
 }
 
 function buildVisionPrompt() {
@@ -4334,6 +4511,15 @@ function buildVisionPrompt() {
   const statinsNote = (p.statins === 'true' || p.statins === true)
     ? 'принимает статины — цель LDL строже: <1.8 ммоль/л'
     : 'без статинов — цель LDL <3.0 ммоль/л';
+  const apobNote = p.apob
+    ? `ApoB: ${p.apob} г/л (цель <0.9, идеал <0.7) — точнее LDL отражает число опасных частиц`
+    : 'ApoB: не сдавал';
+  const tgHdlNote = p.tgHdl
+    ? `ТГ/HDL индекс: ${p.tgHdl} (норма <2.0, идеал <1.0) — маркер инсулинорезистентности`
+    : 'ТГ/HDL индекс: нет данных';
+  const lmhrWarning = parseFloat(p.bmi) < 23 && parseFloat(p.ldl) >= 3.5
+    ? '\n⚠️ LMHR-профиль (худощавый + высокий LDL): низкоуглеводная и кето-диета могут ПОВЫСИТЬ LDL у этого человека — учитывай при рекомендациях.'
+    : '';
   const out = `Ты опытный нутриционист-кардиолог. Анализируй фото еды строго под липидный профиль этого конкретного человека.
 
 ПРОФИЛЬ ПАЦИЕНТА:
@@ -4341,8 +4527,10 @@ function buildVisionPrompt() {
 - LDL "плохой": ${p.ldl} ммоль/л → риск: ${ldlRisk}
 - HDL "хороший": ${p.hdl} ммоль/л (цель >1.5 — чем выше тем лучше)
 - Триглицериды: ${p.trig} ммоль/л (цель <1.7)
+- ${apobNote}
+- ${tgHdlNote}
 - Пол: ${p.sex}, возраст: ${p.age} лет, ИМТ: ${p.bmi} (${bmiRisk})
-- Медикаменты: ${statinsNote}
+- Медикаменты: ${statinsNote}${lmhrWarning}
 
 КОНТЕКСТ: Человек активно работает над снижением холестерина через питание. Его LDL ${p.ldl} — это ${ldlRisk} уровень риска. Твои ответы должны обучать его — объясняй механизмы, а не просто давай оценки.
 
@@ -4877,7 +5065,7 @@ function syncProfileCtaIfEditOpen() {
   }
 }
 
-['v-total', 'v-ldl', 'v-hdl', 'v-trig'].forEach((fid) => {
+['v-total', 'v-ldl', 'v-hdl', 'v-trig', 'v-apob'].forEach((fid) => {
   document.getElementById(fid)?.addEventListener('input', () => {
     if (isMainOrLipidsScreenActive()) syncMainCholCard();
     syncProfileCtaIfEditOpen();
