@@ -2336,11 +2336,13 @@ function buildFullUserRow(profile, emailNormalized) {
   const ldlSrc = profile.ldl != null ? profile.ldl : profile.v_ldl;
   const hdlSrc = profile.hdl != null ? profile.hdl : profile.v_hdl;
   const trigSrc = profile.trig != null ? profile.trig : profile.v_trig;
+  const apobSrc = profile.apob != null ? profile.apob : profile.v_apob;
   const isMg = profileUnitsToDb(profile.units) === 'mgdl';
   const rawTotal = parseFloatProfile(totalSrc);
   const rawLdl   = parseFloatProfile(ldlSrc);
   const rawHdl   = parseFloatProfile(hdlSrc);
   const rawTrig  = parseFloatProfile(trigSrc);
+  const rawApob  = parseFloatProfile(apobSrc);
   // Если ввод в мг/дл — конвертируем в ммоль/л для старых столбцов
   const totalMmol = isMg ? toMmol(rawTotal, false) : rawTotal;
   const ldlMmol   = isMg ? toMmol(rawLdl,   false) : rawLdl;
@@ -2366,6 +2368,7 @@ function buildFullUserRow(profile, emailNormalized) {
     hdl_mgdl: isMg ? rawHdl : toMgdl(rawHdl, false),
     trig_mmol: trigMmol,
     trig_mgdl: isMg ? rawTrig : toMgdl(rawTrig, true),
+    apob: rawApob,
     units: profileUnitsToDb(profile.units) || 'mmol',
     profile_json: profile,
     updated_at: new Date().toISOString(),
@@ -2379,6 +2382,7 @@ function buildMergedUserUpdate(existing, profile) {
   const ldlSrc = profile.ldl != null ? profile.ldl : profile.v_ldl;
   const hdlSrc = profile.hdl != null ? profile.hdl : profile.v_hdl;
   const trigSrc = profile.trig != null ? profile.trig : profile.v_trig;
+  const apobSrc = profile.apob != null ? profile.apob : profile.v_apob;
   const nameNew = String(profile.name ?? '').trim();
   const sexNew = profileToSex(profile);
   const isMg = profileUnitsToDb(profile.units) === 'mgdl';
@@ -2386,6 +2390,7 @@ function buildMergedUserUpdate(existing, profile) {
   const rawLdl   = parseFloatProfile(ldlSrc);
   const rawHdl   = parseFloatProfile(hdlSrc);
   const rawTrig  = parseFloatProfile(trigSrc);
+  const rawApob  = parseFloatProfile(apobSrc);
   const totalMmol = rawTotal != null ? (isMg ? toMmol(rawTotal, false) : rawTotal) : existing.cholesterol ?? null;
   const ldlMmol   = rawLdl   != null ? (isMg ? toMmol(rawLdl,   false) : rawLdl)   : existing.ldl ?? null;
   const hdlMmol   = rawHdl   != null ? (isMg ? toMmol(rawHdl,   false) : rawHdl)   : existing.hdl ?? null;
@@ -2409,6 +2414,7 @@ function buildMergedUserUpdate(existing, profile) {
     hdl_mgdl: hdlMmol != null ? toMgdl(hdlMmol, false) : (existing.hdl_mgdl ?? null),
     trig_mmol: trigMmol,
     trig_mgdl: trigMmol != null ? toMgdl(trigMmol, true) : (existing.trig_mgdl ?? null),
+    apob: rawApob != null ? rawApob : (existing.apob ?? null),
     units: profileUnitsToDb(profile.units) || existing.units || 'mmol',
     profile_json: profile,
     updated_at: new Date().toISOString(),
@@ -2481,6 +2487,10 @@ function applySupabaseUserRowToForm(row) {
   if (ldlVal != null && vLdl) vLdl.value = formatLipidInputFromNumber(ldlVal);
   if (hdlVal != null && vHdl) vHdl.value = formatLipidInputFromNumber(hdlVal);
   if (trigVal != null && vTrig) vTrig.value = formatLipidInputFromNumber(trigVal);
+  const vApob = document.getElementById('v-apob');
+  if (vApob && row.apob != null && Number.isFinite(Number(row.apob))) {
+    vApob.value = parseFloat(row.apob).toFixed(2);
+  }
   const st = document.getElementById('toggle-statins');
   if (st) st.classList.toggle('on', row.statins === true);
   dontKnowOn = false;
@@ -2519,6 +2529,7 @@ function getProfileFormSnapshot() {
     v_ldl: vLdl?.value ?? '',
     v_hdl: vHdl?.value ?? '',
     v_trig: vTrig?.value ?? '',
+    v_apob: (document.getElementById('v-apob')?.value ?? ''),
     dontKnowOn: !!dontKnowOn,
     gender: genderEl ? genderEl.textContent.trim() : 'Мужской',
     units: unitsEl ? unitsEl.textContent.trim() : 'ммоль/л',
