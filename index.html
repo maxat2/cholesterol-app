@@ -1284,6 +1284,141 @@
     }
   }
 
+  /* ===== ONBOARDING SCREEN ===== */
+  #screen-onboarding {
+    background: linear-gradient(180deg, #FFFFFF 0%, #C8DCE4 100%);
+    display: none;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    position: relative;
+  }
+  #screen-onboarding.active {
+    display: flex;
+  }
+
+  .onboarding-slides-wrap {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .onboarding-slides {
+    display: flex;
+    width: 300%;
+    height: 100%;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .onboarding-slide {
+    width: calc(100% / 3);
+    height: 100%;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 28px;
+    box-sizing: border-box;
+  }
+
+  .onboarding-logo {
+    font-family: var(--sans);
+    font-size: 28px;
+    font-weight: 700;
+    color: #1a3a4a;
+    letter-spacing: -0.02em;
+    margin-top: max(48px, env(safe-area-inset-top, 20px) + 32px);
+    flex-shrink: 0;
+    align-self: center;
+  }
+
+  .onboarding-logo .logo-zero {
+    color: #2a7a6a;
+  }
+
+  .onboarding-img-wrap {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 16px 0;
+  }
+
+  .onboarding-img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+
+  .onboarding-text {
+    font-family: var(--sans);
+    font-size: 22px;
+    font-weight: 400;
+    color: #1a1a1a;
+    text-align: center;
+    line-height: 1.3;
+    letter-spacing: -0.02em;
+    flex-shrink: 0;
+    margin-bottom: 28px;
+  }
+
+  .onboarding-dots {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-bottom: 20px;
+  }
+
+  .onboarding-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.2);
+    transition: background 0.3s, transform 0.3s;
+  }
+
+  .onboarding-dot.active {
+    background: #1a1a1a;
+    transform: scale(1.2);
+  }
+
+  .onboarding-footer {
+    padding: 0 20px calc(max(32px, env(safe-area-inset-bottom, 16px)) + 12px);
+    width: 100%;
+    box-sizing: border-box;
+    flex-shrink: 0;
+  }
+
+  .onboarding-btn-next {
+    width: 100%;
+    height: 54px;
+    background: #1a1a1b;
+    color: #fff;
+    border: none;
+    border-radius: 16px;
+    font-family: var(--sans);
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.12s ease, transform 0.12s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .onboarding-btn-next:active {
+    opacity: 0.88;
+    transform: scale(0.97);
+  }
+
+  /* swipe hint — touch gesture */
+  .onboarding-slides-wrap {
+    touch-action: pan-y;
+  }
+
 
   /* ===== screen-my-profile ===== */
   #screen-my-profile .content {
@@ -1384,7 +1519,62 @@
 <div class="phone" style="position:relative;">
   <div id="app-init-error" class="app-init-error" role="alert">Не удалось загрузить настройки приложения</div>
 
-  <div class="screen active" id="screen-auth">
+  <!-- ONBOARDING SCREEN -->
+  <div class="screen" id="screen-onboarding">
+    <div class="onboarding-slides-wrap" id="onboarding-slides-wrap">
+      <div class="onboarding-slides" id="onboarding-slides">
+
+        <!-- Slide 1 -->
+        <div class="onboarding-slide">
+          <div class="onboarding-logo">cH<span class="logo-zero">0</span>lipid</div>
+          <div class="onboarding-img-wrap">
+            <img class="onboarding-img" src="onboarding_1.png" alt="Добавь данные о себе" />
+          </div>
+          <div class="onboarding-text">Добавь данные о&nbsp;себе<br>(идеально с&nbsp;анализами)</div>
+          <div class="onboarding-dots">
+            <div class="onboarding-dot active" id="ob-dot-0"></div>
+            <div class="onboarding-dot" id="ob-dot-1"></div>
+            <div class="onboarding-dot" id="ob-dot-2"></div>
+          </div>
+        </div>
+
+        <!-- Slide 2 -->
+        <div class="onboarding-slide">
+          <div class="onboarding-logo">cH<span class="logo-zero">0</span>lipid</div>
+          <div class="onboarding-img-wrap">
+            <img class="onboarding-img" src="onboarding_2.png" alt="Сфотографируй блюдо" />
+          </div>
+          <div class="onboarding-text">Сфотографируй блюдо&nbsp;—<br>получи персональный разбор</div>
+          <div class="onboarding-dots">
+            <div class="onboarding-dot" id="ob-dot-0b"></div>
+            <div class="onboarding-dot active" id="ob-dot-1b"></div>
+            <div class="onboarding-dot" id="ob-dot-2b"></div>
+          </div>
+        </div>
+
+        <!-- Slide 3 -->
+        <div class="onboarding-slide">
+          <div class="onboarding-logo">cH<span class="logo-zero">0</span>lipid</div>
+          <div class="onboarding-img-wrap">
+            <img class="onboarding-img" src="onboarding_3.png" alt="Пойми, что влияет на твой липидный профиль" />
+          </div>
+          <div class="onboarding-text">Пойми, что влияет<br>на&nbsp;твой липидный профиль</div>
+          <div class="onboarding-dots">
+            <div class="onboarding-dot" id="ob-dot-0c"></div>
+            <div class="onboarding-dot" id="ob-dot-1c"></div>
+            <div class="onboarding-dot active" id="ob-dot-2c"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="onboarding-footer">
+      <button type="button" class="onboarding-btn-next" id="onboarding-btn-next" onclick="onboardingNext()">Далее</button>
+    </div>
+  </div>
+  <!-- END ONBOARDING SCREEN -->
+
+  <div class="screen" id="screen-auth">
     <div class="auth-screen-inner">
       <div class="auth-status" id="auth-status" role="status" aria-live="polite"></div>
       <button type="button" class="auth-btn-google" id="auth-google" aria-label="Continue with Google">
@@ -2113,7 +2303,12 @@ supabaseClient.auth.onAuthStateChange(async (event, session) => {
       setTimeout(() => {
         if (!authNavigationDone) {
           console.log('[auth] refresh не пришёл за 10с → screen-auth');
-          goTo('screen-auth');
+          // Показываем онбординг новым пользователям перед экраном входа
+          if (!isOnboardingDone()) {
+            showOnboarding();
+          } else {
+            goTo('screen-auth');
+          }
         }
       }, 10000);
     }
@@ -5297,6 +5492,18 @@ function clearBtnLoading(btn) {
 
 async function bootstrapApp() {
   console.log('[bootstrap] старт');
+  // Показываем онбординг при первом запуске (до авторизации).
+  // Если supabase уже установил навигацию через onAuthStateChange — не перебиваем.
+  // Используем небольшой таймаут чтобы дать supabase шанс сработать синхронно (INITIAL_SESSION).
+  setTimeout(() => {
+    if (!authNavigationDone) {
+      if (!isOnboardingDone()) {
+        showOnboarding();
+      } else {
+        goTo('screen-auth');
+      }
+    }
+  }, 0);
   // OpenAI ключ теперь хранится в Vercel env vars, не загружаем на клиент
 }
 
@@ -5350,6 +5557,80 @@ document.getElementById('auth-submit')?.addEventListener('click', () => void sub
 document.getElementById('auth-email')?.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') void submitAuthEmail();
 });
+
+// ===== ONBOARDING =====
+const ONBOARDING_DONE_KEY = 'cholesterol_onboarding_done';
+let onboardingStep = 0;
+const ONBOARDING_TOTAL = 3;
+
+function isOnboardingDone() {
+  try { return !!localStorage.getItem(ONBOARDING_DONE_KEY); } catch(e) { return false; }
+}
+function markOnboardingDone() {
+  try { localStorage.setItem(ONBOARDING_DONE_KEY, '1'); } catch(e) {}
+}
+
+function showOnboarding() {
+  onboardingStep = 0;
+  updateOnboardingUI();
+  goTo('screen-onboarding');
+}
+
+function updateOnboardingUI() {
+  const slides = document.getElementById('onboarding-slides');
+  if (slides) slides.style.transform = `translateX(-${onboardingStep * (100/3)}%)`;
+
+  // Обновляем точки на всех слайдах
+  for (let s = 0; s < ONBOARDING_TOTAL; s++) {
+    const suffixes = ['', 'b', 'c'];
+    for (let d = 0; d < ONBOARDING_TOTAL; d++) {
+      const dot = document.getElementById('ob-dot-' + d + suffixes[s]);
+      if (dot) dot.classList.toggle('active', d === onboardingStep);
+    }
+  }
+
+  const btn = document.getElementById('onboarding-btn-next');
+  if (btn) btn.textContent = onboardingStep < ONBOARDING_TOTAL - 1 ? 'Далее' : 'Заполнить профиль';
+}
+
+function onboardingNext() {
+  if (onboardingStep < ONBOARDING_TOTAL - 1) {
+    onboardingStep++;
+    updateOnboardingUI();
+  } else {
+    finishOnboarding();
+  }
+}
+
+function finishOnboarding() {
+  markOnboardingDone();
+  goTo('screen-auth');
+}
+
+// Touch swipe support for onboarding
+(function initOnboardingSwipe() {
+  let startX = 0;
+  let isDragging = false;
+  const wrap = document.getElementById('onboarding-slides-wrap');
+  if (!wrap) return;
+  wrap.addEventListener('touchstart', (e) => {
+    startX = e.touches[0].clientX;
+    isDragging = true;
+  }, { passive: true });
+  wrap.addEventListener('touchend', (e) => {
+    if (!isDragging) return;
+    isDragging = false;
+    const dx = e.changedTouches[0].clientX - startX;
+    if (dx < -50 && onboardingStep < ONBOARDING_TOTAL - 1) {
+      onboardingStep++;
+      updateOnboardingUI();
+    } else if (dx > 50 && onboardingStep > 0) {
+      onboardingStep--;
+      updateOnboardingUI();
+    }
+  }, { passive: true });
+})();
+// ===== END ONBOARDING =====
 
 bootstrapApp();
 </script>
