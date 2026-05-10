@@ -2996,121 +2996,7 @@ async function upsertUserToSupabase() {
 
 
 /** Проверяет нужно ли генерировать итог дня и запускает генерацию */
-async function checkAndGenerateDailySummary() {
-  const uid = getStoredUserId();
-  if (!uid) return;
 
-  const now = new Date();
-  if (now.getHours() < 22) return; // только после 22:00
-
-  const todayKey = now.toISOString().slice(0, 10); // "2026-04-23"
-
-  // Проверяем есть ли уже итог за сегодня
-  const all = getMealHistory();
-  const alreadyDone = all.some(m => m.isDailySummary && m.summaryDate === todayKey);
-  if (alreadyDone) return;
-
-  // Собираем обычные записи за сегодня
-  const todayMeals = all.filter(m => {
-    if (m.isDailySummary) return false;
-    if (!m.at) return false;
-    const d = new Date(m.at);
-    return d.toISOString().slice(0, 10) === todayKey && m.verdict !== 'error';
-  });
-
-  if (todayMeals.length < 2) return; // минимум 2 записи
-
-  console.log('[daily] генерируем итог дня, блюд:', todayMeals.length);
-  await generateDailySummary(todayMeals, todayKey, uid);
-}
-
-/** Генерирует итог дня через API и сохраняет в БД */
-async function generateDailySummary(meals, dateKey, uid) {
-  const p = getProfileForPrompt();
-  const mealsList = meals.map((m, i) =>
-    `${i + 1}. ${m.title || 'блюдо'} (оценка ${m.score || '?'}/10, вердикт: ${m.verdict})`
-  ).join('\n');
-
-  const prompt = `Ты нутриционист-кардиолог. Составь краткий итог питания за день для пациента.
-
-ПРОФИЛЬ: LDL ${p.ldl} ммоль/л, общий холестерин ${p.total} ммоль/л, пол: ${p.sex}, возраст: ${p.age} лет.
-
-БЛЮДА ЗА ДЕНЬ:
-${mealsList}
-
-Ответь ТОЛЬКО валидным JSON:
-{
-  "score": 7.5,
-  "meals_line": "греческий салат, куриный суп, творог",
-  "good": "одно предложение что было хорошего в питании сегодня",
-  "warn": "одно предложение чего не хватало или что было лишним",
-  "tip": "один конкретный совет на завтра с механизмом почему это поможет LDL"
-}
-
-score — средняя взвешенная оценка дня 1.0-10.0, одна цифра после запятой.`;
-
-  try {
-    const res = await fetch('/api/analyze', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'gpt-4o',
-        max_tokens: 1000,
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
-    const json = await res.json();
-    const raw = json?.choices?.[0]?.message?.content || '';
-    let parsed;
-    try { parsed = parseModelJson(raw); } catch { return; }
-
-    const summaryItem = {
-      at: new Date(dateKey + 'T22:00:00').toISOString(),
-      isDailySummary: true,
-      summaryDate: dateKey,
-      score: parsed.score,
-      mealsLine: parsed.meals_line || '',
-      good: parsed.good || '',
-      warn: parsed.warn || '',
-      tip: parsed.tip || '',
-      verdict: 'summary'
-    };
-
-    // Сохраняем в localStorage
-    const all = getMealHistory();
-    all.push(summaryItem);
-    setMealHistory(all);
-
-    // Сохраняем в Supabase
-    const { data, error } = await supabaseClient.from('meals').insert({
-      user_id: uid,
-      verdict: 'summary',
-      score: parsed.score,
-      title: `Итог дня — ${formatDateRuShort(dateKey)}`,
-      summary: parsed.good || '',
-      nuances: parsed.warn || '',
-      upgrade: parsed.tip || '',
-      vision: parsed.meals_line || '',
-      factors: [],
-      is_daily_summary: true,
-      summary_date: dateKey,
-      eaten_at: summaryItem.at,
-      created_at: summaryItem.at
-    }).select('id').single();
-
-    if (!error && data?.id) {
-      const updated = getMealHistory();
-      const idx = updated.findIndex(m => m.isDailySummary && m.summaryDate === dateKey);
-      if (idx !== -1) { updated[idx].supabaseId = data.id; setMealHistory(updated); }
-      console.log('[daily] итог дня сохранён:', data.id);
-    }
-
-    // Перерендериваем список
-    renderHistoryList();
-  } catch(e) {
-    console.warn('[daily] ошибка генерации итога', e);
-  }
-}
 
 function formatDateRuShort(dateKey) {
   const d = new Date(dateKey + 'T12:00:00');
@@ -3150,14 +3036,18 @@ function getTodayDateStr() {
 function getMealsForDate(dateStr) {
   const all = getMealHistory();
   return all.filter(m => {
-    if (m.is_daily_summary) return false;
+    if (m.is_daily_summary || m.isDailySummary) return false;
     if (!m.at) return false;
+    if (m.verdict === 'error') return false;
     return m.at.slice(0, 10) === dateStr;
   });
 }
 
 function hasDailySummaryForDate(dateStr) {
-  return getMealHistory().some(m => m.is_daily_summary && m.summary_date === dateStr);
+  return getMealHistory().some(m =>
+    (m.is_daily_summary || m.isDailySummary) &&
+    (m.summary_date === dateStr || m.summaryDate === dateStr)
+  );
 }
 
 function buildDailySummaryPrompt(meals, profile) {
@@ -4214,6 +4104,12 @@ async function saveMealToHistoryAndGoMain() {
   saveMealToHistoryAndGoMain._running = true;
   try {
   if (resultViewSource === 'history') return;
+  // Если запись уже была автосохранена при уходе в фон — не дублируем,
+  // просто идём на главный экран. syncPendingMeals сама загрузит фото.
+  if (autoSaveResultIfPending._savedAt === lastMealAnalysisData) {
+    goTo('screen-main');
+    return;
+  }
   if (!lastMealAnalysisData) {
     goTo('screen-main');
     return;
@@ -5632,6 +5528,61 @@ function finishOnboarding() {
 // ===== END ONBOARDING =====
 
 bootstrapApp();
+
+// ===== АВТОСОХРАНЕНИЕ ПРИ УХОДЕ В ФОН =====
+// Если пользователь не нажал «Сохранить» и телефон уходит в сон —
+// сохраняем запись в localStorage немедленно, фото синхронизируется
+// через syncPendingMeals при следующем открытии истории.
+function autoSaveResultIfPending() {
+  // Только если пользователь смотрит на экран результата свежего анализа
+  const resultScreen = document.getElementById('screen-result');
+  if (!resultScreen || !resultScreen.classList.contains('active')) return;
+  if (resultViewSource === 'history') return;
+  if (!lastMealAnalysisData) return;
+  if (lastMealAnalysisData.verdict === 'error') return;
+
+  const v = lastMealAnalysisData.verdict;
+  if (v !== 'green' && v !== 'yellow' && v !== 'red') return;
+
+  // Проверяем — уже сохранили этот анализ? (флаг выставляем при сохранении)
+  if (autoSaveResultIfPending._savedAt === lastMealAnalysisData) return;
+  autoSaveResultIfPending._savedAt = lastMealAnalysisData;
+
+  const d = lastMealAnalysisData;
+  const atIso = new Date().toISOString();
+  const mealLocal = {
+    textOnly: !!lastMealTextOnly,
+    verdict: v,
+    score: d.score,
+    title: d.title != null ? String(d.title) : '',
+    vision: d.vision != null ? String(d.vision) : '',
+    summary: d.summary != null ? String(d.summary) : '',
+    education: d.education != null ? String(d.education) : '',
+    nuances: d.nuances != null ? String(d.nuances) : '',
+    upgrade: d.upgrade != null ? String(d.upgrade) : '',
+    factors: Array.isArray(d.factors) ? d.factors : [],
+    at: atIso,
+    autoSaved: true
+  };
+  if (!lastMealTextOnly && lastMealPhotoDataUrl) {
+    mealLocal.photoBase64 = lastMealPhotoDataUrl;
+  }
+  const arr = getMealHistory();
+  arr.push(mealLocal);
+  setMealHistory(arr);
+  console.log('[autosave] запись сохранена в localStorage, фото синхронизируется при открытии истории');
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') {
+    autoSaveResultIfPending();
+  }
+  if (document.visibilityState === 'visible') {
+    // При возврате — запускаем синхронизацию pending записей в Supabase
+    syncPendingMeals().catch(e => console.warn('[sync] при возврате из фона', e));
+  }
+});
+// ===== END АВТОСОХРАНЕНИЕ =====
 </script>
 
 </body>
