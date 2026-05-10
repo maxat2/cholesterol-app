@@ -2343,7 +2343,11 @@ async function handleAuthSession(session) {
   if (cachedProfile) {
     console.log('[auth] handleAuthSession: профиль в кэше, сразу goTo screen-main');
     try { loadProfileFromStorage(); } catch(e) {}
-    goTo('screen-main');
+    // Не перебиваем экран если пользователь уже на каком-то экране приложения
+    // (например вернулся из сна на screen-result — TOKEN_REFRESHED не должен его сбрасывать)
+    const currentActive = document.querySelector('.screen.active');
+    const isOnAuthOrEmpty = !currentActive || currentActive.id === 'screen-auth';
+    if (isOnAuthOrEmpty) goTo('screen-main');
     // Фоновое обновление профиля из БД
     supabaseClient.from('users').select('*').eq('id', session.user.id).maybeSingle()
       .then(({ data: userRow }) => {
@@ -2362,7 +2366,9 @@ async function handleAuthSession(session) {
     if (userRow) {
       applySupabaseUserRowToForm(userRow);
       saveProfileToStorage();
-      goTo('screen-main');
+      const currentActive2 = document.querySelector('.screen.active');
+      const isOnAuthOrEmpty2 = !currentActive2 || currentActive2.id === 'screen-auth';
+      if (isOnAuthOrEmpty2) goTo('screen-main');
     } else {
       // Новый пользователь — подставляем email из Google в поле формы
       const emailFromGoogle = session.user.email || '';
@@ -5523,39 +5529,7 @@ function finishOnboarding() {
 
 bootstrapApp();
 
-// ===== ВОССТАНОВЛЕНИЕ ЭКРАНА ПОСЛЕ ВЫХОДА ИЗ СПЯЩЕГО РЕЖИМА =====
-// Когда телефон уходит в сон и возвращается, браузер/PWA иногда
-// перезагружает страницу или сбрасывает активный экран на главный.
-// Мы запоминаем, что пользователь был на экране результата,
-// и при возврате восстанавливаем его — без автосохранения.
-// Пользователь сам решает, нажимать «Сохранить» или нет.
 
-let _screenBeforeHide = null;
-
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'hidden') {
-    // Запоминаем активный экран
-    const active = document.querySelector('.screen.active');
-    _screenBeforeHide = active ? active.id : null;
-  }
-  if (document.visibilityState === 'visible') {
-    // Если были на экране результата свежего анализа — восстанавливаем его
-    if (
-      _screenBeforeHide === 'screen-result' &&
-      resultViewSource === 'fresh' &&
-      lastMealAnalysisData &&
-      lastMealAnalysisData.verdict !== 'error'
-    ) {
-      const current = document.querySelector('.screen.active');
-      if (current && current.id !== 'screen-result') {
-        // Страница сбросилась — возвращаем пользователя на результат
-        goTo('screen-result');
-        console.log('[restore] вернули пользователя на screen-result');
-      }
-    }
-  }
-});
-// ===== END ВОССТАНОВЛЕНИЕ ЭКРАНА =====
 </script>
 
 </body>
