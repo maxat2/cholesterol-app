@@ -4104,12 +4104,6 @@ async function saveMealToHistoryAndGoMain() {
   saveMealToHistoryAndGoMain._running = true;
   try {
   if (resultViewSource === 'history') return;
-  // Если запись уже была автосохранена при уходе в фон — не дублируем,
-  // просто идём на главный экран. syncPendingMeals сама загрузит фото.
-  if (autoSaveResultIfPending._savedAt === lastMealAnalysisData) {
-    goTo('screen-main');
-    return;
-  }
   if (!lastMealAnalysisData) {
     goTo('screen-main');
     return;
@@ -5529,60 +5523,39 @@ function finishOnboarding() {
 
 bootstrapApp();
 
-// ===== АВТОСОХРАНЕНИЕ ПРИ УХОДЕ В ФОН =====
-// Если пользователь не нажал «Сохранить» и телефон уходит в сон —
-// сохраняем запись в localStorage немедленно, фото синхронизируется
-// через syncPendingMeals при следующем открытии истории.
-function autoSaveResultIfPending() {
-  // Только если пользователь смотрит на экран результата свежего анализа
-  const resultScreen = document.getElementById('screen-result');
-  if (!resultScreen || !resultScreen.classList.contains('active')) return;
-  if (resultViewSource === 'history') return;
-  if (!lastMealAnalysisData) return;
-  if (lastMealAnalysisData.verdict === 'error') return;
+// ===== ВОССТАНОВЛЕНИЕ ЭКРАНА ПОСЛЕ ВЫХОДА ИЗ СПЯЩЕГО РЕЖИМА =====
+// Когда телефон уходит в сон и возвращается, браузер/PWA иногда
+// перезагружает страницу или сбрасывает активный экран на главный.
+// Мы запоминаем, что пользователь был на экране результата,
+// и при возврате восстанавливаем его — без автосохранения.
+// Пользователь сам решает, нажимать «Сохранить» или нет.
 
-  const v = lastMealAnalysisData.verdict;
-  if (v !== 'green' && v !== 'yellow' && v !== 'red') return;
-
-  // Проверяем — уже сохранили этот анализ? (флаг выставляем при сохранении)
-  if (autoSaveResultIfPending._savedAt === lastMealAnalysisData) return;
-  autoSaveResultIfPending._savedAt = lastMealAnalysisData;
-
-  const d = lastMealAnalysisData;
-  const atIso = new Date().toISOString();
-  const mealLocal = {
-    textOnly: !!lastMealTextOnly,
-    verdict: v,
-    score: d.score,
-    title: d.title != null ? String(d.title) : '',
-    vision: d.vision != null ? String(d.vision) : '',
-    summary: d.summary != null ? String(d.summary) : '',
-    education: d.education != null ? String(d.education) : '',
-    nuances: d.nuances != null ? String(d.nuances) : '',
-    upgrade: d.upgrade != null ? String(d.upgrade) : '',
-    factors: Array.isArray(d.factors) ? d.factors : [],
-    at: atIso,
-    autoSaved: true
-  };
-  if (!lastMealTextOnly && lastMealPhotoDataUrl) {
-    mealLocal.photoBase64 = lastMealPhotoDataUrl;
-  }
-  const arr = getMealHistory();
-  arr.push(mealLocal);
-  setMealHistory(arr);
-  console.log('[autosave] запись сохранена в localStorage, фото синхронизируется при открытии истории');
-}
+let _screenBeforeHide = null;
 
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'hidden') {
-    autoSaveResultIfPending();
+    // Запоминаем активный экран
+    const active = document.querySelector('.screen.active');
+    _screenBeforeHide = active ? active.id : null;
   }
   if (document.visibilityState === 'visible') {
-    // При возврате — запускаем синхронизацию pending записей в Supabase
-    syncPendingMeals().catch(e => console.warn('[sync] при возврате из фона', e));
+    // Если были на экране результата свежего анализа — восстанавливаем его
+    if (
+      _screenBeforeHide === 'screen-result' &&
+      resultViewSource === 'fresh' &&
+      lastMealAnalysisData &&
+      lastMealAnalysisData.verdict !== 'error'
+    ) {
+      const current = document.querySelector('.screen.active');
+      if (current && current.id !== 'screen-result') {
+        // Страница сбросилась — возвращаем пользователя на результат
+        goTo('screen-result');
+        console.log('[restore] вернули пользователя на screen-result');
+      }
+    }
   }
 });
-// ===== END АВТОСОХРАНЕНИЕ =====
+// ===== END ВОССТАНОВЛЕНИЕ ЭКРАНА =====
 </script>
 
 </body>
