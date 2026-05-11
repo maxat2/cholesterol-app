@@ -44,143 +44,218 @@
 </head>
 <body>
 
-<p class="section-title">Топ-10 продуктов<br>для снижения холестерина</p>
+<p class="section-title" id="section-title"></p>
 
-<div class="cards-stack">
-
-  <div class="card card-1" onclick="toggleCard(this)">
-    <div class="card-img-wrap">
-      <img class="card-img" src="images/oatmeal_1.png" alt="">
-      <span class="card-num">1</span>
-    </div>
-    <div class="card-content">
-      <div class="card-title">Овсянка и овсяные отруби</div>
-      <div class="card-body"><div class="card-text">
-        <p>Содержат бета-глюканы — растворимую клетчатку, которая снижает всасывание холестерина в кишечнике. Помогает «забирать» лишний холестерин и выводить его из организма.</p>
-      </div></div>
-    </div>
-  </div>
-
-  <div class="card card-2" onclick="toggleCard(this)">
-    <div class="card-img-wrap">
-      <img class="card-img" src="images/fish_2.png" alt="">
-      <span class="card-num">2</span>
-    </div>
-    <div class="card-content">
-      <div class="card-title">Жирная рыба (лосось, скумбрия)</div>
-      <div class="card-body"><div class="card-text">
-        <p>Источник омега-3 жирных кислот, которые уменьшают воспаление и снижают триглицериды. Успокаивает сосуды и снижает «жир в крови», который перегружает сердце.</p>
-      </div></div>
-    </div>
-  </div>
-
-  <div class="card card-3" onclick="toggleCard(this)">
-    <div class="card-img-wrap">
-      <img class="card-img" src="images/avocado_3.png" alt="">
-      <span class="card-num">3</span>
-    </div>
-    <div class="card-content">
-      <div class="card-title">Авокадо</div>
-      <div class="card-body"><div class="card-text">
-        <p>Богато мононенасыщенными жирами, которые помогают снижать ЛПНП и поддерживать ЛПВП. Плюс: замена «плохих» жиров без потери вкуса.</p>
-      </div></div>
-    </div>
-  </div>
-
-  <div class="card card-4" onclick="toggleCard(this)">
-    <div class="card-img-wrap">
-      <img class="card-img" src="images/nuts_and_almonds_4.png" alt="">
-      <span class="card-num">4</span>
-    </div>
-    <div class="card-content">
-      <div class="card-title">Орехи (миндаль, грецкие)</div>
-      <div class="card-body"><div class="card-text">
-        <p>Содержат полезные жиры, фитостеролы и антиоксиданты — улучшают липидный профиль. Плюс: снижают окисление ЛПНП (важный механизм).</p>
-      </div></div>
-    </div>
-  </div>
-
-  <div class="card card-5" onclick="toggleCard(this)">
-    <div class="card-img-wrap">
-      <img class="card-img" src="images/legumes_5.png" alt="">
-      <span class="card-num">5</span>
-    </div>
-    <div class="card-content">
-      <div class="card-title">Бобовые (чечевица, фасоль)</div>
-      <div class="card-body"><div class="card-text">
-        <p>Источник клетчатки и растительного белка, снижают уровень ЛПНП. Снижают всасывание холестерина в кишечнике.</p>
-      </div></div>
-    </div>
-  </div>
-
-  <div class="card card-6" onclick="toggleCard(this)">
-    <div class="card-img-wrap">
-      <img class="card-img" src="images/olive_oil_6.png" alt="">
-      <span class="card-num">6</span>
-    </div>
-    <div class="card-content">
-      <div class="card-title">Оливковое масло (extra virgin)</div>
-      <div class="card-body"><div class="card-text">
-        <p>Содержит мононенасыщенные жиры и полифенолы, улучшает липидный профиль и снижает воспаление. Плюс: база средиземноморского подхода.</p>
-      </div></div>
-    </div>
-  </div>
-
-  <div class="card card-7" onclick="toggleCard(this)">
-    <div class="card-img-wrap">
-      <img class="card-img" src="images/berries_7.png" alt="">
-      <span class="card-num">7</span>
-    </div>
-    <div class="card-content">
-      <div class="card-title">Ягоды (черника, клубника, малина)</div>
-      <div class="card-body"><div class="card-text">
-        <p>Богаты антиоксидантами и клетчаткой, помогают снижать окислительный стресс. Антиоксиданты защищают сосуды от повреждений.</p>
-      </div></div>
-    </div>
-  </div>
-
-  <div class="card card-8" onclick="toggleCard(this)">
-    <div class="card-img-wrap">
-      <img class="card-img" src="images/citrus_fruits_8.png" alt="">
-      <span class="card-num">8</span>
-    </div>
-    <div class="card-content">
-      <div class="card-title">Яблоки и цитрусовые</div>
-      <div class="card-body"><div class="card-text">
-        <p>Содержат пектин — растворимую клетчатку, которая снижает уровень холестерина в крови.</p>
-      </div></div>
-    </div>
-  </div>
-
-  <div class="card card-9" onclick="toggleCard(this)">
-    <div class="card-img-wrap">
-      <img class="card-img" src="images/green_vegetables_9.png" alt="">
-      <span class="card-num">9</span>
-    </div>
-    <div class="card-content">
-      <div class="card-title">Зелёные овощи (брокколи, шпинат)</div>
-      <div class="card-body"><div class="card-text">
-        <p>Источник клетчатки, антиоксидантов и микронутриентов. Поддерживают здоровье сосудов и обмен веществ.</p>
-      </div></div>
-    </div>
-  </div>
-
-  <div class="card card-10" onclick="toggleCard(this)">
-    <div class="card-img-wrap">
-      <img class="card-img" src="images/flax_seeds_10.png" alt="">
-      <span class="card-num">10</span>
-    </div>
-    <div class="card-content">
-      <div class="card-title">Семена (льняные, чиа)</div>
-      <div class="card-body"><div class="card-text">
-        <p>Содержат омега-3 (растительные) и клетчатку. Помогают снижать LDL и поддерживать здоровье сердца.</p>
-      </div></div>
-    </div>
-  </div>
-
-</div>
+<div class="cards-stack" id="cards-stack"></div>
 
 <script>
+// ── i18n ──────────────────────────────────────────────────────────────────
+const CARDS_I18N = {
+  ru: {
+    title: 'Топ-10 продуктов<br>для снижения холестерина',
+    cards: [
+      {
+        title: 'Овсянка и овсяные отруби',
+        text: 'Содержат бета-глюканы — растворимую клетчатку, которая снижает всасывание холестерина в кишечнике. Помогает «забирать» лишний холестерин и выводить его из организма.'
+      },
+      {
+        title: 'Жирная рыба (лосось, скумбрия)',
+        text: 'Источник омега-3 жирных кислот, которые уменьшают воспаление и снижают триглицериды. Успокаивает сосуды и снижает «жир в крови», который перегружает сердце.'
+      },
+      {
+        title: 'Авокадо',
+        text: 'Богато мононенасыщенными жирами, которые помогают снижать ЛПНП и поддерживать ЛПВП. Плюс: замена «плохих» жиров без потери вкуса.'
+      },
+      {
+        title: 'Орехи (миндаль, грецкие)',
+        text: 'Содержат полезные жиры, фитостеролы и антиоксиданты — улучшают липидный профиль. Плюс: снижают окисление ЛПНП (важный механизм).'
+      },
+      {
+        title: 'Бобовые (чечевица, фасоль)',
+        text: 'Источник клетчатки и растительного белка, снижают уровень ЛПНП. Снижают всасывание холестерина в кишечнике.'
+      },
+      {
+        title: 'Оливковое масло (extra virgin)',
+        text: 'Содержит мононенасыщенные жиры и полифенолы, улучшает липидный профиль и снижает воспаление. Плюс: база средиземноморского подхода.'
+      },
+      {
+        title: 'Ягоды (черника, клубника, малина)',
+        text: 'Богаты антиоксидантами и клетчаткой, помогают снижать окислительный стресс. Антиоксиданты защищают сосуды от повреждений.'
+      },
+      {
+        title: 'Яблоки и цитрусовые',
+        text: 'Содержат пектин — растворимую клетчатку, которая снижает уровень холестерина в крови.'
+      },
+      {
+        title: 'Зелёные овощи (брокколи, шпинат)',
+        text: 'Источник клетчатки, антиоксидантов и микронутриентов. Поддерживают здоровье сосудов и обмен веществ.'
+      },
+      {
+        title: 'Семена (льняные, чиа)',
+        text: 'Содержат омега-3 (растительные) и клетчатку. Помогают снижать LDL и поддерживать здоровье сердца.'
+      }
+    ]
+  },
+  en: {
+    title: 'Top 10 foods<br>to lower cholesterol',
+    cards: [
+      {
+        title: 'Oatmeal and oat bran',
+        text: 'Rich in beta-glucans — soluble fibre that reduces cholesterol absorption in the gut. Helps bind excess cholesterol and remove it from the body.'
+      },
+      {
+        title: 'Fatty fish (salmon, mackerel)',
+        text: 'A source of omega-3 fatty acids that reduce inflammation and lower triglycerides. Calms blood vessels and reduces blood fat that strains the heart.'
+      },
+      {
+        title: 'Avocado',
+        text: 'Rich in monounsaturated fats that help lower LDL while maintaining HDL. A tasty swap for unhealthy fats.'
+      },
+      {
+        title: 'Nuts (almonds, walnuts)',
+        text: 'Packed with healthy fats, phytosterols and antioxidants that improve your lipid profile and reduce LDL oxidation — a key mechanism.'
+      },
+      {
+        title: 'Legumes (lentils, beans)',
+        text: 'A source of fibre and plant protein that lowers LDL. Slows cholesterol absorption in the gut.'
+      },
+      {
+        title: 'Olive oil (extra virgin)',
+        text: 'Contains monounsaturated fats and polyphenols that improve your lipid profile and reduce inflammation. The cornerstone of the Mediterranean approach.'
+      },
+      {
+        title: 'Berries (blueberries, strawberries, raspberries)',
+        text: 'Rich in antioxidants and fibre that help reduce oxidative stress. Antioxidants protect blood vessels from damage.'
+      },
+      {
+        title: 'Apples and citrus fruits',
+        text: 'Contain pectin — a soluble fibre that lowers blood cholesterol levels.'
+      },
+      {
+        title: 'Green vegetables (broccoli, spinach)',
+        text: 'A source of fibre, antioxidants and micronutrients. Support vascular health and metabolism.'
+      },
+      {
+        title: 'Seeds (flax, chia)',
+        text: 'Contain plant-based omega-3s and fibre. Help lower LDL and support heart health.'
+      }
+    ]
+  },
+  de: {
+    title: 'Top 10 Lebensmittel<br>zur Cholesterinsenkung',
+    cards: [
+      {
+        title: 'Haferflocken und Haferkleie',
+        text: 'Enthalten Beta-Glucane — lösliche Ballaststoffe, die die Cholesterinaufnahme im Darm reduzieren. Helfen, überschüssiges Cholesterin zu binden und aus dem Körper zu transportieren.'
+      },
+      {
+        title: 'Fettreicher Fisch (Lachs, Makrele)',
+        text: 'Quelle für Omega-3-Fettsäuren, die Entzündungen reduzieren und Triglyzeride senken. Beruhigt die Blutgefäße und senkt das Blutfett, das das Herz belastet.'
+      },
+      {
+        title: 'Avocado',
+        text: 'Reich an einfach ungesättigten Fetten, die LDL senken und HDL unterstützen. Ein leckerer Ersatz für ungesunde Fette.'
+      },
+      {
+        title: 'Nüsse (Mandeln, Walnüsse)',
+        text: 'Enthalten gesunde Fette, Phytosterole und Antioxidantien — verbessern das Lipidprofil und reduzieren die LDL-Oxidation.'
+      },
+      {
+        title: 'Hülsenfrüchte (Linsen, Bohnen)',
+        text: 'Quelle für Ballaststoffe und pflanzliches Eiweiß, senken LDL und verlangsamen die Cholesterinaufnahme im Darm.'
+      },
+      {
+        title: 'Olivenöl (extra vergine)',
+        text: 'Enthält einfach ungesättigte Fette und Polyphenole, verbessert das Lipidprofil und reduziert Entzündungen. Basis des Mittelmeer-Ansatzes.'
+      },
+      {
+        title: 'Beeren (Blaubeeren, Erdbeeren, Himbeeren)',
+        text: 'Reich an Antioxidantien und Ballaststoffen, helfen oxidativen Stress zu reduzieren. Antioxidantien schützen die Blutgefäße vor Schäden.'
+      },
+      {
+        title: 'Äpfel und Zitrusfrüchte',
+        text: 'Enthalten Pektin — lösliche Ballaststoffe, die den Blutcholesterinspiegel senken.'
+      },
+      {
+        title: 'Grünes Gemüse (Brokkoli, Spinat)',
+        text: 'Quelle für Ballaststoffe, Antioxidantien und Mikronährstoffe. Unterstützen die Gefäßgesundheit und den Stoffwechsel.'
+      },
+      {
+        title: 'Samen (Leinsamen, Chia)',
+        text: 'Enthalten pflanzliche Omega-3-Fettsäuren und Ballaststoffe. Helfen LDL zu senken und die Herzgesundheit zu unterstützen.'
+      }
+    ]
+  }
+};
+
+const IMAGES = [
+  'images/oatmeal_1.png',
+  'images/fish_2.png',
+  'images/avocado_3.png',
+  'images/nuts_and_almonds_4.png',
+  'images/legumes_5.png',
+  'images/olive_oil_6.png',
+  'images/berries_7.png',
+  'images/citrus_fruits_8.png',
+  'images/green_vegetables_9.png',
+  'images/flax_seeds_10.png'
+];
+
+const BG_CLASSES = ['card-1','card-2','card-3','card-4','card-5','card-6','card-7','card-8','card-9','card-10'];
+
+// Определяем язык: 1) URL param ?lang=  2) язык браузера  3) fallback ru
+function detectLang() {
+  const param = new URLSearchParams(location.search).get('lang');
+  if (param && CARDS_I18N[param]) return param;
+  const nav = (navigator.language || 'ru').slice(0, 2).toLowerCase();
+  return CARDS_I18N[nav] ? nav : 'ru';
+}
+
+let LANG = detectLang();
+
+function render() {
+  const i18n = CARDS_I18N[LANG] || CARDS_I18N['ru'];
+  document.documentElement.lang = LANG;
+
+  // Заголовок
+  document.getElementById('section-title').innerHTML = i18n.title;
+
+  // Карточки
+  const stack = document.getElementById('cards-stack');
+  stack.innerHTML = '';
+  i18n.cards.forEach((card, idx) => {
+    const div = document.createElement('div');
+    div.className = `card ${BG_CLASSES[idx]}`;
+    div.onclick = () => toggleCard(div);
+    div.innerHTML = `
+      <div class="card-img-wrap">
+        <img class="card-img" src="${IMAGES[idx]}" alt="" loading="lazy">
+        <span class="card-num">${idx + 1}</span>
+      </div>
+      <div class="card-content">
+        <div class="card-title">${card.title}</div>
+        <div class="card-body"><div class="card-text"><p>${card.text}</p></div></div>
+      </div>`;
+    stack.appendChild(div);
+    div.querySelector('.card-img').addEventListener('load', notifyParentResize);
+  });
+
+  // Раскрываем последнюю карточку
+  expandedCard = null;
+  const last = stack.querySelector('.card:last-child');
+  if (last) {
+    last.classList.add('expanded');
+    expandedCard = last;
+  }
+
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    notifyParentResize();
+    setTimeout(notifyParentResize, 100);
+    setTimeout(notifyParentResize, 450);
+  }));
+}
+
+// ── Логика карточек ───────────────────────────────────────────────────────
 let expandedCard = null;
 
 function notifyParentResize() {
@@ -190,33 +265,6 @@ function notifyParentResize() {
     }
   } catch (e) {}
 }
-
-(function initLastCardExpanded() {
-  const last = document.querySelector('.cards-stack .card:last-child');
-  if (last) {
-    last.classList.add('expanded');
-    expandedCard = last;
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        notifyParentResize();
-        setTimeout(notifyParentResize, 100);
-        setTimeout(notifyParentResize, 450);
-      });
-    });
-  }
-})();
-
-if (typeof ResizeObserver !== 'undefined') {
-  const stack = document.querySelector('.cards-stack');
-  if (stack) {
-    const ro = new ResizeObserver(() => notifyParentResize());
-    ro.observe(stack);
-  }
-}
-
-document.querySelectorAll('.card-img').forEach((img) => {
-  img.addEventListener('load', notifyParentResize);
-});
 
 function toggleCard(card) {
   if (expandedCard === card) {
@@ -232,6 +280,23 @@ function toggleCard(card) {
   setTimeout(notifyParentResize, 50);
   setTimeout(notifyParentResize, 450);
 }
+
+if (typeof ResizeObserver !== 'undefined') {
+  const stack = document.getElementById('cards-stack');
+  const ro = new ResizeObserver(() => notifyParentResize());
+  ro.observe(stack);
+}
+
+// Слушаем postMessage от родителя на случай смены языка без перезагрузки
+window.addEventListener('message', (e) => {
+  if (e.data && e.data.type === 'setLang' && CARDS_I18N[e.data.lang]) {
+    LANG = e.data.lang;
+    render();
+  }
+});
+
+// Запуск
+render();
 </script>
 </body>
 </html>

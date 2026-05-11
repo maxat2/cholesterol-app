@@ -3106,6 +3106,17 @@ function setLocale(lang) {
   LOCALE = lang;
   localStorage.setItem('userLocale', lang);
   applyLocaleToDOM();
+  updateCardsLang();
+}
+
+function updateCardsLang() {
+  const iframe = document.getElementById('main-edu-iframe');
+  if (!iframe) return;
+  // Обновляем src с новым lang параметром
+  const base = 'cards.html';
+  const newSrc = `${base}?lang=${LOCALE}`;
+  if (iframe.src.endsWith(newSrc) || iframe.getAttribute('src') === newSrc) return;
+  iframe.src = newSrc;
 }
 
 // Применяем переводы к DOM-элементам с data-i18n атрибутом
@@ -6625,6 +6636,7 @@ function finishOnboarding() {
 
 // Применяем локализацию сразу при загрузке
 applyLocaleToDOM();
+updateCardsLang();
 bootstrapApp();
 
 
