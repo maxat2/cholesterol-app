@@ -1284,16 +1284,17 @@
     background: #000;
     color: #fff;
     border: none;
-    border-radius: 14px;
-    padding: 0 18px;
-    height: 52px;
+    border-radius: 16px;
+    padding: 0 20px;
+    height: 56px;
     font-family: var(--sans);
-    font-size: 14px;
-    font-weight: 700;
+    font-size: 16px;
+    font-weight: 600;
     cursor: pointer;
     margin-bottom: 16px;
+    margin-top: 12px;
     letter-spacing: 0.01em;
-    transition: opacity 0.15s;
+    transition: opacity 0.15s, transform 0.12s ease;
   }
   .pricing-btn:active { opacity: 0.82; transform: scale(0.97); }
   .pricing-btn-left { display: flex; align-items: center; gap: 8px; }
@@ -2653,7 +2654,7 @@
   <div class="screen" id="screen-paywall">
     <div style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;">
       <div class="pw-header">
-        <button type="button" class="pw-back-btn" onclick="history.back ? history.back() : goTo('screen-my-profile')">
+        <button type="button" class="pw-back-btn" onclick="goTo(paywallBackScreen || 'screen-my-profile')">
           <svg width="10" height="17" viewBox="0 0 10 17" fill="none"><path d="M8.5 15.5L1.5 8.5L8.5 1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           Назад
         </button>
@@ -4827,6 +4828,7 @@ let lastMealSourceDescribeText = null;
 let describeFoodModalMode = 'describe';
 /** Куда вернуться с экрана результата: свежий анализ → главная, просмотр из истории → история */
 let resultBackScreen = 'screen-main';
+let paywallBackScreen = 'screen-my-profile';
 /** fresh — можно сохранить в историю; history — только просмотр */
 let resultViewSource = 'fresh';
 let historyScrollRestore = false;
@@ -6862,6 +6864,13 @@ async function confirmCaptureAndAnalyze() {
 function goTo(id, opts) {
   let targetId = id;
   let forcedProfileGate = false;
+  // Track where we came from before going to paywall
+  if (id === 'screen-paywall') {
+    const current = document.querySelector('.phone .screen.active');
+    if (current && current.id !== 'screen-paywall') {
+      paywallBackScreen = current.id;
+    }
+  }
   if (
     (id === 'screen-main' ||
       id === 'screen-lipids' ||
