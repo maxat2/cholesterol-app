@@ -2038,7 +2038,7 @@
       <button type="button" class="history-nav-side" onclick="goTo('screen-main')" aria-label="Назад" data-i18n="nav.back" data-i18n-attr="aria-label">
         <svg width="10" height="17" viewBox="0 0 10 17" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M8.5 15.5L1.5 8.5L8.5 1.5" stroke="#1C1B1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
-      <div class="history-nav-title">Профиль</div>
+      <div class="history-nav-title" data-i18n="my_profile.title">Профиль</div>
       <button type="button" class="history-nav-side" onclick="goTo('screen-profile', {mode:'edit'})" aria-label="Редактировать профиль" data-i18n="nav.edit_profile" data-i18n-attr="aria-label">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z" stroke="#1C1B1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" stroke="#1C1B1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
@@ -2156,7 +2156,7 @@
               <span class="ref-row-unit"><span data-i18n="ref.ideal">(идеал &lt;1.0)</span></span>
             </div>
           </div>
-          <div class="ref-card-note">Источники: Helix, KDL, ESC/EAS, Mayo Clinic, AHA 2026. Разные лаборатории могут использовать немного разные диапазоны. Точный диапазон всегда смотрите в бланке своей лаборатории. Конверсия: холестерин ммоль/л × 38.67 = мг/дл, триглицериды × 88.57 = мг/дл.</div>
+          <div class="ref-card-note" data-i18n="lipids.ref_note">Источники: Helix, KDL, ESC/EAS, Mayo Clinic, AHA 2026. Разные лаборатории могут использовать немного разные диапазоны. Точный диапазон всегда смотрите в бланке своей лаборатории. Конверсия: холестерин ммоль/л × 38.67 = мг/дл, триглицериды × 88.57 = мг/дл.</div>
         </div>
       </section>
     </div>
@@ -2188,7 +2188,7 @@
         </div>
         <img class="result-photo-img" id="result-photo-img" alt="" />
       </div>
-      <div class="result-gpt-line">ⓘ Приведённая информация носит справочный характер. В ответах искусственного интеллекта могут быть ошибки.</div>
+      <div class="result-gpt-line" data-i18n="disclaimer">ⓘ Приведённая информация носит справочный характер. В ответах искусственного интеллекта могут быть ошибки.</div>
       <div class="result-body">
         <div class="result-dish-title" id="result-dish-title">—</div>
         <div class="result-summary-text" id="result-summary-text">—</div>
@@ -2477,6 +2477,26 @@ const LOCALES = {
     // Ошибки
     'error.profile_required': 'Укажите e-mail и имя, чтобы пользоваться приложением.',
 
+    // Статусы холестерина
+    'status.ok': 'норма',
+    'status.mid': 'погранично',
+    'status.high': 'повышен',
+    'status.low': 'ниже нормы',
+
+    // Единицы в карточках (динамические)
+    'unit.mmol': 'ммоль/л',
+    'unit.mgdl': 'мг/дл',
+    'unit.gl': 'г/л',
+
+    // Disclaimer
+    'disclaimer': 'ⓘ Приведённая информация носит справочный характер. В ответах искусственного интеллекта могут быть ошибки.',
+
+    // Гендер в сегменте (для profileGenderFemale)
+    'profile.sex_female_val': 'Женский',
+
+    // Название раздела my-profile
+    'my_profile.title': 'Профиль',
+
     // Кнопка Фото + нижняя навигация
     'main.photo_btn': 'Фото',
     'nav.main': 'Главная',
@@ -2661,6 +2681,21 @@ const LOCALES = {
 
     'error.profile_required': 'Please enter your e-mail and name to use the app.',
 
+    'status.ok': 'normal',
+    'status.mid': 'borderline',
+    'status.high': 'elevated',
+    'status.low': 'below normal',
+
+    'unit.mmol': 'mmol/L',
+    'unit.mgdl': 'mg/dL',
+    'unit.gl': 'g/L',
+
+    'disclaimer': 'ⓘ This information is for reference only. AI responses may contain errors.',
+
+    'profile.sex_female_val': 'Female',
+
+    'my_profile.title': 'Profile',
+
     'main.photo_btn': 'Photo',
     'nav.main': 'Home',
     'nav.history': 'History',
@@ -2837,6 +2872,21 @@ const LOCALES = {
     'week.days': ['So','Mo','Di','Mi','Do','Fr','Sa'],
 
     'error.profile_required': 'Bitte E-Mail und Name eingeben, um die App zu nutzen.',
+
+    'status.ok': 'normal',
+    'status.mid': 'grenzwertig',
+    'status.high': 'erhöht',
+    'status.low': 'unter normal',
+
+    'unit.mmol': 'mmol/L',
+    'unit.mgdl': 'mg/dL',
+    'unit.gl': 'g/L',
+
+    'disclaimer': 'ⓘ Diese Informationen dienen nur als Referenz. KI-Antworten können Fehler enthalten.',
+
+    'profile.sex_female_val': 'Weiblich',
+
+    'my_profile.title': 'Profil',
 
     'main.photo_btn': 'Foto',
     'nav.main': 'Start',
@@ -5201,34 +5251,34 @@ function getLipidMmolerForPrompt(id) {
 
 function profileGenderFemale() {
   const g = document.querySelector('#seg-gender .seg-btn.active');
-  return g && g.textContent.trim() === 'Женский';
+  return g && g.textContent.trim() === t('profile.sex_female_val');
 }
 
 function statusCholTotal(m) {
-  if (m <= 5.0) return { tone: 'ok', label: 'норма' };
-  if (m < 6.2) return { tone: 'mid', label: 'погранично' };
-  return { tone: 'bad', label: 'повышен' };
+  if (m <= 5.0) return { tone: 'ok',  label: t('status.ok')  };
+  if (m < 6.2) return { tone: 'mid', label: t('status.mid') };
+  return { tone: 'bad', label: t('status.high') };
 }
 
 function statusCholLdl(m) {
-  if (m <= 3.0) return { tone: 'ok', label: 'норма' };
-  if (m < 4.0) return { tone: 'mid', label: 'погранично' };
-  return { tone: 'bad', label: 'повышен' };
+  if (m <= 3.0) return { tone: 'ok',  label: t('status.ok')  };
+  if (m < 4.0) return { tone: 'mid', label: t('status.mid') };
+  return { tone: 'bad', label: t('status.high') };
 }
 
 /** HDL: выше лучше; красный — низкий (порог зависит от пола). */
 function statusCholHdl(m) {
   const female = profileGenderFemale();
   const lowRed = female ? 1.2 : 1.0;
-  if (m < lowRed) return { tone: 'bad', label: 'ниже нормы' };
-  if (m < 1.5) return { tone: 'mid', label: 'погранично' };
-  return { tone: 'ok', label: 'норма' };
+  if (m < lowRed) return { tone: 'bad', label: t('status.low') };
+  if (m < 1.5) return { tone: 'mid', label: t('status.mid') };
+  return { tone: 'ok',  label: t('status.ok')  };
 }
 
 function statusCholTrig(m) {
-  if (m <= 1.7) return { tone: 'ok', label: 'норма' };
-  if (m < 2.3) return { tone: 'mid', label: 'погранично' };
-  return { tone: 'bad', label: 'повышен' };
+  if (m <= 1.7) return { tone: 'ok',  label: t('status.ok')  };
+  if (m < 2.3) return { tone: 'mid', label: t('status.mid') };
+  return { tone: 'bad', label: t('status.high') };
 }
 
 function setCholMiniCell(cellId, numId, unitId, stId, mmol, statusFor, isTrig) {
@@ -5237,7 +5287,7 @@ function setCholMiniCell(cellId, numId, unitId, stId, mmol, statusFor, isTrig) {
   const unitEl = document.getElementById(unitId);
   const stEl = document.getElementById(stId);
   const mg = isProfileMgDl();
-  const displayUnit = mg ? 'мг/дл' : 'ммоль/л';
+  const displayUnit = mg ? t('unit.mgdl') : t('unit.mmol');
   if (!cell || !numEl || !unitEl || !stEl) return;
   unitEl.textContent = displayUnit;
   if (mmol == null) {
@@ -5330,7 +5380,7 @@ function toggleTip(el) {
 function statusCholApob(v) {
   if (v < 0.7) return { tone: 'ok', label: 'отлично' };
   if (v <= 0.9) return { tone: 'mid', label: 'норма' };
-  return { tone: 'bad', label: 'повышен' };
+  return { tone: 'bad', label: t('status.high') };
 }
 
 function statusTgHdl(v) {
@@ -5456,7 +5506,7 @@ async function syncMyProfileScreen() {
 
   // Карточки холестерина — используем те же данные что и на screen-lipids
   const mg = isProfileMgDl();
-  const displayUnit = mg ? 'мг/дл' : 'ммоль/л';
+  const displayUnit = mg ? t('unit.mgdl') : t('unit.mmol');
   const pairs = [
     ['mp-chol-cell-total', 'mp-chol-total-num', 'mp-chol-total-unit', 'mp-chol-total-st', getMmolLipid('v-total'), statusCholTotal, false],
     ['mp-chol-cell-ldl',   'mp-chol-ldl-num',   'mp-chol-ldl-unit',   'mp-chol-ldl-st',   getMmolLipid('v-ldl'),   statusCholLdl,   false],
