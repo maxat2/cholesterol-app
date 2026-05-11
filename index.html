@@ -5933,15 +5933,15 @@ async function uploadPhotoToStorage(base64DataUrl, fileName) {
 }
 
 function parseModelJson(raw) {
-  let t = String(raw || '').trim();
-  const m = t.match(/^```(?:json)?\s*([\s\S]*?)```$/i);
-  if (m) t = m[1].trim();
+  let txt = String(raw || '').trim();
+  const m = txt.match(/^```(?:json)?\s*([\s\S]*?)```$/i);
+  if (m) txt = m[1].trim();
   try {
-    return JSON.parse(t);
+    return JSON.parse(txt);
   } catch (e) {
     // Ответ обрезан лимитом токенов — пробуем восстановить JSON
     // добавляем закрывающие скобки и парсим снова
-    const attempts = [t + '"}', t + '"}]', t + '[]}}', t + '}}'];
+    const attempts = [txt + '"}', txt + '"}]', txt + '[]}}', txt + '}}'];
     for (const attempt of attempts) {
       try { return JSON.parse(attempt); } catch {}
     }
@@ -6353,8 +6353,8 @@ function updateName(val) {
   const line = document.getElementById('main-greeting-line');
   const screenProfile = document.getElementById('screen-profile');
   if (!line) return;
-  const t = String(val || '').trim();
-  line.textContent = t ? t('main.greeting_name', {name: t}) : t('main.greeting');
+  const name = String(val || '').trim();
+  line.textContent = name ? t('main.greeting_name', {name}) : t('main.greeting');
   if (profileScreenMode === 'edit' && screenProfile?.classList.contains('active')) {
     syncProfileCtaButton();
   }
