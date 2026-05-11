@@ -1127,6 +1127,37 @@
   .daily-summary-conclusion {
     font-size: 14px; line-height: 1.5; color: var(--text); margin-top: 4px;
   }
+  .daily-summary-pattern {
+    font-size: 13px; color: var(--muted); font-style: italic;
+    padding: 0 16px 12px; line-height: 1.4;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+  }
+  .daily-summary-balance {
+    display: flex; gap: 6px; flex-wrap: wrap;
+    padding: 10px 16px 4px;
+  }
+  .balance-chip {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 11px; font-weight: 500; padding: 3px 8px;
+    border-radius: 20px; white-space: nowrap;
+  }
+  .balance-chip.ok  { background: #E8F5E9; color: #2E7D32; }
+  .balance-chip.low { background: #FFF3E0; color: #E65100; }
+  .balance-chip.high-bad { background: #FFEBEE; color: #C62828; }
+  .balance-chip.high-ok  { background: #E8F5E9; color: #2E7D32; }
+  .daily-summary-wins-issues {
+    display: flex; flex-direction: column; gap: 6px;
+    padding: 10px 16px 0;
+  }
+  .win-issue-row {
+    display: flex; gap: 8px; align-items: flex-start;
+    font-size: 13px; line-height: 1.45; color: var(--text);
+  }
+  .win-issue-icon { flex-shrink: 0; font-size: 14px; }
+  .daily-summary-hidden {
+    font-size: 13px; color: var(--muted); font-style: italic;
+    line-height: 1.45; padding: 4px 0;
+  }
   .daily-summary-generating {
     display: flex; align-items: center; gap: 10px;
     background: #F5F7FF; border-radius: 16px; padding: 16px;
@@ -2612,6 +2643,10 @@ function mealRowToLocal(row) {
       score: row.score,
       title: row.title || 'Итог дня',
       meals_line: parsed.meals_line || '',
+      pattern: parsed.pattern || '',
+      strongest_win: parsed.strongest_win || '',
+      dominant_issue: parsed.dominant_issue || '',
+      balance: parsed.balance || null,
       good: parsed.good || '',
       bad: parsed.bad || '',
       tip: parsed.tip || '',
@@ -3117,7 +3152,17 @@ async function refreshMealsCacheFromSupabase() {
   const pending = local.filter((m) => !m.supabaseId);
   const merged = fromServer.concat(pending);
   merged.sort((a, b) => new Date(a.at).getTime() - new Date(b.at).getTime());
-  setMealHistory(merged);
+  // Дедупликация daily summary из Supabase (на случай дублей в БД)
+  const seenDates = {};
+  const deduped = merged.filter(m => {
+    const isDaily = m.is_daily_summary || m.isDailySummary;
+    if (!isDaily) return true;
+    const dk = m.summary_date || m.summaryDate || (m.at && m.at.slice(0, 10)) || '';
+    if (!dk || !seenDates[dk]) { seenDates[dk] = true; return true; }
+    console.log('[merge] удалён дубль daily summary за', dk);
+    return false;
+  });
+  setMealHistory(deduped);
   // Фоновая синхронизация несинхронизированных записей
   syncPendingMeals().catch(e => console.warn('[sync] фоновая ошибка', e));
 }
@@ -3149,39 +3194,87 @@ function hasDailySummaryForDate(dateStr) {
 
 function buildDailySummaryPrompt(meals, profile) {
   const p = profile || getProfileForPrompt();
+  const bodyContext = [p.bodyType, p.activity].filter(Boolean).join(', ') || 'не указано';
+  const lmhrNote = p.lmhr
+    ? '\nLMHR-КОНТЕКСТ: Человек худощавый и активный при высоком LDL — не поддерживай кето, carnivore и low-carb; учитывай риск роста LDL/ApoB при избытке насыщенных жиров.'
+    : (parseFloat(p.bmi) < 23 && parseFloat(p.ldl) >= 3.5
+        ? '\nLMHR-КОНТЕКСТ: Возможный LMHR-профиль (низкий ИМТ + высокий LDL): с осторожностью относись к насыщенным жирам.'
+        : '');
   const mealsList = meals.map((m, i) =>
     (i+1) + '. ' + (m.title || 'Без названия') + ' — оценка ' + (m.score ?? '?') + '/10\n' +
     '   Состав: ' + (m.vision || '—') + '\n' +
     '   Резюме: ' + (m.summary || '—')
   ).join('\n\n');
 
-  return 'Ты опытный нутриционист-кардиолог. Составь структурированный итог питания за день.\n\n' +
-    'ПРОФИЛЬ: холестерин ' + p.total + ' ммоль/л, LDL ' + p.ldl + ', HDL ' + p.hdl + ', триглицериды ' + p.trig + ', ' + p.sex + ', ' + p.age + ' лет.\n\n' +
-    'БЛЮДА ЗА ДЕНЬ:\n' + mealsList + '\n\n' +
-    'Отвечай ТОЛЬКО валидным JSON без пояснений:\n' +
-    '{\n' +
-    '  "score": 7.2,\n' +
-    '  "meals_line": "названия блюд через запятую",\n' +
-    '  "extended": {\n' +
-    '    "good_items": [\n' +
-    '      "Конкретный позитивный факт 1 с объяснением пользы для липидного профиля",\n' +
-    '      "Конкретный позитивный факт 2",\n' +
-    '      "Конкретный позитивный факт 3 если есть"\n' +
-    '    ],\n' +
-    '    "bad_items": [\n' +
-    '      "Конкретная проблема 1 с объяснением механизма влияния",\n' +
-    '      "Конкретная проблема 2",\n' +
-    '      "Итоговый вывод о паттерне питания"\n' +
-    '    ],\n' +
-    '    "conclusion": "2-3 предложения: общая оценка дня и значение для здоровья сердца",\n' +
-    '    "tip": "Один конкретный совет на завтра — что добавить или убрать"\n' +
-    '  }\n' +
-    '}\n\n' +
-    'Правила:\n' +
-    '- good_items: 3-4 конкретных пункта, не общие слова\n' +
-    '- bad_items: 3-5 пунктов, последний — итоговый вывод о паттерне\n' +
-    '- conclusion: честная оценка без лести\n' +
-    '- score: взвешенная оценка с учётом липидного профиля пациента';
+  return `Ты AI-ассистент по питанию для людей с повышенным LDL и ApoB.
+
+Составь итоговый анализ питания за день на основе всех блюд. Анализируй не отдельные блюда, а общий паттерн дня: что в сумме помогало LDL/ApoB, что мешало, какие перекосы повторялись и какой главный вывод можно сделать.
+
+ПРОФИЛЬ ЧЕЛОВЕКА:
+- Общий холестерин: ${p.total} ммоль/л
+- LDL: ${p.ldl} ммоль/л
+- HDL: ${p.hdl} ммоль/л
+- Триглицериды: ${p.trig} ммоль/л
+- Пол: ${p.sex}, возраст: ${p.age} лет
+- Телосложение/активность: ${bodyContext}${lmhrNote}
+
+БЛЮДА ЗА ДЕНЬ:
+${mealsList}
+
+АНАЛИЗИРУЙ:
+- насыщенные жиры и их источники за весь день
+- суммарную клетчатку
+- качество и разнообразие овощей
+- качество жиров (насыщенные vs ненасыщенные)
+- белок и его источники
+- ультрапереработанную еду
+- избыток сыра, сливочного масла, жирного мяса, жареного
+- избыток сахара
+- недостаток бобовых, рыбы, цельных злаков
+- дефицит разнообразия
+- недостаток калорий у активного худощавого человека
+
+ВАЖНЫЕ ПРАВИЛА:
+- Не пересказывай выводы отдельных блюд — делай новый общий анализ.
+- Ищи закономерности, которые видны только при взгляде на весь день.
+- Определи что сильнее влияло: полезные факторы или источники насыщенных жиров.
+- Не повторяй одну мысль разными словами.
+- Не пугай и не льсти.
+- Каждый вывод привязан к конкретному паттерну дня.
+
+ЗАПРЕЩЕНЫ ФРАЗЫ: "важен баланс", "питайтесь разнообразно", "всё хорошо в меру", "не забывайте овощи", "сбалансированное питание", "продолжайте в том же духе".
+
+ОТВЕЧАЙ ТОЛЬКО ВАЛИДНЫМ JSON БЕЗ ЛИШНЕГО ТЕКСТА:
+{
+  "score": 7.4,
+  "meals_line": "названия блюд через запятую",
+  "pattern": "1 короткое предложение о главном паттерне дня",
+  "strongest_win": "что сегодня больше всего помогало LDL-friendly профилю",
+  "dominant_issue": "главный фактор, который сильнее всего ухудшал LDL-friendly профиль дня",
+  "balance": {
+    "fiber": "low|ok|high",
+    "saturated_fat": "low|ok|high",
+    "protein": "low|ok|high",
+    "vegetables": "low|ok|high",
+    "processed_food": "low|ok|high"
+  },
+  "extended": {
+    "good_items": ["3-4 конкретных сильных стороны дня"],
+    "bad_items": ["2-4 конкретных проблемы или перекоса"],
+    "hidden_pattern": "1-2 предложения о неочевидном паттерне, видном только при анализе всего дня.",
+    "conclusion": "2-3 предложения. Честная общая оценка дня в контексте LDL/ApoB.",
+    "tip": "Один конкретный совет на завтра с объяснением механизма."
+  }
+}
+
+ПРАВИЛА SCORE:
+- 9.0-10.0 → очень сильный LDL-friendly день
+- 7.0-8.9 → хороший устойчивый паттерн
+- 5.0-6.9 → смешанный день с перекосами
+- 3.0-4.9 → много факторов риска для LDL/ApoB
+- 1.0-2.9 → крайне неблагоприятный день
+
+ВАЖНО: score с одним знаком после запятой. JSON валидный. Никаких markdown. Никаких пояснений вне JSON. Не копируй summary блюд. Если данных мало — честно отражай в conclusion.`;
 }
 
 async function generateDailySummary() {
@@ -3236,6 +3329,10 @@ async function generateDailySummary() {
       score: parsed.score,
       title: 'Итог дня',
       meals_line: parsed.meals_line || '',
+      pattern: parsed.pattern || '',
+      strongest_win: parsed.strongest_win || '',
+      dominant_issue: parsed.dominant_issue || '',
+      balance: parsed.balance || null,
       good: (ext.good_items || []).join(' | '),
       bad: (ext.bad_items || []).join(' | '),
       tip: ext.tip || '',
@@ -3255,7 +3352,7 @@ async function generateDailySummary() {
       verdict: 'summary',
       score: parsed.score,
       title: parsed.title || 'Итог дня',
-      summary: JSON.stringify({ meals_line: parsed.meals_line, extended: parsed.extended || {}, good: (parsed.extended?.good_items||[]).join(' | '), bad: (parsed.extended?.bad_items||[]).join(' | '), tip: parsed.extended?.tip || '' }),
+      summary: JSON.stringify({ meals_line: parsed.meals_line, pattern: parsed.pattern || '', strongest_win: parsed.strongest_win || '', dominant_issue: parsed.dominant_issue || '', balance: parsed.balance || null, extended: parsed.extended || {}, good: (parsed.extended?.good_items||[]).join(' | '), bad: (parsed.extended?.bad_items||[]).join(' | '), tip: parsed.extended?.tip || '' }),
       is_daily_summary: true,
       summary_date: today,
       eaten_at: new Date().toISOString(),
@@ -3799,7 +3896,24 @@ function getMealHistory() {
     const r = localStorage.getItem(LS_MEAL_HISTORY);
     if (!r) return [];
     const arr = JSON.parse(r);
-    return Array.isArray(arr) ? arr : [];
+    if (!Array.isArray(arr)) return [];
+    // Дедупликация: если за одну дату несколько daily summary — оставляем одну
+    // (ту у которой есть supabaseId, иначе последнюю)
+    const seen = {};
+    const deduped = [];
+    for (let i = arr.length - 1; i >= 0; i--) {
+      const m = arr[i];
+      const isDaily = m.is_daily_summary || m.isDailySummary;
+      if (!isDaily) { deduped.unshift(m); continue; }
+      const dateKey = m.summary_date || m.summaryDate || (m.at && m.at.slice(0, 10)) || '';
+      if (!dateKey) { deduped.unshift(m); continue; }
+      if (!seen[dateKey]) {
+        seen[dateKey] = true;
+        deduped.unshift(m);
+      }
+      // дубль — пропускаем (он старее, т.к. идём с конца)
+    }
+    return deduped;
   } catch (e) {
     return [];
   }
@@ -4056,24 +4170,37 @@ async function renderHistoryList() {
       card.className = 'daily-summary-card';
       card.setAttribute('data-expanded', 'false');
 
-      // Парсим расширенный отчёт
-      let goodItems = [], badItems = [], conclusion = '', tip = '';
+      // Парсим все поля отчёта
+      let goodItems = [], badItems = [], conclusion = '', tip = '', hiddenPattern = '';
+      const pattern = item.pattern || '';
+      const strongestWin = item.strongest_win || '';
+      const dominantIssue = item.dominant_issue || '';
+      const balance = item.balance || null;
       try {
         const ext = item.extended || {};
-        // Новый формат (extended) или старый (plain text)
         if (ext.good_items && Array.isArray(ext.good_items)) {
           goodItems = ext.good_items;
           badItems = Array.isArray(ext.bad_items) ? ext.bad_items : [];
           conclusion = ext.conclusion || '';
           tip = ext.tip || item.tip || '';
+          hiddenPattern = ext.hidden_pattern || '';
         } else {
-          // Старый формат — разбиваем по ' | ' или показываем как есть
           goodItems = item.good ? item.good.split(' | ').filter(Boolean) : [];
           badItems = item.bad ? item.bad.split(' | ').filter(Boolean) : [];
           tip = item.tip || '';
-          conclusion = '';
         }
       } catch(e) {}
+
+      // Balance chips
+      const balanceLabels = { fiber: 'Клетчатка', saturated_fat: 'Нас. жиры', protein: 'Белок', vegetables: 'Овощи', processed_food: 'Переработка' };
+      const balanceChips = balance ? Object.entries(balance).map(([k, v]) => {
+        const label = balanceLabels[k] || k;
+        // Для saturated_fat и processed_food "high" — плохо, "low" — хорошо
+        const isBadHigh = (k === 'saturated_fat' || k === 'processed_food');
+        const chipClass = v === 'ok' ? 'ok' : (v === 'high' ? (isBadHigh ? 'high-bad' : 'high-ok') : 'low');
+        const icon = v === 'ok' ? '●' : (v === 'high' ? '▲' : '▼');
+        return `<span class="balance-chip ${chipClass}">${icon} ${label}</span>`;
+      }).join('') : '';
 
       card.innerHTML = `
         <div class="daily-summary-header" onclick="(function(h){const b=h.closest('.daily-summary-card').querySelector('.daily-summary-body');const c=h.querySelector('.daily-summary-chevron');if(b.style.display==='none'){b.style.display='block';c.style.transform='rotate(180deg)';}else{b.style.display='none';c.style.transform='rotate(0deg)';};})(this)">
@@ -4082,19 +4209,34 @@ async function renderHistoryList() {
           <span class="daily-summary-score-inline">${sc}/10</span>
         </div>
         <div class="daily-summary-body" style="display:none;">
+          ${pattern ? `<div class="daily-summary-pattern">${pattern}</div>` : ''}
+          ${balanceChips ? `<div class="daily-summary-balance">${balanceChips}</div>` : ''}
+          ${(strongestWin || dominantIssue) ? `
+            <div class="daily-summary-wins-issues">
+              ${strongestWin ? `<div class="win-issue-row"><span class="win-issue-icon">✅</span><span>${strongestWin}</span></div>` : ''}
+              ${dominantIssue ? `<div class="win-issue-row"><span class="win-issue-icon">⚠️</span><span>${dominantIssue}</span></div>` : ''}
+            </div>
+          ` : ''}
           ${goodItems.length ? `
-            <div class="daily-summary-section-label">Что хорошо</div>
-            ${goodItems.map(t => `<div class="daily-summary-row"><span class="daily-summary-row-icon good">✓</span><span>${t}</span></div>`).join('')}
+            <div class="daily-summary-section-label" style="margin-top:12px;">Что работало</div>
+            ${goodItems.map(t => `<div class="daily-summary-row"><span class="daily-summary-row-icon">✓</span><span>${t}</span></div>`).join('')}
           ` : ''}
           ${badItems.length ? `
-            <div class="daily-summary-section-label" style="margin-top:12px;">Что неочень</div>
-            ${badItems.map(t => `<div class="daily-summary-row"><span class="daily-summary-row-icon bad">❗</span><span>${t}</span></div>`).join('')}
+            <div class="daily-summary-section-label" style="margin-top:12px;">Что мешало</div>
+            ${badItems.map(t => `<div class="daily-summary-row"><span class="daily-summary-row-icon">–</span><span>${t}</span></div>`).join('')}
+          ` : ''}
+          ${hiddenPattern ? `
+            <div class="daily-summary-section-label" style="margin-top:12px;">Паттерн дня</div>
+            <div class="daily-summary-hidden">${hiddenPattern}</div>
           ` : ''}
           ${conclusion ? `
             <div class="daily-summary-section-label" style="margin-top:12px;">Итог</div>
             <div class="daily-summary-conclusion">${conclusion}</div>
           ` : ''}
-          ${tip ? `<div class="daily-summary-row tip"><span class="daily-summary-row-icon tip">📌</span><span>${tip}</span></div>` : ''}
+          ${tip ? `
+            <div class="daily-summary-section-label" style="margin-top:12px;">Совет на завтра</div>
+            <div class="daily-summary-row"><span class="daily-summary-row-icon">📌</span><span>${tip}</span></div>
+          ` : ''}
         </div>`;
       listEl.appendChild(card);
       return;
