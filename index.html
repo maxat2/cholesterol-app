@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <title>Холестериновая слежка</title>
+  <title data-i18n="app.title">Холестериновая слежка</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -1612,7 +1612,7 @@
 
 <div class="app-wrap">
 <div class="phone" style="position:relative;">
-  <div id="app-init-error" class="app-init-error" role="alert">Не удалось загрузить настройки приложения</div>
+  <div id="app-init-error" class="app-init-error" role="alert" data-i18n="app.init_error">Не удалось загрузить настройки приложения</div>
 
 
   <!-- CAPTURE PREVIEW SCREEN -->
@@ -1624,17 +1624,17 @@
           id="capture-caption-input"
           class="capture-caption-input"
           type="text"
-          placeholder="Уточните что на фото…"
+          placeholder="Уточните что на фото…" data-i18n="capture.placeholder" data-i18n-attr="placeholder"
           autocomplete="off"
           maxlength="200"
         />
       </div>
     </div>
     <div class="capture-bottom-bar">
-      <button class="capture-btn-retake" onclick="retakePhoto()" aria-label="Переснять">
+      <button class="capture-btn-retake" onclick="retakePhoto()" aria-label="Переснять" data-i18n="capture.retake" data-i18n-attr="aria-label">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.95"/></svg>
       </button>
-      <button class="capture-btn-confirm" onclick="confirmCaptureAndAnalyze()" aria-label="Анализировать">
+      <button class="capture-btn-confirm" onclick="confirmCaptureAndAnalyze()" aria-label="Анализировать" data-i18n="capture.confirm" data-i18n-attr="aria-label">
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
       </button>
     </div>
@@ -1651,7 +1651,7 @@
           <div class="onboarding-img-wrap">
             <img class="onboarding-img" src="onboarding_1.png" alt="Добавь данные о себе" />
           </div>
-          <div class="onboarding-text">Добавь данные о&nbsp;себе<br>(идеально с&nbsp;анализами)</div>
+          <div class="onboarding-text" data-i18n="onboarding.slide1">Добавь данные о&nbsp;себе<br>(идеально с&nbsp;анализами)</div>
           <div class="onboarding-dots">
             <div class="onboarding-dot active" id="ob-dot-0"></div>
             <div class="onboarding-dot" id="ob-dot-1"></div>
@@ -1665,7 +1665,7 @@
           <div class="onboarding-img-wrap">
             <img class="onboarding-img" src="onboarding_2.png" alt="Сфотографируй блюдо" />
           </div>
-          <div class="onboarding-text">Сфотографируй блюдо&nbsp;—<br>получи персональный разбор</div>
+          <div class="onboarding-text" data-i18n="onboarding.slide2">Сфотографируй блюдо&nbsp;—<br>получи персональный разбор</div>
           <div class="onboarding-dots">
             <div class="onboarding-dot" id="ob-dot-0b"></div>
             <div class="onboarding-dot active" id="ob-dot-1b"></div>
@@ -1679,7 +1679,7 @@
           <div class="onboarding-img-wrap">
             <img class="onboarding-img" src="onboarding_3.png" alt="Пойми, что влияет на твой липидный профиль" />
           </div>
-          <div class="onboarding-text">Пойми, что влияет<br>на&nbsp;твой липидный профиль</div>
+          <div class="onboarding-text" data-i18n="onboarding.slide3">Пойми, что влияет<br>на&nbsp;твой липидный профиль</div>
           <div class="onboarding-dots">
             <div class="onboarding-dot" id="ob-dot-0c"></div>
             <div class="onboarding-dot" id="ob-dot-1c"></div>
@@ -1690,7 +1690,7 @@
       </div>
     </div>
     <div class="onboarding-footer">
-      <button type="button" class="onboarding-btn-next" id="onboarding-btn-next" onclick="onboardingNext()">Далее</button>
+      <button type="button" class="onboarding-btn-next" id="onboarding-btn-next" onclick="onboardingNext()" data-i18n="onboarding.next">Далее</button>
     </div>
   </div>
   <!-- END ONBOARDING SCREEN -->
@@ -1708,7 +1708,7 @@
         Continue with Google
       </button>
       <div class="auth-divider">
-        <span>или</span>
+        <span data-i18n="auth.or">или</span>
       </div>
       <div class="auth-field-wrap">
         <input
@@ -1725,99 +1725,99 @@
           </svg>
         </span>
       </div>
-      <button type="button" class="auth-btn" id="auth-submit">Войти</button>
+      <button type="button" class="auth-btn" id="auth-submit" data-i18n="auth.sign_in">Войти</button>
     </div>
   </div>
 
   <div class="screen mode-onboarding" id="screen-profile">
     <div class="nav profile-nav--onboarding">
-      <div class="nav-title" id="profile-nav-title">Профиль</div>
-      <div class="nav-skip" onclick="skipOnboardingToMain()">Пропустить</div>
+      <div class="nav-title" id="profile-nav-title" data-i18n="profile.title">Профиль</div>
+      <div class="nav-skip" onclick="skipOnboardingToMain()" data-i18n="onboarding.skip">Пропустить</div>
     </div>
     <div class="nav history-top-nav profile-nav--edit" aria-hidden="true">
       <button type="button" class="history-nav-side" onclick="goTo('screen-my-profile')" aria-label="Назад" title="Назад">
         <svg width="10" height="17" viewBox="0 0 10 17" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M8.5 15.5L1.5 8.5L8.5 1.5" stroke="#1C1B1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
-      <div class="history-nav-title">Профиль</div>
+      <div class="history-nav-title" data-i18n="my_profile.nav">Профиль</div>
       <span class="history-nav-side" aria-hidden="true"></span>
     </div>
     <div class="content">
-      <div class="h2-section">Личные данные</div>
+      <div class="h2-section" data-i18n="profile.personal">Личные данные</div>
       <div class="field" id="field-wrap-email" style="opacity:0.6; pointer-events:none;">
         <div class="field-label" style="display:flex;justify-content:space-between;align-items:center;">
           E-mail
-          <span style="font-size:11px;color:var(--muted2);font-weight:400;">не изменяется</span>
+          <span style="font-size:11px;color:var(--muted2);font-weight:400;" data-i18n="profile.email_readonly">не изменяется</span>
         </div>
         <div class="field-row">
           <input type="email" id="input-email" placeholder="you@example.com" readonly tabindex="-1" style="color:var(--muted);" />
         </div>
       </div>
       <div class="field" id="field-wrap-name">
-        <div class="field-label">Имя</div>
+        <div class="field-label" data-i18n="profile.name">Имя</div>
         <div class="field-row">
-          <input type="text" id="input-name" placeholder="Имя" autocomplete="name" oninput="updateName(this.value)" />
+          <input type="text" id="input-name" placeholder="Имя" data-i18n-attr="placeholder" data-i18n="profile.name_placeholder" autocomplete="name" oninput="updateName(this.value)" />
         </div>
       </div>
       <div class="field-row-2">
         <div class="field">
-          <div class="field-label">Рост</div>
+          <div class="field-label" data-i18n="profile.height">Рост</div>
           <div class="field-row">
             <input type="number" id="input-height" placeholder="178" />
-            <span class="field-unit">см</span>
+            <span class="field-unit" data-i18n="profile.height_unit">см</span>
           </div>
         </div>
         <div class="field">
-          <div class="field-label">Вес</div>
+          <div class="field-label" data-i18n="profile.weight">Вес</div>
           <div class="field-row">
             <input type="number" id="input-weight" placeholder="80" />
-            <span class="field-unit">кг</span>
+            <span class="field-unit" data-i18n="profile.weight_unit">кг</span>
           </div>
         </div>
       </div>
       <div class="field-row-2">
         <div class="field">
-          <div class="field-label">Возраст</div>
+          <div class="field-label" data-i18n="profile.age">Возраст</div>
           <div class="field-row">
             <input type="number" id="input-age" placeholder="38" />
-            <span class="field-unit">лет</span>
+            <span class="field-unit" data-i18n="profile.age_unit">лет</span>
           </div>
         </div>
         <div>
-          <div class="field-label" style="margin-bottom:6px;">Пол</div>
+          <div class="field-label" style="margin-bottom:6px;" data-i18n="profile.sex">Пол</div>
           <div class="seg" id="seg-gender">
-            <div class="seg-btn active" onclick="setSeg('seg-gender',this)">Мужской</div>
-            <div class="seg-btn" onclick="setSeg('seg-gender',this)">Женский</div>
+            <div class="seg-btn active" onclick="setSeg('seg-gender',this)" data-i18n="profile.sex_male">Мужской</div>
+            <div class="seg-btn" onclick="setSeg('seg-gender',this)" data-i18n="profile.sex_female">Женский</div>
           </div>
         </div>
       </div>
 
-      <div class="h2-section">Образ жизни</div>
+      <div class="h2-section" data-i18n="profile.lifestyle">Образ жизни</div>
 
-      <div class="field-label" style="margin-bottom:6px;">Телосложение</div>
+      <div class="field-label" style="margin-bottom:6px;" data-i18n="profile.body_type">Телосложение</div>
       <div class="seg" id="seg-body-type">
-        <div class="seg-btn active" onclick="setSeg('seg-body-type',this);checkLmhr()">Худощавый</div>
-        <div class="seg-btn" onclick="setSeg('seg-body-type',this);checkLmhr()">Среднее</div>
-        <div class="seg-btn" onclick="setSeg('seg-body-type',this);checkLmhr()">Плотное</div>
+        <div class="seg-btn active" onclick="setSeg('seg-body-type',this);checkLmhr()" data-i18n="profile.body_lean">Худощавый</div>
+        <div class="seg-btn" onclick="setSeg('seg-body-type',this);checkLmhr()" data-i18n="profile.body_medium">Среднее</div>
+        <div class="seg-btn" onclick="setSeg('seg-body-type',this);checkLmhr()" data-i18n="profile.body_heavy">Плотное</div>
       </div>
 
-      <div class="field-label" style="margin-bottom:6px;">Физическая активность</div>
+      <div class="field-label" style="margin-bottom:6px;" data-i18n="profile.activity">Физическая активность</div>
       <div class="seg" id="seg-activity">
-        <div class="seg-btn" onclick="setSeg('seg-activity',this);checkLmhr()">Низкая</div>
-        <div class="seg-btn active" onclick="setSeg('seg-activity',this);checkLmhr()">Средняя</div>
-        <div class="seg-btn" onclick="setSeg('seg-activity',this);checkLmhr()">Высокая</div>
+        <div class="seg-btn" onclick="setSeg('seg-activity',this);checkLmhr()" data-i18n="profile.activity_low">Низкая</div>
+        <div class="seg-btn active" onclick="setSeg('seg-activity',this);checkLmhr()" data-i18n="profile.activity_medium">Средняя</div>
+        <div class="seg-btn" onclick="setSeg('seg-activity',this);checkLmhr()" data-i18n="profile.activity_high">Высокая</div>
       </div>
 
       <div class="lmhr-banner" id="lmhr-banner">
         <div class="lmhr-banner-icon">⚡</div>
         <div class="lmhr-banner-body">
           <div class="lmhr-banner-title">Включён режим LMHR</div>
-          <div class="lmhr-banner-text">Худощавый + активный + высокий LDL — особый профиль. Кето и низкоуглеводные диеты могут ПОВЫСИТЬ твой LDL. ИИ учтёт это при анализе еды.</div>
+          <div class="lmhr-banner-text" data-i18n="profile.lmhr_text">Худощавый + активный + высокий LDL — особый профиль. Кето и низкоуглеводные диеты могут ПОВЫСИТЬ твой LDL. ИИ учтёт это при анализе еды.</div>
         </div>
       </div>
 
-      <div class="h2-section">Твой липидный профиль</div>
+      <div class="h2-section" data-i18n="profile.lipids_title">Твой липидный профиль</div>
       <div class="field" id="f-total">
-        <div class="field-label">ОХ — Общий холестерин (Total Cholesterol)</div>
+        <div class="field-label" data-i18n="profile.total">ОХ — Общий холестерин (Total Cholesterol)</div>
         <div class="field-row">
           <input type="number" id="v-total" placeholder="5.2" />
           <span class="field-unit" id="field-unit-total">ммоль/л</span>
@@ -1838,14 +1838,14 @@
         </div>
       </div>
       <div class="field" id="f-trig">
-        <div class="field-label">Триглицериды (TG)</div>
+        <div class="field-label" data-i18n="profile.trig">Триглицериды (TG)</div>
         <div class="field-row">
           <input type="number" id="v-trig" placeholder="1.5" />
           <span class="field-unit" id="field-unit-trig">ммоль/л</span>
         </div>
       </div>
       <div class="field" id="f-apob">
-        <div class="field-label">Аполипопротеин B (ApoB) — необязательно</div>
+        <div class="field-label" data-i18n="profile.apob">Аполипопротеин B (ApoB) — необязательно</div>
         <div class="field-row">
           <input type="number" id="v-apob" placeholder="0.9" step="0.01" oninput="onApobInput()" />
           <span class="field-unit">г/л</span>
@@ -1853,38 +1853,44 @@
       </div>
 
       <button type="button" class="dontknow-btn" id="dontknow-btn" onclick="toggleDontKnow()">
-        <span class="dontknow-text">Заполнить средними значениями</span>
+        <span class="dontknow-text" data-i18n="profile.fill_avg">Заполнить средними значениями</span>
         <span class="dontknow-arrow">▾</span>
       </button>
 
       <div class="dontknow-hint" id="dontknow-hint">
-        <div class="dontknow-hint-title">Всё равно начнём!</div>
+        <div class="dontknow-hint-title" data-i18n="profile.fill_avg_title">Всё равно начнём!</div>
         <div class="dontknow-hint-text">
-          Мы подставили <b>средние показатели</b> — AI даст общие рекомендации. После анализов обнови цифры в профиле.
+          <span data-i18n="profile.fill_avg_text">Мы подставили <b>средние показатели</b> — AI даст общие рекомендации. После анализов обнови цифры в профиле.</span>
         </div>
       </div>
 
       <div class="toggle-row-plain">
-        <span class="toggle-label">Принимаю статины</span>
+        <span class="toggle-label" data-i18n="profile.statins">Принимаю статины</span>
         <div class="toggle-switch" id="toggle-statins" onclick="toggleSwitch(this)"></div>
       </div>
 
       <div class="lmhr-mode-row" id="lmhr-mode-row">
-        <span class="lmhr-mode-label">Режим анализа еды</span>
+        <span class="lmhr-mode-label" data-i18n="profile.analysis_mode">Режим анализа еды</span>
         <span class="lmhr-badge" id="lmhr-badge"><span class="lmhr-badge-dot"></span>LMHR активен</span>
       </div>
 
-      <div class="field-label units-mini">Единицы измерения анализов</div>
+      <div class="field-label units-mini" data-i18n="profile.units">Единицы измерения анализов</div>
       <div class="seg" id="seg-units">
         <div class="seg-btn active" onclick="setSeg('seg-units',this)">ммоль/л</div>
         <div class="seg-btn" onclick="setSeg('seg-units',this)">мг/дл</div>
       </div>
+      <div class="field-label units-mini" style="margin-top:16px;" data-i18n="profile.language">Язык</div>
+      <div class="seg" id="seg-locale">
+        <div class="seg-btn" onclick="setSeg('seg-locale',this);setLocale('ru')">Русский</div>
+        <div class="seg-btn" onclick="setSeg('seg-locale',this);setLocale('en')">English</div>
+        <div class="seg-btn" onclick="setSeg('seg-locale',this);setLocale('de')">Deutsch</div>
+      </div>
 
       <div class="inline-error" id="profile-validate-error" role="alert"></div>
-      <button type="button" class="btn-primary" id="profile-cta-btn" onclick="setBtnLoading(this);saveProfileAndStart()"><span class="btn-label">Продолжить</span><span class="btn-spinner"></span></button>
+      <button type="button" class="btn-primary" id="profile-cta-btn" onclick="setBtnLoading(this);saveProfileAndStart()"><span class="btn-label" data-i18n="profile.continue">Продолжить</span><span class="btn-spinner"></span></button>
 
       <div class="profile-logout-wrap">
-        <button type="button" class="btn-primary" id="profile-logout-btn" onclick="logoutFromApp()">Выйти</button>
+        <button type="button" class="btn-primary" id="profile-logout-btn" onclick="logoutFromApp()" data-i18n="profile.logout">Выйти</button>
       </div>
     </div>
     <div class="bottom-nav">
@@ -1903,8 +1909,8 @@
   <div class="screen" id="screen-main">
     <div class="main-wrap">
       <div class="main-header main-header--hero">
-        <div class="main-greeting" id="main-greeting-line">Привет!</div>
-        <p class="main-lead">Что ешь сегодня? Сфотографируй еду — узнай подходит ли она тебе.</p>
+        <div class="main-greeting" id="main-greeting-line" data-i18n="main.greeting">Привет!</div>
+        <p class="main-lead" data-i18n="main.lead">Что ешь сегодня? Сфотографируй еду — узнай подходит ли она тебе.</p>
       </div>
       <div id="main-hero-animation">
         <img src="main_animation.svg" id="main-anim-img" alt="" style="width:100%;height:auto;display:block;" />
@@ -1943,7 +1949,7 @@
       <button type="button" class="history-nav-side" onclick="goTo('screen-main')" aria-label="Назад" title="Назад">
         <svg width="10" height="17" viewBox="0 0 10 17" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M8.5 15.5L1.5 8.5L8.5 1.5" stroke="#1C1B1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
-      <div class="history-nav-title">Липидный профиль</div>
+      <div class="history-nav-title" data-i18n="lipids.nav">Липидный профиль</div>
       <span class="history-nav-side" aria-hidden="true"></span>
     </div>
     <div class="content">
@@ -1955,7 +1961,7 @@
         <img src="profile_illustration.png" class="lipid-profile-emoji" alt="" />
       </div>
       <section class="main-lipids" aria-labelledby="lipid-heading">
-        <h2 class="lipid-section-title" id="lipid-heading">Твой липидный профиль</h2>
+        <h2 class="lipid-section-title" id="lipid-heading" data-i18n="lipids.title">Твой липидный профиль</h2>
         <div class="main-lipids-stack" id="main-lipids-stack">
         <div id="main-lipids-skeleton" aria-hidden="true">
           <div class="chol-grid skeleton-lipid-grid">
@@ -2049,7 +2055,7 @@
 
       <!-- Липидный профиль -->
       <section class="main-lipids" aria-labelledby="my-lipid-heading">
-        <h2 class="my-profile-section-title" id="my-lipid-heading">Твой липидный профиль</h2>
+        <h2 class="my-profile-section-title" id="my-lipid-heading" data-i18n="lipids.title">Твой липидный профиль</h2>
         <div class="chol-grid">
           <div class="chol-mini chol-mini--empty" id="mp-chol-cell-total">
             <div>
@@ -2099,7 +2105,7 @@
       <!-- Референсные значения -->
       <section>
         <div class="ref-card">
-          <div class="ref-card-title">Референсные значения</div>
+          <div class="ref-card-title" data-i18n="lipids.ref_title">Референсные значения</div>
           <div class="ref-divider"></div>
           <div class="ref-row">
             <span class="ref-row-name"><span class="chol-tip" onclick="toggleTip(this)">ОХ — Общий холестерин<span class="chol-tip-box"><strong>Total Cholesterol (TC)</strong>Сумма всех фракций. Важен не сам по себе — смотри соотношение LDL и HDL.</span></span></span>
@@ -2192,25 +2198,25 @@
         </div>
         <div class="result-hr"></div>
         <div class="result-block">
-          <div class="result-block-title">Как это работает</div>
+          <div class="result-block-title" data-i18n="result.how_it_works">Как это работает</div>
           <div class="result-block-text" id="result-education-text">—</div>
         </div>
         <div class="result-block">
-          <div class="result-block-title">Нюансы</div>
+          <div class="result-block-title" data-i18n="result.nuances">Нюансы</div>
           <div class="result-block-text" id="result-nuances-text">—</div>
         </div>
         <div class="result-block">
-          <div class="result-block-title">Как сделать 10/10</div>
+          <div class="result-block-title" data-i18n="result.how_to_10">Как сделать 10/10</div>
           <div class="result-block-text" id="result-upgrade-text">—</div>
         </div>
         <div class="result-block">
-          <div class="result-block-title">Факторы</div>
+          <div class="result-block-title" data-i18n="result.factors">Факторы</div>
           <div id="result-factors-list"></div>
         </div>
       </div>
       <div class="result-actions" id="result-actions">
-        <button type="button" class="btn-primary" id="result-btn-save-history" onclick="setBtnLoading(this);saveMealToHistoryAndGoMain()"><span class="btn-label">Сохранить в историю</span><span class="btn-spinner"></span></button>
-        <button type="button" class="btn-primary" id="result-btn-refine" style="display:none" onclick="setBtnLoading(this);openDescribeFoodModalForRefine()"><span class="btn-label">Уточнить</span><span class="btn-spinner"></span></button>
+        <button type="button" class="btn-primary" id="result-btn-save-history" onclick="setBtnLoading(this);saveMealToHistoryAndGoMain()"><span class="btn-label" data-i18n="result.save">Сохранить в историю</span><span class="btn-spinner"></span></button>
+        <button type="button" class="btn-primary" id="result-btn-refine" style="display:none" onclick="setBtnLoading(this);openDescribeFoodModalForRefine()"><span class="btn-label" data-i18n="result.refine">Уточнить</span><span class="btn-spinner"></span></button>
         <button type="button" class="btn-secondary" onclick="backFromResult()">← Назад</button>
       </div>
     </div>
@@ -2232,14 +2238,14 @@
       <button type="button" class="history-nav-side" onclick="goTo('screen-main')" aria-label="Назад" title="Назад">
         <svg width="10" height="17" viewBox="0 0 10 17" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M8.5 15.5L1.5 8.5L8.5 1.5" stroke="#1C1B1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
-      <div class="history-nav-title">История</div>
+      <div class="history-nav-title" data-i18n="history.title">История</div>
       <span class="history-nav-side" aria-hidden="true"></span>
     </div>
     <div class="content history-content">
       <div id="history-summary-card" class="history-summary" style="display:none;">
         <div class="history-summary-top">
           <div class="history-summary-left">
-            <span class="history-summary-label">Средняя оценка питания</span>
+            <span class="history-summary-label" data-i18n="history.avg_label">Средняя оценка питания</span>
             <span class="history-summary-num" id="history-avg-num">—</span>
           </div>
 
@@ -2250,10 +2256,10 @@
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="flex-shrink:0;">
           <path d="M1 21.98C1 22.54 1.45 22.99 2.01 22.99H15C15.56 22.99 16.01 22.54 16.01 21.98V21H1V21.98ZM8.5 8.99C4.75 8.99 1 11 1 15H16C16 11 12.25 8.99 8.5 8.99ZM3.62 13C4.73 11.45 7.09 10.99 8.5 10.99C9.91 10.99 12.27 11.45 13.38 13H3.62ZM1 17H16V19H1V17ZM18 5V1H16V5H11L11.23 7H20.79L19.39 21H18V23H19.72C20.56 23 21.25 22.35 21.35 21.53L23 5H18Z" fill="white"/>
         </svg>
-        <span style="margin-left:10px;">Добавить без фото</span>
+        <span style="margin-left:10px;" data-i18n="history.add_no_photo">Добавить без фото</span>
       </button>
 
-      <div class="history-empty" id="history-empty" style="display:none;">Пока нет записей. Сфоткай свою первую еду!</div>
+      <div class="history-empty" id="history-empty" style="display:none;" data-i18n="history.empty">Пока нет записей. Сфоткай свою первую еду!</div>
       <div class="history-skeleton-wrap" id="history-skeleton-wrap" aria-hidden="true">
         <div class="history-skel-item">
           <div class="skeleton history-skel-thumb"></div>
@@ -2299,14 +2305,14 @@
   >
     <div class="describe-food-sheet" onclick="event.stopPropagation()">
       <div class="purchase-grab"></div>
-      <div class="describe-food-title">Описание еды</div>
+      <div class="describe-food-title" data-i18n="result.describe_title">Описание еды</div>
       <textarea
         id="describe-food-text"
         class="describe-food-textarea"
-        placeholder="Опишите то что сегодня ели, желательно подробно, чтобы точность ответа была лучше"
+        placeholder="Опишите то что сегодня ели, желательно подробно, чтобы точность ответа была лучше" data-i18n="result.describe_placeholder" data-i18n-attr="placeholder"
         rows="6"
       ></textarea>
-      <button type="button" class="btn-primary" id="describe-food-submit" onclick="setBtnLoading(this);submitDescribeFood()"><span class="btn-label">Отправить</span><span class="btn-spinner"></span></button>
+      <button type="button" class="btn-primary" id="describe-food-submit" onclick="setBtnLoading(this);submitDescribeFood()"><span class="btn-label" data-i18n="result.describe_submit">Отправить</span><span class="btn-spinner"></span></button>
     </div>
   </div>
 
@@ -2330,6 +2336,440 @@
 </div>
 
 <script>
+// ===== i18n ЛОКАЛИЗАЦИЯ =====
+const LOCALES = {
+  ru: {
+    // Общее
+    'app.title': 'Холестериновая слежка',
+    'app.init_error': 'Не удалось загрузить настройки приложения',
+
+    // Онбординг
+    'onboarding.slide1': 'Добавь данные о себе\n(идеально с анализами)',
+    'onboarding.slide2': 'Сфотографируй блюдо —\nполучи персональный разбор',
+    'onboarding.slide3': 'Пойми, что влияет\nна твой липидный профиль',
+    'onboarding.next': 'Далее',
+    'onboarding.fill_profile': 'Заполнить профиль',
+    'onboarding.skip': 'Пропустить',
+
+    // Авторизация
+    'auth.or': 'или',
+    'auth.sign_in': 'Войти',
+    'auth.email_required': 'Введите e-mail.',
+    'auth.check_email': 'Проверь почту — мы отправили ссылку для входа',
+    'auth.retry_in': 'Повторить через',
+    'auth.retry': 'Войти',
+
+    // Профиль — поля
+    'profile.title': 'Профиль',
+    'profile.personal': 'Личные данные',
+    'profile.email_readonly': 'не изменяется',
+    'profile.name': 'Имя',
+    'profile.name_placeholder': 'Имя',
+    'profile.height': 'Рост',
+    'profile.height_unit': 'см',
+    'profile.weight': 'Вес',
+    'profile.weight_unit': 'кг',
+    'profile.age': 'Возраст',
+    'profile.age_unit': 'лет',
+    'profile.sex': 'Пол',
+    'profile.sex_male': 'Мужской',
+    'profile.sex_female': 'Женский',
+    'profile.lifestyle': 'Образ жизни',
+    'profile.body_type': 'Телосложение',
+    'profile.body_lean': 'Худощавый',
+    'profile.body_medium': 'Среднее',
+    'profile.body_heavy': 'Плотное',
+    'profile.activity': 'Физическая активность',
+    'profile.activity_low': 'Низкая',
+    'profile.activity_medium': 'Средняя',
+    'profile.activity_high': 'Высокая',
+    'profile.lmhr_text': 'Худощавый + активный + высокий LDL — особый профиль. Кето и низкоуглеводные диеты могут ПОВЫСИТЬ твой LDL. ИИ учтёт это при анализе еды.',
+    'profile.lipids_title': 'Твой липидный профиль',
+    'profile.total': 'ОХ — Общий холестерин (Total Cholesterol)',
+    'profile.trig': 'Триглицериды (TG)',
+    'profile.apob': 'Аполипопротеин B (ApoB) — необязательно',
+    'profile.fill_avg': 'Заполнить средними значениями',
+    'profile.fill_avg_title': 'Всё равно начнём!',
+    'profile.fill_avg_text': 'Мы подставили <b>средние показатели</b> — AI даст общие рекомендации. После анализов обнови цифры в профиле.',
+    'profile.statins': 'Принимаю статины',
+    'profile.analysis_mode': 'Режим анализа еды',
+    'profile.units': 'Единицы измерения анализов',
+    'profile.continue': 'Продолжить',
+    'profile.save': 'Сохранить изменения',
+    'profile.logout': 'Выйти',
+    'profile.language': 'Язык',
+
+    // Главный экран
+    'main.greeting': 'Привет!',
+    'main.greeting_name': 'Привет, {name}!',
+    'main.lead': 'Что ешь сегодня? Сфотографируй еду — узнай подходит ли она тебе.',
+    'main.camera_btn': 'Сделать фото еды',
+
+    // Capture экран
+    'capture.placeholder': 'Уточните что на фото…',
+    'capture.retake': 'Переснять',
+    'capture.confirm': 'Анализировать',
+
+    // Результат
+    'result.analyzing_photo': 'Анализируем фото…',
+    'result.analyzing_text': 'Анализируем описание…',
+    'result.how_it_works': 'Как это работает',
+    'result.nuances': 'Нюансы',
+    'result.how_to_10': 'Как сделать 10/10',
+    'result.factors': 'Факторы',
+    'result.save': 'Сохранить в историю',
+    'result.refine': 'Уточнить',
+    'result.refine_title': 'Уточнить детали',
+    'result.refine_submit': 'Пересчитать',
+    'result.describe_title': 'Описание еды',
+    'result.describe_placeholder': 'Опишите то что сегодня ели, желательно подробно, чтобы точность ответа была лучше',
+    'result.describe_submit': 'Отправить',
+
+    // История
+    'history.title': 'История',
+    'history.avg_label': 'Средняя оценка питания',
+    'history.add_no_photo': 'Добавить без фото',
+    'history.empty': 'Пока нет записей. Сфоткай свою первую еду!',
+    'history.today': 'Сегодня',
+    'history.yesterday': 'Вчера',
+    'history.at': 'в',
+    'history.daily_report': 'ОТЧЕТ ЗА ДЕНЬ',
+    'history.generating': 'Готовим итог дня…',
+    'history.good': 'Что работало',
+    'history.bad': 'Что мешало',
+    'history.pattern': 'Паттерн дня',
+    'history.conclusion': 'Итог',
+    'history.tip': 'Совет на завтра',
+
+    // Баланс-чипсы
+    'balance.fiber': 'Клетчатка',
+    'balance.saturated_fat': 'Нас. жиры',
+    'balance.protein': 'Белок',
+    'balance.vegetables': 'Овощи',
+    'balance.processed_food': 'Переработка',
+
+    // Липидный профиль
+    'lipids.title': 'Твой липидный профиль',
+    'lipids.nav': 'Липидный профиль',
+    'lipids.total_tip': '<strong>Общий холестерин (TC)</strong>Сумма всех фракций. Смотри не на цифру, а на соотношение LDL/HDL.',
+    'lipids.ldl_tip': '<strong>LDL — «плохой» холестерин</strong>Липопротеины низкой плотности. Оседает в артериях. Чем ниже — тем лучше.',
+    'lipids.hdl_tip': '<strong>HDL — «хороший» холестерин</strong>Липопротеины высокой плотности. Выводит холестерин из артерий. Чем выше — тем лучше.',
+    'lipids.trig_tip': '<strong>Триглицериды (TG)</strong>Жиры в крови. Растут от сахара и алкоголя. Сдавать строго натощак.',
+    'lipids.apob_tip': '<strong>Аполипопротеин B</strong>Считает число опасных частиц в крови. Точнее LDL. Цель: <0.9 г/л (идеал <0.7).',
+    'lipids.tghdl_tip': '<strong>Индекс ТГ / HDL</strong>Простой маркер инсулинорезистентности. <1.0 — отлично, <2.0 — норма, >3.0 — риск.',
+    'lipids.ref_title': 'Референсные значения',
+    'lipids.ref_note': 'Источники: Helix, KDL, ESC/EAS, Mayo Clinic, AHA 2026. Разные лаборатории могут использовать немного разные диапазоны. Точный диапазон всегда смотрите в бланке своей лаборатории. Конверсия: холестерин ммоль/л × 38.67 = мг/дл, триглицериды × 88.57 = мг/дл.',
+
+    // Мой профиль
+    'my_profile.nav': 'Профиль',
+    'my_profile.edit': 'Редактировать профиль',
+
+    // Мотивация
+    'motivation.great': '{name}, ты просто огонь! 🔥\nТакое питание — мечта кардиолога.',
+    'motivation.good': 'Отличный результат, {name}!\nТвоё сердце говорит спасибо.',
+    'motivation.ok': 'Неплохо, {name}!\nЕсть куда расти — ты на правильном пути.',
+    'motivation.warn': '{name}, стоит присмотреться к питанию.\nПару замен — и станет заметно лучше.',
+    'motivation.bad': '{name}, питание требует внимания.\nПопробуй чаще выбирать более лёгкие блюда.',
+
+    // Дни недели (график)
+    'week.days': ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'],
+
+    // Ошибки
+    'error.profile_required': 'Укажите e-mail и имя, чтобы пользоваться приложением.',
+  },
+
+  en: {
+    'app.title': 'Cholesterol Tracker',
+    'app.init_error': 'Failed to load app settings',
+
+    'onboarding.slide1': 'Add your data\n(ideally with lab results)',
+    'onboarding.slide2': 'Photograph your meal —\nget a personalised breakdown',
+    'onboarding.slide3': 'Understand what affects\nyour lipid profile',
+    'onboarding.next': 'Next',
+    'onboarding.fill_profile': 'Fill in profile',
+    'onboarding.skip': 'Skip',
+
+    'auth.or': 'or',
+    'auth.sign_in': 'Sign in',
+    'auth.email_required': 'Please enter your e-mail.',
+    'auth.check_email': 'Check your inbox — we sent you a sign-in link',
+    'auth.retry_in': 'Retry in',
+    'auth.retry': 'Sign in',
+
+    'profile.title': 'Profile',
+    'profile.personal': 'Personal data',
+    'profile.email_readonly': 'cannot be changed',
+    'profile.name': 'Name',
+    'profile.name_placeholder': 'Name',
+    'profile.height': 'Height',
+    'profile.height_unit': 'cm',
+    'profile.weight': 'Weight',
+    'profile.weight_unit': 'kg',
+    'profile.age': 'Age',
+    'profile.age_unit': 'yr',
+    'profile.sex': 'Sex',
+    'profile.sex_male': 'Male',
+    'profile.sex_female': 'Female',
+    'profile.lifestyle': 'Lifestyle',
+    'profile.body_type': 'Body type',
+    'profile.body_lean': 'Lean',
+    'profile.body_medium': 'Average',
+    'profile.body_heavy': 'Heavy',
+    'profile.activity': 'Physical activity',
+    'profile.activity_low': 'Low',
+    'profile.activity_medium': 'Moderate',
+    'profile.activity_high': 'High',
+    'profile.lmhr_text': 'Lean + active + high LDL — a special profile. Keto and low-carb diets can RAISE your LDL. AI will factor this into food analysis.',
+    'profile.lipids_title': 'Your lipid profile',
+    'profile.total': 'TC — Total Cholesterol',
+    'profile.trig': 'Triglycerides (TG)',
+    'profile.apob': 'Apolipoprotein B (ApoB) — optional',
+    'profile.fill_avg': 'Fill with average values',
+    'profile.fill_avg_title': "Let's get started anyway!",
+    'profile.fill_avg_text': "We've filled in <b>average values</b> — AI will give general recommendations. Update your numbers after your next lab test.",
+    'profile.statins': 'Taking statins',
+    'profile.analysis_mode': 'Food analysis mode',
+    'profile.units': 'Lab result units',
+    'profile.continue': 'Continue',
+    'profile.save': 'Save changes',
+    'profile.logout': 'Log out',
+    'profile.language': 'Language',
+
+    'main.greeting': 'Hello!',
+    'main.greeting_name': 'Hello, {name}!',
+    'main.lead': 'What are you eating today? Photograph your food — find out if it suits you.',
+    'main.camera_btn': 'Take a food photo',
+
+    'capture.placeholder': "Clarify what's in the photo…",
+    'capture.retake': 'Retake',
+    'capture.confirm': 'Analyse',
+
+    'result.analyzing_photo': 'Analysing photo…',
+    'result.analyzing_text': 'Analysing description…',
+    'result.how_it_works': 'How it works',
+    'result.nuances': 'Nuances',
+    'result.how_to_10': 'How to get 10/10',
+    'result.factors': 'Factors',
+    'result.save': 'Save to history',
+    'result.refine': 'Refine',
+    'result.refine_title': 'Refine details',
+    'result.refine_submit': 'Recalculate',
+    'result.describe_title': 'Food description',
+    'result.describe_placeholder': 'Describe what you ate today — the more detail, the better the result',
+    'result.describe_submit': 'Submit',
+
+    'history.title': 'History',
+    'history.avg_label': 'Average nutrition score',
+    'history.add_no_photo': 'Add without photo',
+    'history.empty': 'No entries yet. Photograph your first meal!',
+    'history.today': 'Today',
+    'history.yesterday': 'Yesterday',
+    'history.at': 'at',
+    'history.daily_report': 'DAY REPORT',
+    'history.generating': 'Generating daily summary…',
+    'history.good': 'What worked',
+    'history.bad': 'What held back',
+    'history.pattern': "Day's pattern",
+    'history.conclusion': 'Summary',
+    'history.tip': 'Tip for tomorrow',
+
+    'balance.fiber': 'Fibre',
+    'balance.saturated_fat': 'Sat. fat',
+    'balance.protein': 'Protein',
+    'balance.vegetables': 'Veggies',
+    'balance.processed_food': 'Processed',
+
+    'lipids.title': 'Your lipid profile',
+    'lipids.nav': 'Lipid profile',
+    'lipids.total_tip': '<strong>Total Cholesterol (TC)</strong>Sum of all fractions. Focus on the LDL/HDL ratio, not the absolute number.',
+    'lipids.ldl_tip': '<strong>LDL — "bad" cholesterol</strong>Low-density lipoproteins. Deposits in arteries. Lower is better.',
+    'lipids.hdl_tip': '<strong>HDL — "good" cholesterol</strong>High-density lipoproteins. Removes cholesterol from arteries. Higher is better.',
+    'lipids.trig_tip': '<strong>Triglycerides (TG)</strong>Blood fats. Rise with sugar and alcohol. Fast before testing.',
+    'lipids.apob_tip': '<strong>Apolipoprotein B</strong>Counts dangerous particles in blood. More precise than LDL. Target: <0.9 g/L (ideal <0.7).',
+    'lipids.tghdl_tip': '<strong>TG / HDL index</strong>Simple insulin-resistance marker. <1.0 excellent, <2.0 normal, >3.0 risk.',
+    'lipids.ref_title': 'Reference values',
+    'lipids.ref_note': 'Sources: ESC/EAS, Mayo Clinic, AHA 2026. Different labs may use slightly different ranges. Always check the reference range on your own lab report. Conversion: cholesterol mmol/L × 38.67 = mg/dL, triglycerides × 88.57 = mg/dL.',
+
+    'my_profile.nav': 'Profile',
+    'my_profile.edit': 'Edit profile',
+
+    'motivation.great': "{name}, you're on fire! 🔥\nYour cardiologist would be proud.",
+    'motivation.good': 'Great result, {name}!\nYour heart says thank you.',
+    'motivation.ok': "Not bad, {name}!\nRoom to grow — you're on the right track.",
+    'motivation.warn': "{name}, worth taking a closer look at your diet.\nA couple of swaps and you'll feel the difference.",
+    'motivation.bad': '{name}, your diet needs attention.\nTry choosing lighter options more often.',
+
+    'week.days': ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],
+
+    'error.profile_required': 'Please enter your e-mail and name to use the app.',
+  },
+
+  de: {
+    'app.title': 'Cholesterin-Tracker',
+    'app.init_error': 'App-Einstellungen konnten nicht geladen werden',
+
+    'onboarding.slide1': 'Füge deine Daten hinzu\n(am besten mit Laborwerten)',
+    'onboarding.slide2': 'Fotografiere dein Gericht —\nerhalte eine persönliche Analyse',
+    'onboarding.slide3': 'Verstehe, was dein\nLipidprofil beeinflusst',
+    'onboarding.next': 'Weiter',
+    'onboarding.fill_profile': 'Profil ausfüllen',
+    'onboarding.skip': 'Überspringen',
+
+    'auth.or': 'oder',
+    'auth.sign_in': 'Anmelden',
+    'auth.email_required': 'Bitte E-Mail eingeben.',
+    'auth.check_email': 'Prüfe dein Postfach — wir haben dir einen Anmeldelink geschickt',
+    'auth.retry_in': 'Erneut in',
+    'auth.retry': 'Anmelden',
+
+    'profile.title': 'Profil',
+    'profile.personal': 'Persönliche Daten',
+    'profile.email_readonly': 'nicht änderbar',
+    'profile.name': 'Name',
+    'profile.name_placeholder': 'Name',
+    'profile.height': 'Größe',
+    'profile.height_unit': 'cm',
+    'profile.weight': 'Gewicht',
+    'profile.weight_unit': 'kg',
+    'profile.age': 'Alter',
+    'profile.age_unit': 'J.',
+    'profile.sex': 'Geschlecht',
+    'profile.sex_male': 'Männlich',
+    'profile.sex_female': 'Weiblich',
+    'profile.lifestyle': 'Lebensstil',
+    'profile.body_type': 'Körperbau',
+    'profile.body_lean': 'Schlank',
+    'profile.body_medium': 'Mittel',
+    'profile.body_heavy': 'Kräftig',
+    'profile.activity': 'Körperliche Aktivität',
+    'profile.activity_low': 'Niedrig',
+    'profile.activity_medium': 'Mittel',
+    'profile.activity_high': 'Hoch',
+    'profile.lmhr_text': 'Schlank + aktiv + hohes LDL — ein besonderes Profil. Keto und Low-Carb können dein LDL ERHÖHEN. Die KI berücksichtigt dies bei der Lebensmittelanalyse.',
+    'profile.lipids_title': 'Dein Lipidprofil',
+    'profile.total': 'Gesamtcholesterin (TC)',
+    'profile.trig': 'Triglyzeride (TG)',
+    'profile.apob': 'Apolipoprotein B (ApoB) — optional',
+    'profile.fill_avg': 'Mit Durchschnittswerten ausfüllen',
+    'profile.fill_avg_title': 'Trotzdem loslegen!',
+    'profile.fill_avg_text': 'Wir haben <b>Durchschnittswerte</b> eingetragen — KI gibt allgemeine Empfehlungen. Aktualisiere deine Werte nach dem nächsten Labortest.',
+    'profile.statins': 'Nehme Statine',
+    'profile.analysis_mode': 'Lebensmittelanalysemodus',
+    'profile.units': 'Laboreinheiten',
+    'profile.continue': 'Weiter',
+    'profile.save': 'Änderungen speichern',
+    'profile.logout': 'Abmelden',
+    'profile.language': 'Sprache',
+
+    'main.greeting': 'Hallo!',
+    'main.greeting_name': 'Hallo, {name}!',
+    'main.lead': 'Was isst du heute? Fotografiere dein Essen — finde heraus, ob es zu dir passt.',
+    'main.camera_btn': 'Foto vom Essen machen',
+
+    'capture.placeholder': 'Was ist auf dem Foto?…',
+    'capture.retake': 'Wiederholen',
+    'capture.confirm': 'Analysieren',
+
+    'result.analyzing_photo': 'Foto wird analysiert…',
+    'result.analyzing_text': 'Beschreibung wird analysiert…',
+    'result.how_it_works': 'Wie es funktioniert',
+    'result.nuances': 'Besonderheiten',
+    'result.how_to_10': 'Wie man 10/10 erreicht',
+    'result.factors': 'Faktoren',
+    'result.save': 'In Verlauf speichern',
+    'result.refine': 'Verfeinern',
+    'result.refine_title': 'Details verfeinern',
+    'result.refine_submit': 'Neu berechnen',
+    'result.describe_title': 'Essensbeschreibung',
+    'result.describe_placeholder': 'Beschreibe, was du heute gegessen hast — je mehr Details, desto besser das Ergebnis',
+    'result.describe_submit': 'Absenden',
+
+    'history.title': 'Verlauf',
+    'history.avg_label': 'Durchschnittliche Ernährungsbewertung',
+    'history.add_no_photo': 'Ohne Foto hinzufügen',
+    'history.empty': 'Noch keine Einträge. Fotografiere deine erste Mahlzeit!',
+    'history.today': 'Heute',
+    'history.yesterday': 'Gestern',
+    'history.at': 'um',
+    'history.daily_report': 'TAGESBERICHT',
+    'history.generating': 'Tageszusammenfassung wird erstellt…',
+    'history.good': 'Was gut war',
+    'history.bad': 'Was gebremst hat',
+    'history.pattern': 'Muster des Tages',
+    'history.conclusion': 'Fazit',
+    'history.tip': 'Tipp für morgen',
+
+    'balance.fiber': 'Ballaststoffe',
+    'balance.saturated_fat': 'Ges. Fette',
+    'balance.protein': 'Eiweiß',
+    'balance.vegetables': 'Gemüse',
+    'balance.processed_food': 'Verarbeitet',
+
+    'lipids.title': 'Dein Lipidprofil',
+    'lipids.nav': 'Lipidprofil',
+    'lipids.total_tip': '<strong>Gesamtcholesterin (TC)</strong>Summe aller Fraktionen. Achte auf das LDL/HDL-Verhältnis, nicht den absoluten Wert.',
+    'lipids.ldl_tip': '<strong>LDL — "schlechtes" Cholesterin</strong>Lagert sich in Arterien ab. Je niedriger, desto besser.',
+    'lipids.hdl_tip': '<strong>HDL — "gutes" Cholesterin</strong>Transportiert Cholesterin aus den Arterien. Je höher, desto besser.',
+    'lipids.trig_tip': '<strong>Triglyzeride (TG)</strong>Blutfette. Steigen durch Zucker und Alkohol. Nüchtern messen.',
+    'lipids.apob_tip': '<strong>Apolipoprotein B</strong>Zählt gefährliche Partikel im Blut. Präziser als LDL. Ziel: <0,9 g/L (ideal <0,7).',
+    'lipids.tghdl_tip': '<strong>TG / HDL-Index</strong>Einfacher Insulinresistenz-Marker. <1,0 ausgezeichnet, <2,0 normal, >3,0 Risiko.',
+    'lipids.ref_title': 'Referenzwerte',
+    'lipids.ref_note': 'Quellen: ESC/EAS, Mayo Clinic, AHA 2026. Verschiedene Labore können leicht abweichende Bereiche verwenden. Prüfe immer den Referenzbereich auf deinem Laborbefund. Umrechnung: Cholesterin mmol/L × 38,67 = mg/dL, Triglyzeride × 88,57 = mg/dL.',
+
+    'my_profile.nav': 'Profil',
+    'my_profile.edit': 'Profil bearbeiten',
+
+    'motivation.great': '{name}, du bist der Hammer! 🔥\nDein Kardiologe wäre stolz.',
+    'motivation.good': 'Tolles Ergebnis, {name}!\nDein Herz sagt Danke.',
+    'motivation.ok': 'Nicht schlecht, {name}!\nLuft nach oben — du bist auf dem richtigen Weg.',
+    'motivation.warn': '{name}, es lohnt sich, die Ernährung genauer zu betrachten.\nEin paar Tausche und der Unterschied ist spürbar.',
+    'motivation.bad': '{name}, deine Ernährung braucht Aufmerksamkeit.\nVersuche öfter leichtere Gerichte zu wählen.',
+
+    'week.days': ['So','Mo','Di','Mi','Do','Fr','Sa'],
+
+    'error.profile_required': 'Bitte E-Mail und Name eingeben, um die App zu nutzen.',
+  },
+};
+
+// Определяем язык: 1) явный выбор пользователя 2) язык устройства 3) fallback en
+function detectLocale() {
+  const saved = localStorage.getItem('userLocale');
+  if (saved && LOCALES[saved]) return saved;
+  const nav = (navigator.language || navigator.userLanguage || 'en').slice(0, 2).toLowerCase();
+  return LOCALES[nav] ? nav : 'en';
+}
+
+let LOCALE = detectLocale();
+
+function t(key, vars) {
+  const str = (LOCALES[LOCALE] && LOCALES[LOCALE][key]) ||
+              (LOCALES['en'] && LOCALES['en'][key]) ||
+              key;
+  if (!vars) return str;
+  return str.replace(/\{(\w+)\}/g, (_, k) => vars[k] !== undefined ? vars[k] : '');
+}
+
+function setLocale(lang) {
+  if (!LOCALES[lang]) return;
+  LOCALE = lang;
+  localStorage.setItem('userLocale', lang);
+  applyLocaleToDOM();
+}
+
+// Применяем переводы к DOM-элементам с data-i18n атрибутом
+function applyLocaleToDOM() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    const attr = el.getAttribute('data-i18n-attr');
+    const val = t(key);
+    if (attr) { el.setAttribute(attr, val); }
+    else { el.innerHTML = val; }
+  });
+  // Обновляем заголовок страницы
+  document.title = t('app.title');
+}
+// ===== END i18n =====
+
 const SUPABASE_URL = 'https://jwbhwwuznapaaeiuhxrp.supabase.co'.trim();
 const SUPABASE_ANON_KEY =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3Ymh3d3V6bmFwYWFlaXVoeHJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5Nzk3MjAsImV4cCI6MjA5MTU1NTcyMH0.j_ociAX5y8X1FbTuSwh8fv96fx8VZkOhURzltmrHdio'.trim();
@@ -2864,6 +3304,7 @@ function applySupabaseUserRowToForm(row) {
   // Сначала устанавливаем единицы, потом подставляем нужные значения
   setSegActiveByLabel('seg-gender', dbSexToGenderLabel(row.sex));
   setSegActiveByLabel('seg-units', dbUnitsToLabel(row.units));
+  setSegActiveByLabel('seg-locale', LOCALE === 'ru' ? 'Русский' : LOCALE === 'de' ? 'Deutsch' : 'English');
   const isMgRow = row.units === 'mgdl';
   const totalVal = isMgRow
     ? (row.cholesterol_mgdl ?? (row.cholesterol != null ? toMgdl(row.cholesterol, false) : null))
@@ -3012,11 +3453,11 @@ function syncProfileCtaButton() {
 
   if (profileScreenMode === 'onboarding') {
     btn.classList.remove('profile-cta--hidden');
-    btn.textContent = 'Продолжить';
+    btn.textContent = t('profile.continue');
     return;
   }
 
-  btn.textContent = 'Сохранить изменения';
+  btn.textContent = t('profile.save');
   // baseline === null означает что форма ещё не "устаканилась" после загрузки — скрываем
   // baseline === 'dirty' означает принудительно показать (например после смены единиц)
   if (profileEditBaseline === 'dirty') {
@@ -3132,7 +3573,7 @@ async function upsertUserToSupabase() {
 
 function formatDateRuShort(dateKey) {
   const d = new Date(dateKey + 'T12:00:00');
-  return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
+  return d.toLocaleDateString(LOCALE + '-' + LOCALE.toUpperCase(), { day: 'numeric', month: 'long' });
 }
 
 async function refreshMealsCacheFromSupabase() {
@@ -3194,6 +3635,8 @@ function hasDailySummaryForDate(dateStr) {
 
 function buildDailySummaryPrompt(meals, profile) {
   const p = profile || getProfileForPrompt();
+  const localeNames = {ru:'русском',en:'English',de:'Deutsch'};
+  const localeName = localeNames[LOCALE] || 'English';
   const bodyContext = [p.bodyType, p.activity].filter(Boolean).join(', ') || 'не указано';
   const lmhrNote = p.lmhr
     ? '\nLMHR-КОНТЕКСТ: Человек худощавый и активный при высоком LDL — не поддерживай кето, carnivore и low-carb; учитывай риск роста LDL/ApoB при избытке насыщенных жиров.'
@@ -3274,7 +3717,7 @@ ${mealsList}
 - 3.0-4.9 → много факторов риска для LDL/ApoB
 - 1.0-2.9 → крайне неблагоприятный день
 
-ВАЖНО: score с одним знаком после запятой. JSON валидный. Никаких markdown. Никаких пояснений вне JSON. Не копируй summary блюд. Если данных мало — честно отражай в conclusion.`;
+ВАЖНО: score с одним знаком после запятой. JSON валидный. Никаких markdown. Никаких пояснений вне JSON. Не копируй summary блюд. Если данных мало — честно отражай в conclusion. Все текстовые поля пиши на языке: ${localeName}.`;
 }
 
 async function generateDailySummary() {
@@ -3544,21 +3987,21 @@ function configureDescribeFoodModal(mode) {
   const ta = document.getElementById('describe-food-text');
   const submitBtn = document.getElementById('describe-food-submit');
   if (mode === 'refine') {
-    if (titleEl) titleEl.textContent = 'Уточнить детали';
+    if (titleEl) titleEl.textContent = t('result.refine_title');
     if (ta) {
       ta.placeholder =
         'Например: масло было виноградное, а не подсолнечное. Или: порция была небольшая';
       ta.value = '';
     }
-    if (submitBtn) submitBtn.textContent = 'Пересчитать';
+    if (submitBtn) submitBtn.textContent = t('result.refine_submit');
   } else {
-    if (titleEl) titleEl.textContent = 'Описание еды';
+    if (titleEl) titleEl.textContent = t('result.describe_title');
     if (ta) {
       ta.placeholder =
         'Опишите то что сегодня ели, желательно подробно, чтобы точность ответа была лучше';
       ta.value = '';
     }
-    if (submitBtn) submitBtn.textContent = 'Отправить';
+    if (submitBtn) submitBtn.textContent = t('result.describe_submit');
   }
 }
 
@@ -3635,7 +4078,7 @@ async function submitDescribeFood() {
       });
     } finally {
       setResultLoading(false);
-      if (loaderText) loaderText.textContent = 'Анализируем фото…';
+      if (loaderText) loaderText.textContent = t('result.analyzing_photo');
       updateResultActionButtons();
     }
     return;
@@ -3675,7 +4118,7 @@ async function submitDescribeFood() {
   img.onerror = null;
   if (ph) ph.style.display = 'flex';
 
-  if (loaderText) loaderText.textContent = 'Анализируем описание…';
+  if (loaderText) loaderText.textContent = t('result.analyzing_text');
 
   if (dishTitle) dishTitle.textContent = '…';
   scoreRow?.classList.add('hidden');
@@ -3709,7 +4152,7 @@ async function submitDescribeFood() {
     });
   } finally {
     setResultLoading(false);
-    if (loaderText) loaderText.textContent = 'Анализируем фото…';
+    if (loaderText) loaderText.textContent = t('result.analyzing_photo');
     updateResultActionButtons();
     clearBtnLoading(document.getElementById('describe-food-submit'));
   }
@@ -3820,6 +4263,7 @@ function loadProfileFromStorage() {
     applyDontKnowVisual();
     setSegActiveByLabel('seg-gender', p.gender || 'Мужской');
     setSegActiveByLabel('seg-units', p.units || 'ммоль/л');
+    setSegActiveByLabel('seg-locale', LOCALE === 'ru' ? 'Русский' : LOCALE === 'de' ? 'Deutsch' : 'English');
     const st = document.getElementById('toggle-statins');
     if (st) st.classList.toggle('on', !!p.statins);
     updateName((p.name || '').trim());
@@ -3949,11 +4393,11 @@ function formatHistoryDateRu(iso) {
     const d0 = new Date(dt.getFullYear(), dt.getMonth(), dt.getDate()).getTime();
     const diffDays = Math.round((today0 - d0) / 864e5);
     let dayPart;
-    if (diffDays === 0) dayPart = 'Сегодня';
-    else if (diffDays === 1) dayPart = 'Вчера';
-    else dayPart = dt.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
-    const timePart = dt.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
-    return `${dayPart} в ${timePart}`;
+    if (diffDays === 0) dayPart = t('history.today');
+    else if (diffDays === 1) dayPart = t('history.yesterday');
+    else dayPart = dt.toLocaleDateString(LOCALE + '-' + LOCALE.toUpperCase(), { day: 'numeric', month: 'long' });
+    const timePart = dt.toLocaleTimeString(LOCALE + '-' + LOCALE.toUpperCase(), { hour: '2-digit', minute: '2-digit' });
+    return `${dayPart} ${t('history.at')} ${timePart}`;
   } catch (e) {
     return '—';
   }
@@ -3966,12 +4410,12 @@ function getDateLabel(isoString) {
   const yesterday = new Date();
   yesterday.setDate(today.getDate() - 1);
 
-  if (date.toDateString() === today.toDateString()) return 'Сегодня';
-  if (date.toDateString() === yesterday.toDateString()) return 'Вчера';
+  if (date.toDateString() === today.toDateString()) return t('history.today');
+  if (date.toDateString() === yesterday.toDateString()) return t('history.yesterday');
 
   return date
-    .toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })
-    .replace(' г.', '');
+    .toLocaleDateString(LOCALE + '-' + LOCALE.toUpperCase(), { day: 'numeric', month: 'long' })
+    .replace(' г.', '').replace('.', '');
 }
 
 function profileNameForMotivation() {
@@ -3988,11 +4432,11 @@ function profileNameForMotivation() {
 
 function motivationTextForAvg(avg) {
   const n = profileNameForMotivation();
-  if (avg >= 8.5) return `${n}, ты просто огонь! 🔥\nТакое питание — мечта кардиолога.`;
-  if (avg >= 7) return `Отличный результат, ${n}!\nТвоё сердце говорит спасибо.`;
-  if (avg >= 5.5) return `Неплохо, ${n}!\nЕсть куда расти — ты на правильном пути.`;
-  if (avg >= 4) return `${n}, стоит присмотреться к питанию.\nПару замен — и станет заметно лучше.`;
-  return `${n}, питание требует внимания.\nПопробуй чаще выбирать более лёгкие блюда.`;
+  if (avg >= 8.5) return t('motivation.great', {name: n});
+  if (avg >= 7) return t('motivation.good', {name: n});
+  if (avg >= 5.5) return t('motivation.ok', {name: n});
+  if (avg >= 4) return t('motivation.warn', {name: n});
+  return t('motivation.bad', {name: n});
 }
 
 function motivationLabelForAvg(avg) {
@@ -4019,7 +4463,7 @@ function drawWeekChart(meals) {
     d.setDate(today.getDate() - i);
     days.push(d.toISOString().slice(0, 10));
   }
-  const dow = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
+  const dow = t('week.days');
 
   const dayScores = days.map(dateStr => {
     const dayMeals = (meals || []).filter(m =>
@@ -4192,7 +4636,7 @@ async function renderHistoryList() {
       } catch(e) {}
 
       // Balance chips
-      const balanceLabels = { fiber: 'Клетчатка', saturated_fat: 'Нас. жиры', protein: 'Белок', vegetables: 'Овощи', processed_food: 'Переработка' };
+      const balanceLabels = { fiber: t('balance.fiber'), saturated_fat: t('balance.saturated_fat'), protein: t('balance.protein'), vegetables: t('balance.vegetables'), processed_food: t('balance.processed_food') };
       const balanceChips = balance ? Object.entries(balance).map(([k, v]) => {
         const label = balanceLabels[k] || k;
         // Для saturated_fat и processed_food "high" — плохо, "low" — хорошо
@@ -4942,6 +5386,8 @@ function getProfileForPrompt() {
 
 function buildVisionPrompt() {
   const p = getProfileForPrompt();
+  const localeNames = {ru:'русском',en:'English',de:'Deutsch'};
+  const localeName = localeNames[LOCALE] || 'English';
   const ldlRisk = parseFloat(p.ldl) >= 4.0 ? 'высокий' : parseFloat(p.ldl) >= 3.0 ? 'погранично' : 'норма';
   const totalRisk = parseFloat(p.total) >= 6.2 ? 'высокий' : parseFloat(p.total) >= 5.0 ? 'погранично' : 'норма';
   const bmiRisk = parseFloat(p.bmi) >= 30 ? 'ожирение' : parseFloat(p.bmi) >= 25 ? 'избыточный вес' : 'норма';
@@ -5043,7 +5489,8 @@ function buildVisionPrompt() {
 - score всегда с одним знаком после запятой
 - JSON должен быть валидным
 - никаких markdown
-- никаких пояснений вне JSON`;
+- никаких пояснений вне JSON
+- Все текстовые поля JSON (title, vision, summary, education, nuances, upgrade, effect) пиши на языке: \${localeName}`;
   console.log('[prompt]', out);
   return out;
 }
@@ -5388,7 +5835,7 @@ async function confirmCaptureAndAnalyze() {
   const factorsList = document.getElementById('result-factors-list');
   const loaderText = document.getElementById('result-loader-text');
 
-  if (loaderText) loaderText.textContent = 'Анализируем фото…';
+  if (loaderText) loaderText.textContent = t('result.analyzing_photo');
   if (img) {
     img.src = lastMealPhotoDataUrl;
     img.onload = () => { img.style.display = 'block'; if (ph) ph.style.display = 'none'; };
@@ -5444,7 +5891,7 @@ function goTo(id, opts) {
     forcedProfileGate = true;
     const err = document.getElementById('profile-validate-error');
     if (err) {
-      err.textContent = 'Укажите e-mail и имя, чтобы пользоваться приложением.';
+      err.textContent = t('error.profile_required');
       err.classList.add('visible');
     }
   }
@@ -5531,7 +5978,7 @@ function updateName(val) {
   const screenProfile = document.getElementById('screen-profile');
   if (!line) return;
   const t = String(val || '').trim();
-  line.textContent = t ? 'Привет, ' + t + '!' : 'Привет!';
+  line.textContent = t ? t('main.greeting_name', {name: t}) : t('main.greeting');
   if (profileScreenMode === 'edit' && screenProfile?.classList.contains('active')) {
     syncProfileCtaButton();
   }
@@ -5616,7 +6063,7 @@ async function submitAuthEmail() {
   const status = document.getElementById('auth-status');
   const sendBtn = document.getElementById('auth-submit');
   if (!email) {
-    if (status) status.textContent = 'Введите e-mail.';
+    if (status) status.textContent = t('auth.email_required');
     return;
   }
   if (!sendBtn) return;
@@ -5630,7 +6077,7 @@ async function submitAuthEmail() {
     });
     console.log('[auth] результат:', error ? 'ошибка: ' + error.message : 'успешно отправлено');
     if (error) throw error;
-    if (status) status.textContent = 'Проверь почту — мы отправили ссылку для входа';
+    if (status) status.textContent = t('auth.check_email');
     success = true;
   } catch (e) {
     if (status) status.textContent = String(e.message || e);
@@ -5646,15 +6093,15 @@ async function submitAuthEmail() {
   }
   let countdown = 60;
   sendBtn.disabled = true;
-  sendBtn.textContent = `Повторить через ${countdown}с`;
+  sendBtn.textContent = `${t('auth.retry_in')} ${countdown}с`;
   const timer = setInterval(() => {
     countdown--;
-    sendBtn.textContent = `Повторить через ${countdown}с`;
+    sendBtn.textContent = `${t('auth.retry_in')} ${countdown}с`;
     if (countdown <= 0) {
       clearInterval(timer);
       authResendCountdownTimer = null;
       sendBtn.disabled = false;
-      sendBtn.textContent = 'Войти';
+      sendBtn.textContent = t('auth.retry');
     }
   }, 1000);
   authResendCountdownTimer = timer;
@@ -5782,7 +6229,7 @@ function updateOnboardingUI() {
   }
 
   const btn = document.getElementById('onboarding-btn-next');
-  if (btn) btn.textContent = onboardingStep < ONBOARDING_TOTAL - 1 ? 'Далее' : 'Заполнить профиль';
+  if (btn) btn.textContent = onboardingStep < ONBOARDING_TOTAL - 1 ? t('onboarding.next') : t('onboarding.fill_profile');
 }
 
 function onboardingNext() {
@@ -5824,6 +6271,8 @@ function finishOnboarding() {
 })();
 // ===== END ONBOARDING =====
 
+// Применяем локализацию сразу при загрузке
+applyLocaleToDOM();
 bootstrapApp();
 
 
