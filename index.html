@@ -1310,6 +1310,11 @@
   }
   .pricing-btn-arrow { opacity: 0.5; font-size: 18px; }
 
+  #screen-my-profile .pricing-btn {
+    margin-top: 0;
+    margin-bottom: 12px;
+  }
+
   /* ===== SCREEN PAYWALL ===== */
   #screen-paywall {
     background: #fff;
@@ -2371,7 +2376,7 @@
     </div>
     <div class="content">
       <!-- Pricing button -->
-      <button type="button" class="pricing-btn" id="my-profile-pricing-btn" onclick="goTo('screen-paywall')" style="margin-top:4px;">
+      <button type="button" class="pricing-btn" id="my-profile-pricing-btn" onclick="goTo('screen-paywall')">
         <span class="pricing-btn-left">
           <span>$ Pricing</span>
           <span class="pricing-btn-tag" id="my-profile-pricing-status">Trial</span>
@@ -2654,7 +2659,7 @@
   <div class="screen" id="screen-paywall">
     <div style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;">
       <div class="pw-header">
-        <button type="button" class="pw-back-btn" onclick="goTo(paywallBackScreen || 'screen-my-profile')">
+        <button type="button" class="pw-back-btn" onclick="goTo('screen-my-profile')">
           <svg width="10" height="17" viewBox="0 0 10 17" fill="none"><path d="M8.5 15.5L1.5 8.5L8.5 1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           Назад
         </button>
