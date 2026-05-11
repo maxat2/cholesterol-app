@@ -2369,6 +2369,14 @@
       </button>
     </div>
     <div class="content">
+      <!-- Pricing button -->
+      <button type="button" class="pricing-btn" id="my-profile-pricing-btn" onclick="goTo('screen-paywall')" style="margin-top:4px;">
+        <span class="pricing-btn-left">
+          <span>$ Pricing</span>
+          <span class="pricing-btn-tag" id="my-profile-pricing-status">Trial</span>
+        </span>
+        <span class="pricing-btn-arrow">›</span>
+      </button>
       <!-- Карточка пользователя -->
       <div class="lipid-profile-card" id="my-profile-card">
         <div class="lipid-profile-info">
@@ -3886,22 +3894,22 @@ function isAccessActive() {
 }
 
 function updatePricingBtnStatus() {
-  const btn = document.getElementById('pricing-btn-status');
-  if (!btn) return;
   const s = getTrialStatus();
+  let text, bg, color;
   if (s.plan === 'paid') {
-    btn.textContent = 'Active';
-    btn.style.background = '#22C55E';
-    btn.style.color = '#fff';
+    text = 'Active'; bg = '#22C55E'; color = '#fff';
   } else if (s.plan === 'trial') {
-    btn.textContent = `Trial · ${s.daysLeft}д`;
-    btn.style.background = '#fff';
-    btn.style.color = '#000';
+    text = `Trial · ${s.daysLeft}д`; bg = '#fff'; color = '#000';
   } else {
-    btn.textContent = 'Expired';
-    btn.style.background = '#ff3b30';
-    btn.style.color = '#fff';
+    text = 'Expired'; bg = '#ff3b30'; color = '#fff';
   }
+  ['pricing-btn-status', 'my-profile-pricing-status'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (!btn) return;
+    btn.textContent = text;
+    btn.style.background = bg;
+    btn.style.color = color;
+  });
 }
 
 function checkTrialBlocker() {
@@ -6876,7 +6884,7 @@ function goTo(id, opts) {
   if (targetId === 'screen-main' || targetId === 'screen-lipids') void prepareMainScreenLipids();
   if (targetId === 'screen-lipids') updateLipidProfileCard();
   if (targetId === 'screen-main') checkTrialBlocker();
-  if (targetId === 'screen-my-profile') syncMyProfileScreen();
+  if (targetId === 'screen-my-profile') { syncMyProfileScreen(); updatePricingBtnStatus(); }
   if (targetId === 'screen-profile') updatePricingBtnStatus();
   if (targetId === 'screen-history') void renderHistoryList();
   if (targetId === 'screen-profile') {
