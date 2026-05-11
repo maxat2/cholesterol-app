@@ -333,6 +333,8 @@
   .btn-camera-wide { transition: transform 0.12s ease, opacity 0.12s ease !important; }
   .btn-camera-wide:active { opacity: .88 !important; transform: scale(0.97) !important; }
   .disclaimer { font-size: 11px; color: var(--muted2); text-align: center; padding: 16px 8px 0; }
+  .auth-privacy-note { font-size: 12px; color: var(--muted2); text-align: center; margin-top: 16px; line-height: 1.5; }
+  .auth-privacy-note a { color: var(--muted); text-decoration: underline; text-underline-offset: 2px; }
 
   .inline-error { font-size: 13px; color: #DC2626; margin: -8px 0 12px; display: none; }
   .inline-error.visible { display: block; }
@@ -1734,6 +1736,7 @@
         </span>
       </div>
       <button type="button" class="auth-btn" id="auth-submit" data-i18n="auth.sign_in">Войти</button>
+      <p class="auth-privacy-note" id="auth-privacy-note" data-i18n="auth.privacy"></p>
     </div>
   </div>
 
@@ -2362,6 +2365,7 @@ const LOCALES = {
     // Авторизация
     'auth.or': 'или',
     'auth.sign_in': 'Войти',
+    'auth.privacy': 'Продолжая, вы соглашаетесь с <a href="/privacy.html?lang=ru" target="_blank" rel="noopener">Политикой конфиденциальности</a>',
     'auth.email_required': 'Введите e-mail.',
     'auth.check_email': 'Проверь почту — мы отправили ссылку для входа',
     'auth.retry_in': 'Повторить через',
@@ -2638,6 +2642,7 @@ const LOCALES = {
 
     'auth.or': 'or',
     'auth.sign_in': 'Sign in',
+    'auth.privacy': 'By continuing, you agree to our <a href="/privacy.html?lang=en" target="_blank" rel="noopener">Privacy Policy</a>',
     'auth.email_required': 'Please enter your e-mail.',
     'auth.check_email': 'Check your inbox — we sent you a sign-in link',
     'auth.retry_in': 'Retry in',
@@ -2886,6 +2891,7 @@ const LOCALES = {
 
     'auth.or': 'oder',
     'auth.sign_in': 'Anmelden',
+    'auth.privacy': 'Mit der Nutzung stimmst du unserer <a href="/privacy.html?lang=de" target="_blank" rel="noopener">Datenschutzerklärung</a> zu',
     'auth.email_required': 'Bitte E-Mail eingeben.',
     'auth.check_email': 'Prüfe dein Postfach — wir haben dir einen Anmeldelink geschickt',
     'auth.retry_in': 'Erneut in',

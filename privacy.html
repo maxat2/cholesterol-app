@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#FFFFFF" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <title>Privacy Policy</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #FFFFFF; --accent: #000000; --text: #1a1a1a;
+      --muted: #666666; --muted2: #999999; --line: #E0E0E0;
+      --sans: 'IBM Plex Mono', monospace;
+    }
+    html { font-size: 16px; -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+    body { font-family: var(--sans); background: var(--bg); color: var(--text); min-height: 100vh; padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
+    .top-nav { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.92); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 12px; padding: 0 20px; height: 56px; }
+    .back-btn { display: flex; align-items: center; gap: 6px; font-family: var(--sans); font-size: 14px; font-weight: 500; color: var(--accent); text-decoration: none; padding: 8px 0; -webkit-tap-highlight-color: transparent; transition: opacity 0.15s; }
+    .back-btn:active { opacity: 0.5; }
+    .nav-title { flex: 1; font-size: 13px; font-weight: 600; color: var(--muted); text-align: right; letter-spacing: 0.04em; text-transform: uppercase; }
+    .hero { padding: 48px 20px 32px; border-bottom: 1px solid var(--line); }
+    .hero-inner { max-width: 680px; margin: 0 auto; }
+    .hero-label { font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted2); margin-bottom: 12px; }
+    .hero-title { font-size: clamp(28px, 7vw, 40px); font-weight: 700; line-height: 1.08; letter-spacing: -0.03em; color: var(--accent); margin-bottom: 16px; }
+    .hero-date { font-size: 12px; color: var(--muted2); }
+    .summary-wrap { max-width: 680px; margin: 0 auto; }
+    .summary-box { margin: 28px 20px; border: 1.5px solid var(--accent); border-radius: 16px; padding: 20px; }
+    .summary-box-title { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; }
+    .summary-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .summary-list li { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; line-height: 1.5; }
+    .summary-list li::before { content: '→'; font-weight: 700; color: var(--accent); flex-shrink: 0; margin-top: 1px; }
+    .content { max-width: 680px; margin: 0 auto; padding: 0 20px 80px; }
+    .section { padding: 32px 0; border-bottom: 1px solid var(--line); }
+    .section:last-child { border-bottom: none; }
+    .section-num { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted2); margin-bottom: 8px; }
+    .section-title { font-size: 18px; font-weight: 700; letter-spacing: -0.02em; color: var(--accent); margin-bottom: 16px; line-height: 1.2; }
+    .section p { font-size: 14px; line-height: 1.7; margin-bottom: 12px; }
+    .section p:last-child { margin-bottom: 0; }
+    .data-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13px; }
+    .data-table th { text-align: left; padding: 8px 12px; background: #f5f5f5; font-weight: 600; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); border-bottom: 2px solid var(--line); }
+    .data-table td { padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; line-height: 1.5; }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table td:first-child { font-weight: 600; white-space: nowrap; color: var(--accent); }
+    .tag { display: inline-block; background: #f0f0f0; border-radius: 6px; padding: 2px 8px; font-size: 12px; font-weight: 500; margin: 2px 2px 2px 0; }
+    .tag--sensitive { background: #fff0f0; color: #c00; }
+    .highlight { background: #f9f9f9; border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; padding: 14px 16px; margin: 16px 0; font-size: 13px; line-height: 1.6; }
+    .contact-card { margin-top: 16px; border: 1px solid var(--line); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 8px; }
+    .contact-row { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+    .contact-label { color: var(--muted); font-size: 12px; min-width: 70px; }
+    .contact-value { font-weight: 600; color: var(--accent); }
+    a { color: var(--accent); }
+    .footer { padding: 28px 20px; border-top: 1px solid var(--line); text-align: center; font-size: 12px; color: var(--muted2); line-height: 1.6; }
+    @media (max-width: 480px) {
+      .data-table { font-size: 12px; }
+      .data-table th, .data-table td { padding: 8px; }
+      .data-table td:first-child { white-space: normal; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="top-nav">
+    <a class="back-btn" href="/">
+      <svg width="9" height="15" viewBox="0 0 9 15" fill="none"><path d="M7.5 13.5L1.5 7.5L7.5 1.5" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span data-i18n="nav.back"></span>
+    </a>
+    <div class="nav-title" data-i18n="nav.title"></div>
+  </nav>
+
+  <div class="hero">
+    <div class="hero-inner">
+      <div class="hero-label" data-i18n="hero.label"></div>
+      <h1 class="hero-title" data-i18n="hero.title"></h1>
+      <div class="hero-date" data-i18n="hero.date"></div>
+    </div>
+  </div>
+
+  <div class="summary-wrap">
+    <div class="summary-box">
+      <div class="summary-box-title" data-i18n="summary.title"></div>
+      <ul class="summary-list" id="summary-list"></ul>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <div class="section">
+      <div class="section-num">01</div>
+      <h2 class="section-title" data-i18n="s1.title"></h2>
+      <p data-i18n="s1.text"></p>
+      <div class="contact-card">
+        <div class="contact-row">
+          <span class="contact-label" data-i18n="contact.app_label"></span>
+          <span class="contact-value" data-i18n="contact.app_name"></span>
+        </div>
+        <div class="contact-row">
+          <span class="contact-label">E-mail</span>
+          <span class="contact-value"><a href="mailto:privacy@cholesterol-app.vercel.app">privacy@cholesterol-app.vercel.app</a></span>
+        </div>
+        <div class="contact-row">
+          <span class="contact-label" data-i18n="contact.site_label"></span>
+          <span class="contact-value"><a href="https://cholesterol-app.vercel.app">cholesterol-app.vercel.app</a></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-num">02</div>
+      <h2 class="section-title" data-i18n="s2.title"></h2>
+      <p data-i18n="s2.intro"></p>
+      <table class="data-table">
+        <thead><tr>
+          <th data-i18n="table1.h1"></th>
+          <th data-i18n="table1.h2"></th>
+          <th data-i18n="table1.h3"></th>
+        </tr></thead>
+        <tbody id="data-table-body"></tbody>
+      </table>
+      <div class="highlight" data-i18n="s2.highlight"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-num">03</div>
+      <h2 class="section-title" data-i18n="s3.title"></h2>
+      <p data-i18n="s3.intro"></p>
+      <p data-i18n="s3.list"></p>
+      <p data-i18n="s3.outro"></p>
+    </div>
+
+    <div class="section">
+      <div class="section-num">04</div>
+      <h2 class="section-title" data-i18n="s4.title"></h2>
+      <p data-i18n="s4.intro"></p>
+      <table class="data-table">
+        <thead><tr>
+          <th data-i18n="table2.h1"></th>
+          <th data-i18n="table2.h2"></th>
+          <th data-i18n="table2.h3"></th>
+        </tr></thead>
+        <tbody id="third-party-table-body"></tbody>
+      </table>
+      <div class="highlight" data-i18n="s4.highlight"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-num">05</div>
+      <h2 class="section-title" data-i18n="s5.title"></h2>
+      <p data-i18n="s5.p1"></p>
+      <p data-i18n="s5.p2"></p>
+      <p data-i18n="s5.p3"></p>
+      <p data-i18n="s5.p4"></p>
+    </div>
+
+    <div class="section">
+      <div class="section-num">06</div>
+      <h2 class="section-title" data-i18n="s6.title"></h2>
+      <p data-i18n="s6.intro"></p>
+      <p data-i18n="s6.list"></p>
+      <div class="highlight" data-i18n="s6.highlight"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-num">07</div>
+      <h2 class="section-title" data-i18n="s7.title"></h2>
+      <p data-i18n="s7.text"></p>
+    </div>
+
+    <div class="section">
+      <div class="section-num">08</div>
+      <h2 class="section-title" data-i18n="s8.title"></h2>
+      <div class="highlight" data-i18n="s8.text"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-num">09</div>
+      <h2 class="section-title" data-i18n="s9.title"></h2>
+      <p data-i18n="s9.p1"></p>
+      <p data-i18n="s9.p2"></p>
+    </div>
+
+  </div>
+
+  <footer class="footer">
+    <div style="max-width:680px;margin:0 auto;">
+      © 2026 <span data-i18n="footer.app"></span><br>
+      <span data-i18n="footer.contact"></span> <a href="mailto:privacy@cholesterol-app.vercel.app">privacy@cholesterol-app.vercel.app</a>
+    </div>
+  </footer>
+
+<script>
+const T = {
+  ru: {
+    'nav.back': 'Назад', 'nav.title': 'Политика',
+    'hero.label': 'Правовой документ',
+    'hero.title': 'Политика\u00adконфиденциальности',
+    'hero.date': 'Последнее обновление: май 2026 г.',
+    'summary.title': 'Кратко о главном',
+    'summary.items': [
+      'Мы собираем только то, что нужно для работы приложения',
+      'Медицинские данные хранятся в зашифрованном виде и не передаются третьим лицам без вашего ведома',
+      'Данные о еде анализирует OpenAI — они не используются для обучения их моделей',
+      'Вы можете удалить свои данные в любое время',
+      'Мы не продаём данные и не показываем рекламу'
+    ],
+    's1.title': 'Кто мы и как с нами связаться',
+    's1.text': '«Холестериновая слежка» — персональный инструмент контроля питания и уровня холестерина. Мы не являемся медицинской организацией и не оказываем медицинских услуг.',
+    'contact.app_label': 'Приложение', 'contact.app_name': 'Холестериновая слежка', 'contact.site_label': 'Сайт',
+    's2.title': 'Какие данные мы собираем', 's2.intro': 'Мы собираем только те данные, которые вы вводите сами:',
+    'table1.h1': 'Данные', 'table1.h2': 'Тип', 'table1.h3': 'Зачем',
+    'data.rows': [
+      ['E-mail', 'Личные', 'Вход в аккаунт (аутентификация)'],
+      ['Имя', 'Личные', 'Персонализация приветствий'],
+      ['Возраст, пол, рост, вес', 'Личные', 'Расчёт персональных рекомендаций'],
+      ['Холестерин, ЛПНП, ЛПВП, триглицериды', 'Медицинские', 'Анализ рисков, история показателей'],
+      ['Фото еды и описания блюд', 'Поведенческие', 'Оценка влияния питания на холестерин'],
+      ['Тип устройства, браузер, ОС', 'Технические', 'Диагностика и улучшение работы приложения']
+    ],
+    'data.sensitive_row': 3,
+    's2.highlight': 'Мы не собираем геолокацию, не читаем контакты, не имеем доступа к звонкам и сообщениям. Камера используется только когда вы явно нажимаете «Сфотографировать».',
+    's3.title': 'Как мы используем данные', 's3.intro': 'Ваши данные используются исключительно для работы приложения:',
+    's3.list': '— Аутентификация и защита аккаунта<br>— Хранение истории питания и показателей холестерина<br>— Персонализация рекомендаций по питанию<br>— Анализ фото и описаний еды через AI<br>— Отображение динамики показателей',
+    's3.outro': 'Мы не используем данные для рекламы, профилирования или продажи третьим лицам.',
+    's4.title': 'Третьи стороны и передача данных', 's4.intro': 'Для работы приложения мы используем следующие сервисы:',
+    'table2.h1': 'Сервис', 'table2.h2': 'Роль', 'table2.h3': 'Что получает',
+    'third.rows': [
+      ['Supabase', 'База данных и аутентификация', 'Email, профиль, показатели, история еды. Хранение в зашифрованном виде (AES-256)'],
+      ['Google OAuth', 'Вход через Google', 'Email и имя из Google-аккаунта (только при выборе этого способа)'],
+      ['OpenAI', 'Анализ фото и текста еды', 'Фото или описание блюда. Не получает email, имя или медицинские данные'],
+      ['Resend', 'Отправка Magic Link', 'Email для отправки письма-входа'],
+      ['Vercel', 'Хостинг приложения', 'Технические логи запросов (IP, браузер)']
+    ],
+    's4.highlight': 'OpenAI обрабатывает данные через API. По условиям API-использования OpenAI не обучает модели на переданных данных.',
+    's5.title': 'Где и как хранятся данные',
+    's5.p1': 'Ваши данные хранятся в двух местах:',
+    's5.p2': '<strong>На устройстве</strong> — профиль и кэш истории в localStorage. Доступны только вашему браузеру, не передаются автоматически.',
+    's5.p3': '<strong>В облаке (Supabase)</strong> — профиль и история синхронизируются с БД. Данные зашифрованы. Серверы расположены в ЕС и США.',
+    's5.p4': 'Сессия входа действует 7 дней, после чего требуется повторная аутентификация.',
+    's6.title': 'Ваши права',
+    's6.intro': 'В соответствии с GDPR (для пользователей из ЕС) и ФЗ-152 (для пользователей из России) вы имеете право:',
+    's6.list': '— <strong>Доступ</strong> — запросить копию всех ваших данных<br>— <strong>Исправление</strong> — изменить данные в экране профиля<br>— <strong>Удаление</strong> — удалить аккаунт и все данные<br>— <strong>Переносимость</strong> — получить данные в машиночитаемом формате<br>— <strong>Возражение</strong> — отозвать согласие на обработку',
+    's6.highlight': 'Для удаления аккаунта напишите на <a href="mailto:privacy@cholesterol-app.vercel.app">privacy@cholesterol-app.vercel.app</a>. Запрос обрабатывается в течение 30 дней.',
+    's7.title': 'Дети',
+    's7.text': 'Приложение предназначено для лиц старше 18 лет. Мы не собираем намеренно данные детей до 13 лет (или до 16 лет в ЕС). Если вы считаете, что ребёнок создал аккаунт — свяжитесь с нами.',
+    's8.title': 'Медицинский дисклеймер',
+    's8.text': '«Холестериновая слежка» — информационный инструмент, не являющийся медицинским прибором или сервисом. Информация в приложении не является медицинской консультацией и не заменяет обращение к врачу.',
+    's9.title': 'Изменения политики',
+    's9.p1': 'При существенных изменениях мы уведомим вас через приложение или по email. Продолжение использования приложения после уведомления означает согласие с обновлёнными условиями.',
+    's9.p2': 'Версия: <strong>1.0</strong> · Вступила в силу: <strong>май 2026</strong>',
+    'footer.app': 'Холестериновая слежка', 'footer.contact': 'Вопросы по данным:',
+    'page.title': 'Политика конфиденциальности — Холестериновая слежка'
+  },
+
+  en: {
+    'nav.back': 'Back', 'nav.title': 'Privacy',
+    'hero.label': 'Legal document',
+    'hero.title': 'Privacy Policy',
+    'hero.date': 'Last updated: May 2026',
+    'summary.title': 'In brief',
+    'summary.items': [
+      'We collect only what is necessary to run the app',
+      'Medical data is stored encrypted and never shared with third parties without your knowledge',
+      'Food data is analysed by OpenAI — it is not used to train their models',
+      'You can delete your data at any time',
+      'We do not sell data or show ads'
+    ],
+    's1.title': 'Who we are and how to contact us',
+    's1.text': '"Cholesterol Tracker" is a personal tool for monitoring nutrition and cholesterol levels. We are not a medical organisation and do not provide medical services.',
+    'contact.app_label': 'App', 'contact.app_name': 'Cholesterol Tracker', 'contact.site_label': 'Website',
+    's2.title': 'What data we collect', 's2.intro': 'We collect only the data you enter yourself:',
+    'table1.h1': 'Data', 'table1.h2': 'Type', 'table1.h3': 'Purpose',
+    'data.rows': [
+      ['E-mail', 'Personal', 'Account sign-in (authentication)'],
+      ['Name', 'Personal', 'Personalised greetings'],
+      ['Age, sex, height, weight', 'Personal', 'Personalised recommendations'],
+      ['Cholesterol, LDL, HDL, triglycerides', 'Medical', 'Risk analysis, history tracking'],
+      ['Food photos and descriptions', 'Behavioural', 'Assessing diet impact on cholesterol'],
+      ['Device type, browser, OS', 'Technical', 'Diagnostics and app improvement']
+    ],
+    'data.sensitive_row': 3,
+    's2.highlight': 'We do not collect location data, read contacts, or access calls and messages. The camera is used only when you explicitly tap the "Take photo" button.',
+    's3.title': 'How we use your data', 's3.intro': 'Your data is used exclusively to operate the app:',
+    's3.list': '— Authentication and account security<br>— Storing nutrition history and cholesterol readings<br>— Personalising dietary recommendations<br>— Analysing food photos and descriptions via AI<br>— Showing trends in your health metrics',
+    's3.outro': 'We do not use data for advertising, profiling, or sale to third parties.',
+    's4.title': 'Third parties and data transfers', 's4.intro': 'We use the following services to operate the app:',
+    'table2.h1': 'Service', 'table2.h2': 'Role', 'table2.h3': 'What it receives',
+    'third.rows': [
+      ['Supabase', 'Database & authentication', 'Email, profile, readings, food history. Stored encrypted (AES-256)'],
+      ['Google OAuth', 'Sign in with Google', 'Email and name from your Google account (only if you choose this method)'],
+      ['OpenAI', 'Food photo & text analysis', 'Food photo or description. Does not receive your email, name, or medical data'],
+      ['Resend', 'Magic Link emails', 'Your email to send the sign-in link'],
+      ['Vercel', 'App hosting', 'Technical request logs (IP, browser)']
+    ],
+    's4.highlight': 'OpenAI processes data via API. Under API usage terms, OpenAI does not train models on data submitted through the API.',
+    's5.title': 'Where and how data is stored',
+    's5.p1': 'Your data is stored in two places:',
+    's5.p2': '<strong>On your device</strong> — profile and history cache in localStorage. Accessible only to your browser and not transmitted automatically.',
+    's5.p3': '<strong>In the cloud (Supabase)</strong> — profile and history are synced to the database. Data is encrypted. Servers are located in the EU and USA.',
+    's5.p4': 'The sign-in session lasts 7 days, after which re-authentication is required.',
+    's6.title': 'Your rights',
+    's6.intro': 'Under GDPR (for EU users) you have the right to:',
+    's6.list': '— <strong>Access</strong> — request a copy of all your data<br>— <strong>Rectification</strong> — correct data in the profile screen<br>— <strong>Erasure</strong> — delete your account and all data<br>— <strong>Portability</strong> — receive data in a machine-readable format<br>— <strong>Objection</strong> — withdraw consent to data processing',
+    's6.highlight': 'To delete your account, email us at <a href="mailto:privacy@cholesterol-app.vercel.app">privacy@cholesterol-app.vercel.app</a>. Requests are processed within 30 days.',
+    's7.title': 'Children',
+    's7.text': 'The app is intended for users aged 18 and over. We do not knowingly collect data from children under 13 (or under 16 in the EU). If you believe a child has created an account, please contact us.',
+    's8.title': 'Medical disclaimer',
+    's8.text': '"Cholesterol Tracker" is an informational tool, not a medical device or service. Nothing in the app constitutes medical advice or replaces consultation with a qualified healthcare professional.',
+    's9.title': 'Policy changes',
+    's9.p1': 'For significant changes we will notify you through the app or by email. Continued use after notification constitutes acceptance of the updated terms.',
+    's9.p2': 'Version: <strong>1.0</strong> · Effective: <strong>May 2026</strong>',
+    'footer.app': 'Cholesterol Tracker', 'footer.contact': 'Data enquiries:',
+    'page.title': 'Privacy Policy — Cholesterol Tracker'
+  },
+
+  de: {
+    'nav.back': 'Zurück', 'nav.title': 'Datenschutz',
+    'hero.label': 'Rechtliches Dokument',
+    'hero.title': 'Datenschutz\u00aderklärung',
+    'hero.date': 'Letzte Aktualisierung: Mai 2026',
+    'summary.title': 'Kurz zusammengefasst',
+    'summary.items': [
+      'Wir erheben nur Daten, die für den Betrieb der App erforderlich sind',
+      'Medizinische Daten werden verschlüsselt gespeichert und ohne dein Wissen nicht an Dritte weitergegeben',
+      'Essensdaten werden von OpenAI analysiert — sie werden nicht für das Training ihrer Modelle verwendet',
+      'Du kannst deine Daten jederzeit löschen',
+      'Wir verkaufen keine Daten und zeigen keine Werbung'
+    ],
+    's1.title': 'Wer wir sind und wie du uns erreichst',
+    's1.text': '„Cholesterol Tracker" ist ein persönliches Werkzeug zur Kontrolle von Ernährung und Cholesterinwerten. Wir sind keine medizinische Einrichtung und erbringen keine medizinischen Leistungen.',
+    'contact.app_label': 'App', 'contact.app_name': 'Cholesterol Tracker', 'contact.site_label': 'Website',
+    's2.title': 'Welche Daten wir erheben', 's2.intro': 'Wir erheben nur Daten, die du selbst eingibst:',
+    'table1.h1': 'Daten', 'table1.h2': 'Art', 'table1.h3': 'Zweck',
+    'data.rows': [
+      ['E-Mail', 'Persönlich', 'Anmeldung (Authentifizierung)'],
+      ['Name', 'Persönlich', 'Personalisierte Begrüßung'],
+      ['Alter, Geschlecht, Größe, Gewicht', 'Persönlich', 'Personalisierte Empfehlungen'],
+      ['Cholesterin, LDL, HDL, Triglyzeride', 'Medizinisch', 'Risikoanalyse, Verlaufskontrolle'],
+      ['Essensfotos und Beschreibungen', 'Verhaltens', 'Bewertung des Ernährungseinflusses'],
+      ['Gerätetyp, Browser, Betriebssystem', 'Technisch', 'Diagnose und App-Verbesserung']
+    ],
+    'data.sensitive_row': 3,
+    's2.highlight': 'Wir erheben keine Standortdaten, lesen keine Kontakte und haben keinen Zugriff auf Anrufe oder Nachrichten. Die Kamera wird nur genutzt, wenn du aktiv auf „Foto aufnehmen" tippst.',
+    's3.title': 'Wie wir deine Daten verwenden', 's3.intro': 'Deine Daten werden ausschließlich für den Betrieb der App genutzt:',
+    's3.list': '— Authentifizierung und Kontosicherheit<br>— Speicherung von Ernährungsverlauf und Cholesterinwerten<br>— Personalisierung von Ernährungsempfehlungen<br>— Analyse von Essensfotos und -beschreibungen per KI<br>— Anzeige von Werteverläufen',
+    's3.outro': 'Wir nutzen Daten nicht für Werbung, Profiling oder den Verkauf an Dritte.',
+    's4.title': 'Drittanbieter und Datenübermittlung', 's4.intro': 'Für den Betrieb der App nutzen wir folgende Dienste:',
+    'table2.h1': 'Dienst', 'table2.h2': 'Rolle', 'table2.h3': 'Was er erhält',
+    'third.rows': [
+      ['Supabase', 'Datenbank & Authentifizierung', 'E-Mail, Profil, Werte, Essensverlauf. Verschlüsselt gespeichert (AES-256)'],
+      ['Google OAuth', 'Mit Google anmelden', 'E-Mail und Name aus deinem Google-Konto (nur bei dieser Anmeldemethode)'],
+      ['OpenAI', 'Foto- und Textanalyse', 'Essensfoto oder Beschreibung. Erhält keine E-Mail, Namen oder medizinischen Daten'],
+      ['Resend', 'Magic-Link-E-Mails', 'Deine E-Mail zum Versand des Anmeldelinks'],
+      ['Vercel', 'App-Hosting', 'Technische Anfrage-Logs (IP, Browser)']
+    ],
+    's4.highlight': 'OpenAI verarbeitet Daten über die API. Gemäß den API-Nutzungsbedingungen trainiert OpenAI keine Modelle mit über die API übermittelten Daten.',
+    's5.title': 'Wo und wie Daten gespeichert werden',
+    's5.p1': 'Deine Daten werden an zwei Orten gespeichert:',
+    's5.p2': '<strong>Auf deinem Gerät</strong> — Profil und Verlaufscache im localStorage. Nur für deinen Browser zugänglich, nicht automatisch übertragen.',
+    's5.p3': '<strong>In der Cloud (Supabase)</strong> — Profil und Verlauf werden mit der Datenbank synchronisiert. Daten sind verschlüsselt. Server befinden sich in der EU und den USA.',
+    's5.p4': 'Die Anmeldesitzung gilt 7 Tage, danach ist eine erneute Authentifizierung erforderlich.',
+    's6.title': 'Deine Rechte',
+    's6.intro': 'Gemäß DSGVO hast du das Recht auf:',
+    's6.list': '— <strong>Auskunft</strong> — Kopie aller deiner Daten anfordern<br>— <strong>Berichtigung</strong> — Daten im Profilbildschirm korrigieren<br>— <strong>Löschung</strong> — Konto und alle Daten löschen<br>— <strong>Datenübertragbarkeit</strong> — Daten in maschinenlesbarem Format erhalten<br>— <strong>Widerspruch</strong> — Einwilligung zur Datenverarbeitung widerrufen',
+    's6.highlight': 'Zum Löschen deines Kontos schreibe uns an <a href="mailto:privacy@cholesterol-app.vercel.app">privacy@cholesterol-app.vercel.app</a>. Anfragen werden innerhalb von 30 Tagen bearbeitet.',
+    's7.title': 'Kinder',
+    's7.text': 'Die App richtet sich an Personen ab 18 Jahren. Wir erheben wissentlich keine Daten von Kindern unter 13 Jahren (bzw. unter 16 Jahren in der EU). Wenn du glaubst, dass ein Kind ein Konto erstellt hat, kontaktiere uns bitte.',
+    's8.title': 'Medizinischer Hinweis',
+    's8.text': '„Cholesterol Tracker" ist ein Informationswerkzeug und kein Medizinprodukt oder medizinischer Dienst. Die Informationen in der App stellen keine medizinische Beratung dar und ersetzen nicht die Konsultation eines Arztes.',
+    's9.title': 'Änderungen dieser Richtlinie',
+    's9.p1': 'Bei wesentlichen Änderungen informieren wir dich über die App oder per E-Mail. Die weitere Nutzung nach der Benachrichtigung gilt als Zustimmung zu den aktualisierten Bedingungen.',
+    's9.p2': 'Version: <strong>1.0</strong> · In Kraft seit: <strong>Mai 2026</strong>',
+    'footer.app': 'Cholesterol Tracker', 'footer.contact': 'Datenschutzanfragen:',
+    'page.title': 'Datenschutzerklärung — Cholesterol Tracker'
+  }
+};
+
+function detectLang() {
+  const p = new URLSearchParams(window.location.search).get('lang');
+  if (p && T[p]) return p;
+  const ls = localStorage.getItem('userLocale');
+  if (ls && T[ls]) return ls;
+  const nav = (navigator.language || '').slice(0, 2).toLowerCase();
+  return T[nav] ? nav : 'en';
+}
+
+const LANG = detectLang();
+function t(key) { return T[LANG][key] !== undefined ? T[LANG][key] : (T['en'][key] || key); }
+
+function render() {
+  document.documentElement.lang = LANG;
+  document.title = t('page.title');
+
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    el.innerHTML = t(el.getAttribute('data-i18n'));
+  });
+
+  document.getElementById('summary-list').innerHTML =
+    t('summary.items').map(item => `<li>${item}</li>`).join('');
+
+  const sensitiveRow = t('data.sensitive_row');
+  document.getElementById('data-table-body').innerHTML =
+    t('data.rows').map((row, i) => `<tr>
+      <td>${row[0]}</td>
+      <td><span class="tag${i === sensitiveRow ? ' tag--sensitive' : ''}">${row[1]}</span></td>
+      <td>${row[2]}</td>
+    </tr>`).join('');
+
+  document.getElementById('third-party-table-body').innerHTML =
+    t('third.rows').map(row => `<tr>
+      <td>${row[0]}</td><td>${row[1]}</td><td>${row[2]}</td>
+    </tr>`).join('');
+}
+
+render();
+</script>
+</body>
+</html>
