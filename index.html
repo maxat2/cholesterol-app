@@ -1818,7 +1818,7 @@
       <div class="lmhr-banner" id="lmhr-banner">
         <div class="lmhr-banner-icon">⚡</div>
         <div class="lmhr-banner-body">
-          <div class="lmhr-banner-title">Включён режим LMHR</div>
+          <div class="lmhr-banner-title" data-i18n="lmhr.mode_on">Включён режим LMHR</div>
           <div class="lmhr-banner-text" data-i18n="profile.lmhr_text">Худощавый + активный + высокий LDL — особый профиль. Кето и низкоуглеводные диеты могут ПОВЫСИТЬ твой LDL. ИИ учтёт это при анализе еды.</div>
         </div>
       </div>
@@ -1856,7 +1856,7 @@
         <div class="field-label" data-i18n="profile.apob">Аполипопротеин B (ApoB) — необязательно</div>
         <div class="field-row">
           <input type="number" id="v-apob" placeholder="0.9" step="0.01" oninput="onApobInput()" />
-          <span class="field-unit">г/л</span>
+          <span class="field-unit" data-i18n="unit.gl">г/л</span>
         </div>
       </div>
 
@@ -1879,13 +1879,13 @@
 
       <div class="lmhr-mode-row" id="lmhr-mode-row">
         <span class="lmhr-mode-label" data-i18n="profile.analysis_mode">Режим анализа еды</span>
-        <span class="lmhr-badge" id="lmhr-badge"><span class="lmhr-badge-dot"></span>LMHR активен</span>
+        <span class="lmhr-badge" id="lmhr-badge"><span class="lmhr-badge-dot"></span><span data-i18n="lmhr.active">LMHR активен</span></span>
       </div>
 
       <div class="field-label units-mini" data-i18n="profile.units">Единицы измерения анализов</div>
       <div class="seg" id="seg-units">
-        <div class="seg-btn active" onclick="setSeg('seg-units',this)">ммоль/л</div>
-        <div class="seg-btn" onclick="setSeg('seg-units',this)">мг/дл</div>
+        <div class="seg-btn active" onclick="setSeg('seg-units',this)" data-i18n="seg.mmol">ммоль/л</div>
+        <div class="seg-btn" onclick="setSeg('seg-units',this)" data-i18n="seg.mgdl">мг/дл</div>
       </div>
       <div class="field-label units-mini" style="margin-top:16px;" data-i18n="profile.language">Язык</div>
       <div class="seg" id="seg-locale">
@@ -2014,7 +2014,7 @@
             <div class="chol-mini-name"><span class="chol-tip" onclick="toggleTip(this)">ApoB<span class="chol-tip-box" data-i18n="tip.apob">…</span></span></div>
             <div class="chol-mini-val" id="main-chol-apob-num">—</div>
           </div>
-          <div class="chol-mini-foot"><span id="main-chol-apob-unit">г/л</span><span class="st" id="main-chol-apob-st"></span></div>
+          <div class="chol-mini-foot"><span id="main-chol-apob-unit" data-i18n="unit.gl">г/л</span><span class="st" id="main-chol-apob-st"></span></div>
         </div>
         <div class="chol-mini chol-mini--empty" id="main-chol-cell-tghdl">
           <div>
@@ -2098,7 +2098,7 @@
               <div class="chol-mini-name"><span class="chol-tip" onclick="toggleTip(this)">ApoB<span class="chol-tip-box" data-i18n="tip.apob">…</span></span></div>
               <div class="chol-mini-val" id="mp-chol-apob-num">—</div>
             </div>
-            <div class="chol-mini-foot"><span id="mp-chol-apob-unit">г/л</span><span class="st" id="mp-chol-apob-st"></span></div>
+            <div class="chol-mini-foot"><span id="mp-chol-apob-unit" data-i18n="unit.gl">г/л</span><span class="st" id="mp-chol-apob-st"></span></div>
           </div>
           <div class="chol-mini chol-mini--empty" id="mp-chol-cell-tghdl">
             <div>
@@ -2154,7 +2154,7 @@
             <span class="ref-row-name"><span class="chol-tip" onclick="toggleTip(this)" data-i18n="ref.apob">ApoB — Аполипопротеин B<span class="chol-tip-box" data-i18n="ref.apob_tip">…</span></span></span>
             <div class="ref-row-right">
               <span class="ref-row-val">&lt; 0.9</span>
-              <span class="ref-row-unit">г/л</span>
+              <span class="ref-row-unit" data-i18n="unit.gl">г/л</span>
             </div>
           </div>
           <div class="ref-row">
@@ -2485,6 +2485,12 @@ const LOCALES = {
     // Ошибки
     'error.profile_required': 'Укажите e-mail и имя, чтобы пользоваться приложением.',
 
+    'lmhr.active': 'LMHR активен',
+    'lmhr.mode_on': 'Включён режим LMHR',
+    'unit.gl': 'г/л',
+    'seg.mmol': 'ммоль/л',
+    'seg.mgdl': 'мг/дл',
+
     // Аббревиатуры карточек холестерина
     'abbr.total': 'ОХ',
     'abbr.trig': 'ТГ',
@@ -2744,6 +2750,12 @@ const LOCALES = {
 
     'error.profile_required': 'Please enter your e-mail and name to use the app.',
 
+    'lmhr.active': 'LMHR active',
+    'lmhr.mode_on': 'LMHR mode enabled',
+    'unit.gl': 'g/L',
+    'seg.mmol': 'mmol/L',
+    'seg.mgdl': 'mg/dL',
+
     'abbr.total': 'TC',
     'abbr.trig': 'TG',
     'abbr.tghdl': 'TG/HDL',
@@ -2985,6 +2997,12 @@ const LOCALES = {
     'week.days': ['So','Mo','Di','Mi','Do','Fr','Sa'],
 
     'error.profile_required': 'Bitte E-Mail und Name eingeben, um die App zu nutzen.',
+
+    'lmhr.active': 'LMHR aktiv',
+    'lmhr.mode_on': 'LMHR-Modus aktiviert',
+    'unit.gl': 'g/L',
+    'seg.mmol': 'mmol/L',
+    'seg.mgdl': 'mg/dL',
 
     'abbr.total': 'GC',
     'abbr.trig': 'TG',
@@ -4601,6 +4619,7 @@ function saveProfileToStorage() {
 // Маппинг сохранённых значений → ключи i18n
 // Значения в БД могут быть на русском (старые записи) или на любом языке
 const SEG_VALUE_MAP = {
+  // units (метки сегмента — не переводятся через normalizeSegLabel, но добавим для полноты)
   // body type
   'Худощавый': 'profile.body_lean', 'Lean': 'profile.body_lean', 'Schlank': 'profile.body_lean',
   'Среднее': 'profile.body_medium', 'Average': 'profile.body_medium', 'Mittel': 'profile.body_medium',
@@ -5426,7 +5445,9 @@ function convertLipidInputs(fromMgdl) {
 
 function isProfileMgDl() {
   const u = document.querySelector('#seg-units .seg-btn.active');
-  return u && u.textContent.trim().toLowerCase() === 'мг/дл';
+  if (!u) return false;
+  // Проверяем по data-i18n атрибуту — не зависит от языка
+  return u.getAttribute('data-i18n') === 'seg.mgdl';
 }
 
 function parseMmolInput(id) {
@@ -6375,7 +6396,7 @@ function setSeg(id, el) {
   el.classList.add('active');
   // При смене единиц — пересчитываем инпуты
   if (id === 'seg-units') {
-    const nowMgdl = el.textContent.trim() === 'мг/дл';
+    const nowMgdl = el.getAttribute('data-i18n') === 'seg.mgdl';
     if (wasMgdl !== nowMgdl) {
       convertLipidInputs(wasMgdl); // конвертируем из старых в новые
       // Смена единиц — помечаем форму как "грязную" чтобы кнопка показалась
