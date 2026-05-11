@@ -1253,6 +1253,302 @@
     resize: none; box-sizing: border-box; min-height: 120px;
     color: var(--text); background: var(--bg);
   }
+  /* ===== TRIAL BANNER (auth screen) ===== */
+  .trial-banner {
+    background: #000;
+    color: #fff;
+    text-align: center;
+    padding: 10px 16px;
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    line-height: 1.4;
+    flex-shrink: 0;
+  }
+  .trial-banner strong {
+    font-weight: 700;
+  }
+  .trial-banner-sub {
+    color: #aaa;
+    font-size: 11px;
+    margin-top: 2px;
+  }
+
+  /* ===== PRICING BUTTON in profile ===== */
+  .pricing-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    background: #000;
+    color: #fff;
+    border: none;
+    border-radius: 14px;
+    padding: 0 18px;
+    height: 52px;
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-bottom: 16px;
+    letter-spacing: 0.01em;
+    transition: opacity 0.15s;
+  }
+  .pricing-btn:active { opacity: 0.82; transform: scale(0.97); }
+  .pricing-btn-left { display: flex; align-items: center; gap: 8px; }
+  .pricing-btn-tag {
+    background: #fff;
+    color: #000;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 2px 7px;
+    border-radius: 20px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .pricing-btn-arrow { opacity: 0.5; font-size: 18px; }
+
+  /* ===== SCREEN PAYWALL ===== */
+  #screen-paywall {
+    background: #fff;
+  }
+  #screen-paywall .pw-header {
+    padding: 20px 20px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .pw-back-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    margin-bottom: 20px;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .pw-title {
+    font-family: var(--sans);
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1.15;
+    color: #000;
+    margin-bottom: 6px;
+  }
+  .pw-subtitle {
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 24px;
+    line-height: 1.5;
+  }
+  .pw-features {
+    padding: 0 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+  .pw-feature-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--sans);
+    font-size: 13px;
+    color: #222;
+  }
+  .pw-feature-icon {
+    width: 28px;
+    height: 28px;
+    background: #f0f0f0;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .pw-plans {
+    padding: 0 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .pw-plan {
+    border: 2px solid var(--line);
+    border-radius: 16px;
+    padding: 14px 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: border-color 0.15s, background 0.15s;
+    position: relative;
+    background: #fff;
+  }
+  .pw-plan.selected {
+    border-color: #000;
+    background: #f7f7f7;
+  }
+  .pw-plan-left { display: flex; flex-direction: column; gap: 2px; }
+  .pw-plan-name {
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 700;
+    color: #000;
+  }
+  .pw-plan-desc {
+    font-family: var(--sans);
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .pw-plan-right { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+  .pw-plan-price {
+    font-family: var(--sans);
+    font-size: 18px;
+    font-weight: 700;
+    color: #000;
+  }
+  .pw-plan-per {
+    font-family: var(--sans);
+    font-size: 10px;
+    color: var(--muted);
+  }
+  .pw-plan-badge {
+    position: absolute;
+    top: -10px;
+    right: 14px;
+    background: #000;
+    color: #fff;
+    font-family: var(--sans);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 9px;
+    border-radius: 20px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .pw-radio {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid #ccc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: border-color 0.15s;
+  }
+  .pw-plan.selected .pw-radio {
+    border-color: #000;
+  }
+  .pw-radio-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #000;
+    display: none;
+  }
+  .pw-plan.selected .pw-radio-dot { display: block; }
+  .pw-cta-wrap {
+    padding: 0 20px 8px;
+  }
+  .pw-cta-btn {
+    width: 100%;
+    height: 54px;
+    background: #000;
+    color: #fff;
+    border: none;
+    border-radius: 16px;
+    font-family: var(--sans);
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.01em;
+    transition: opacity 0.15s, transform 0.1s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .pw-cta-btn:active { opacity: 0.82; transform: scale(0.97); }
+  .pw-trial-note {
+    text-align: center;
+    font-family: var(--sans);
+    font-size: 11px;
+    color: var(--muted);
+    padding: 8px 20px 16px;
+  }
+  .pw-restore {
+    text-align: center;
+    font-family: var(--sans);
+    font-size: 11px;
+    color: var(--muted2);
+    padding: 0 20px 20px;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+  /* ===== TRIAL EXPIRED BLOCKER ===== */
+  .trial-expired-overlay {
+    display: none;
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.96);
+    z-index: 200;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 24px;
+    text-align: center;
+    gap: 12px;
+  }
+  .trial-expired-overlay.visible { display: flex; }
+  .trial-expired-icon {
+    width: 56px;
+    height: 56px;
+    background: #f0f0f0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    margin-bottom: 4px;
+  }
+  .trial-expired-title {
+    font-family: var(--sans);
+    font-size: 20px;
+    font-weight: 700;
+    color: #000;
+  }
+  .trial-expired-text {
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .trial-expired-btn {
+    margin-top: 8px;
+    width: 100%;
+    height: 52px;
+    background: #000;
+    color: #fff;
+    border: none;
+    border-radius: 14px;
+    font-family: var(--sans);
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.01em;
+  }
+
   .purchase-overlay {
     display: none; position: absolute; inset: 0; z-index: 300; background: rgba(0,0,0,0.45);
     align-items: flex-end; justify-content: center;
@@ -1706,6 +2002,10 @@
   <!-- END ONBOARDING SCREEN -->
 
   <div class="screen" id="screen-auth">
+    <div class="trial-banner">
+      <strong>7 дней бесплатно</strong> — затем от $9/мес
+      <div class="trial-banner-sub">Без обязательств · Отмена в любой момент</div>
+    </div>
     <div class="auth-screen-inner">
       <div class="auth-status" id="auth-status" role="status" aria-live="polite"></div>
       <button type="button" class="auth-btn-google" id="auth-google" aria-label="Continue with Google">
@@ -1901,6 +2201,13 @@
       <button type="button" class="btn-primary" id="profile-cta-btn" onclick="setBtnLoading(this);saveProfileAndStart()"><span class="btn-label" data-i18n="profile.continue">Продолжить</span><span class="btn-spinner"></span></button>
 
       <div class="profile-logout-wrap">
+        <button type="button" class="pricing-btn" id="profile-pricing-btn" onclick="goTo('screen-paywall')">
+          <span class="pricing-btn-left">
+            <span>$ Pricing</span>
+            <span class="pricing-btn-tag" id="pricing-btn-status">Trial</span>
+          </span>
+          <span class="pricing-btn-arrow">›</span>
+        </button>
         <button type="button" class="btn-primary" id="profile-logout-btn" onclick="logoutFromApp()" data-i18n="profile.logout">Выйти</button>
       </div>
     </div>
@@ -1918,6 +2225,13 @@
   </div>
 
   <div class="screen" id="screen-main">
+    <!-- Trial expired blocker -->
+    <div class="trial-expired-overlay" id="trial-expired-overlay">
+      <div class="trial-expired-icon">🔒</div>
+      <div class="trial-expired-title">Пробный период завершён</div>
+      <div class="trial-expired-text">Твои 7 дней истекли. Выбери план чтобы продолжить анализировать еду и следить за холестерином.</div>
+      <button type="button" class="trial-expired-btn" onclick="goTo('screen-paywall')">Выбрать план →</button>
+    </div>
     <div class="main-wrap">
       <div class="main-header main-header--hero">
         <div class="main-greeting" id="main-greeting-line" data-i18n="main.greeting">Привет!</div>
@@ -2326,6 +2640,99 @@
       <button type="button" class="btn-primary" id="describe-food-submit" onclick="setBtnLoading(this);submitDescribeFood()"><span class="btn-label" data-i18n="result.describe_submit">Отправить</span><span class="btn-spinner"></span></button>
     </div>
   </div>
+
+  <!-- ===== SCREEN PAYWALL ===== -->
+  <div class="screen" id="screen-paywall">
+    <div style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;">
+      <div class="pw-header">
+        <button type="button" class="pw-back-btn" onclick="history.back ? history.back() : goTo('screen-my-profile')">
+          <svg width="10" height="17" viewBox="0 0 10 17" fill="none"><path d="M8.5 15.5L1.5 8.5L8.5 1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Назад
+        </button>
+        <div class="pw-title">Начни с&nbsp;7&nbsp;дней<br>бесплатно</div>
+        <div class="pw-subtitle">Потом от $9/мес — отмена в&nbsp;любой момент</div>
+      </div>
+
+      <div class="pw-features">
+        <div class="pw-feature-row">
+          <div class="pw-feature-icon">📸</div>
+          <span>Безлимитный анализ фото еды</span>
+        </div>
+        <div class="pw-feature-row">
+          <div class="pw-feature-icon">🧬</div>
+          <span>Персональный разбор под твой липидный профиль</span>
+        </div>
+        <div class="pw-feature-row">
+          <div class="pw-feature-icon">📊</div>
+          <span>История и динамика по дням</span>
+        </div>
+        <div class="pw-feature-row">
+          <div class="pw-feature-icon">🔔</div>
+          <span>Итог дня и рекомендации</span>
+        </div>
+      </div>
+
+      <div class="pw-plans" id="pw-plans">
+        <!-- 1 month -->
+        <div class="pw-plan selected" data-plan="month" onclick="selectPlan(this)">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div class="pw-radio"><div class="pw-radio-dot"></div></div>
+            <div class="pw-plan-left">
+              <div class="pw-plan-name">1 месяц</div>
+              <div class="pw-plan-desc">Попробовать без риска</div>
+            </div>
+          </div>
+          <div class="pw-plan-right">
+            <div class="pw-plan-price">$9</div>
+            <div class="pw-plan-per">/ месяц</div>
+          </div>
+        </div>
+
+        <!-- 3 months -->
+        <div class="pw-plan" data-plan="quarter" onclick="selectPlan(this)">
+          <div class="pw-plan-badge">Выгода 44%</div>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div class="pw-radio"><div class="pw-radio-dot"></div></div>
+            <div class="pw-plan-left">
+              <div class="pw-plan-name">3 месяца</div>
+              <div class="pw-plan-desc">$5/мес вместо $9</div>
+            </div>
+          </div>
+          <div class="pw-plan-right">
+            <div class="pw-plan-price">$15</div>
+            <div class="pw-plan-per">/ 3 месяца</div>
+          </div>
+        </div>
+
+        <!-- 1 year -->
+        <div class="pw-plan" data-plan="year" onclick="selectPlan(this)">
+          <div class="pw-plan-badge">Лучшая цена</div>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div class="pw-radio"><div class="pw-radio-dot"></div></div>
+            <div class="pw-plan-left">
+              <div class="pw-plan-name">1 год</div>
+              <div class="pw-plan-desc">$3.25/мес вместо $9</div>
+            </div>
+          </div>
+          <div class="pw-plan-right">
+            <div class="pw-plan-price">$39</div>
+            <div class="pw-plan-per">/ год</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pw-cta-wrap">
+        <button type="button" class="pw-cta-btn" id="pw-cta-btn" onclick="paywallStartTrial()">
+          <span id="pw-cta-label">Начать 7 дней бесплатно</span>
+        </button>
+      </div>
+      <div class="pw-trial-note" id="pw-trial-note">
+        7 дней бесплатно, затем $9/мес. Отмена в любой момент.
+      </div>
+      <div class="pw-restore" onclick="paywallRestore()">Восстановить покупку</div>
+    </div>
+  </div>
+  <!-- END SCREEN PAYWALL -->
 
   <div class="purchase-overlay" id="purchase-overlay" onclick="if(event.target===this)dismissPurchaseModal()">
     <div class="purchase-sheet" onclick="event.stopPropagation()">
@@ -3443,6 +3850,119 @@ const LS_MEAL_HISTORY = 'meal_history';
 const LS_SUPABASE_USER_ID = 'cholesterol_app_supabase_user_id';
 const ASSET_NO_IMAGE_BIG = 'no_image_big.svg';
 
+// ===== MONETIZATION / TRIAL =====
+const LS_TRIAL_START = 'ch_trial_start';
+const LS_PAID_UNTIL = 'ch_paid_until';
+const TRIAL_DAYS = 7;
+
+function getTrialStart() {
+  const v = localStorage.getItem(LS_TRIAL_START);
+  if (v) return parseInt(v, 10);
+  // First time — start trial now
+  const now = Date.now();
+  localStorage.setItem(LS_TRIAL_START, String(now));
+  return now;
+}
+
+function getTrialStatus() {
+  // If paid — check paid_until
+  const paidUntil = localStorage.getItem(LS_PAID_UNTIL);
+  if (paidUntil && parseInt(paidUntil, 10) > Date.now()) {
+    return { active: true, plan: 'paid' };
+  }
+  // Check trial
+  const trialStart = getTrialStart();
+  const elapsed = Date.now() - trialStart;
+  const trialMs = TRIAL_DAYS * 24 * 60 * 60 * 1000;
+  if (elapsed < trialMs) {
+    const daysLeft = Math.ceil((trialMs - elapsed) / (24 * 60 * 60 * 1000));
+    return { active: true, plan: 'trial', daysLeft };
+  }
+  return { active: false, plan: 'expired' };
+}
+
+function isAccessActive() {
+  return getTrialStatus().active;
+}
+
+function updatePricingBtnStatus() {
+  const btn = document.getElementById('pricing-btn-status');
+  if (!btn) return;
+  const s = getTrialStatus();
+  if (s.plan === 'paid') {
+    btn.textContent = 'Active';
+    btn.style.background = '#22C55E';
+    btn.style.color = '#fff';
+  } else if (s.plan === 'trial') {
+    btn.textContent = `Trial · ${s.daysLeft}д`;
+    btn.style.background = '#fff';
+    btn.style.color = '#000';
+  } else {
+    btn.textContent = 'Expired';
+    btn.style.background = '#ff3b30';
+    btn.style.color = '#fff';
+  }
+}
+
+function checkTrialBlocker() {
+  const overlay = document.getElementById('trial-expired-overlay');
+  if (!overlay) return;
+  if (!isAccessActive()) {
+    overlay.classList.add('visible');
+  } else {
+    overlay.classList.remove('visible');
+  }
+}
+
+// Paywall plan selection
+function selectPlan(el) {
+  document.querySelectorAll('.pw-plan').forEach(p => p.classList.remove('selected'));
+  el.classList.add('selected');
+  const plan = el.dataset.plan;
+  const label = document.getElementById('pw-cta-label');
+  const note = document.getElementById('pw-trial-note');
+  if (plan === 'month') {
+    if (label) label.textContent = 'Начать 7 дней бесплатно';
+    if (note) note.textContent = '7 дней бесплатно, затем $9/мес. Отмена в любой момент.';
+  } else if (plan === 'quarter') {
+    if (label) label.textContent = 'Начать 7 дней бесплатно';
+    if (note) note.textContent = '7 дней бесплатно, затем $15 за 3 месяца. Отмена в любой момент.';
+  } else if (plan === 'year') {
+    if (label) label.textContent = 'Начать 7 дней бесплатно';
+    if (note) note.textContent = '7 дней бесплатно, затем $39/год. Отмена в любой момент.';
+  }
+}
+
+function paywallStartTrial() {
+  // STUB — здесь будет редирект на платёжный сервис
+  const selected = document.querySelector('.pw-plan.selected');
+  const plan = selected ? selected.dataset.plan : 'month';
+  alert(`[STUB] Оплата плана: ${plan}\nСюда подключишь LemonSqueezy / Google Play / Apple StoreKit`);
+}
+
+function paywallRestore() {
+  // STUB — восстановление покупки
+  alert('[STUB] Восстановление покупки — сюда подключишь API платёжного сервиса');
+}
+
+// Симуляция активации для тестирования (DEV only)
+// Вызови в консоли: devActivatePaid(30) — активирует на 30 дней
+window.devActivatePaid = function(days) {
+  const until = Date.now() + days * 24 * 60 * 60 * 1000;
+  localStorage.setItem(LS_PAID_UNTIL, String(until));
+  updatePricingBtnStatus();
+  checkTrialBlocker();
+  console.log(`[dev] Paid access activated for ${days} days`);
+};
+window.devExpireTrial = function() {
+  localStorage.setItem(LS_TRIAL_START, String(Date.now() - (TRIAL_DAYS + 1) * 24 * 60 * 60 * 1000));
+  localStorage.removeItem(LS_PAID_UNTIL);
+  updatePricingBtnStatus();
+  checkTrialBlocker();
+  console.log('[dev] Trial expired');
+};
+// ===== END MONETIZATION =====
+
 const HISTORY_THUMB_PLACEHOLDER_SVG_INNER =
   '<g><path d="M100.295 77.796L2.75488 79.3201L3.2629 93.5447L11.3912 118.438L17.4875 123.01L32.7281 128.09L35.2683 140.283L64.7335 140.791L66.7656 140.283L67.7816 128.598L84.0383 123.01L93.6907 113.358L98.2629 101.165L100.295 77.796Z" fill="#BAA4A4" fill-opacity="0.4"/><path d="M44.9211 41.7265L43.3971 40.2025H41.365L30.6965 43.7586L29.6805 42.7426L29.1725 38.1704L26.1243 34.1062L17.996 36.6463L15.4559 39.1864L9.35964 48.3308L2.75536 41.2185L0.723278 41.7265L-5.37298 48.8388L-7.91309 53.919V56.4591L-3.34089 65.6035L3.26339 73.7319L32.7286 73.2238L42.381 62.5554L45.9372 56.9672L47.9693 50.3629V46.8067L44.9211 41.7265Z" fill="#BAA4A4" fill-opacity="0.4"/><path d="M97.7554 -5.01147L86.579 -0.439282L81.4987 5.14895L74.3864 14.8014L71.8463 20.8976L71.3383 25.4698L70.8303 25.9778V30.042L70.3223 30.55V40.2024L73.3704 43.7586L77.9426 42.2345L83.0228 38.6784L93.6913 28.0099L97.7554 22.9297L101.82 12.2613L101.312 2.60885L97.7554 -5.01147Z" fill="#BAA4A4" fill-opacity="0.4"/><path d="M105.375 37.1544L104.359 36.6464L100.295 38.1704H98.2625L89.6262 41.7266H88.1021L85.562 43.2506L68.7973 61.0314L68.2893 62.0474L67.7812 73.7319L87.0861 73.2239L92.6743 71.6998L97.7545 68.6517L100.295 64.0795L103.851 53.4111L105.375 37.1544Z" fill="#BAA4A4" fill-opacity="0.4"/><path d="M82.5141 -16.1879L78.45 -12.6317L57.1131 12.7694L47.4606 13.2774L36.2842 24.4538L37.8082 26.994H39.3323L44.9205 22.9298L45.4286 23.9458L40.8564 28.518L41.8724 31.0581H43.3965L48.9847 26.994L49.4927 28.01L44.9205 33.0902L46.4446 34.6143L54.0649 29.026L54.5729 30.0421L49.4927 37.1544L52.5409 39.6945L55.081 37.1544L61.1772 28.01L61.6852 16.8335L86.0703 -12.1237L82.5141 -16.1879Z" fill="#BAA4A4" fill-opacity="0.4"/><path d="M-4.86503 13.2773L-5.37305 13.7854V16.3255L-4.86503 16.8335V19.8816L-4.357 20.3896L-3.84898 22.4217L-2.83294 23.4378L-1.8169 25.4699L-0.292833 26.9939V27.5019L2.75529 31.0581H3.26332L7.32749 34.1062L9.35957 34.6142L13.9318 30.0421V29.026L14.4398 28.518V27.5019L15.4558 25.4699V18.8656L14.9478 18.3576V16.8335L14.4398 15.8175L11.3917 13.7854L10.3756 14.2934L9.86759 16.3255L9.35957 16.8335L8.85155 22.9298L8.34353 23.4378L6.81947 22.4217V21.9137L0.215188 14.8014L-0.292833 13.7854L-1.30888 13.2773H-4.86503Z" fill="#BAA4A4" fill-opacity="0.4"/><path d="M50.0015 59.5073L47.4614 62.0474V62.5554L46.9533 63.0634V64.5875L46.4453 65.0955V68.1436L46.9533 68.6516V70.6837L47.4614 71.1917H47.9694L48.4774 71.6998H49.4934L50.5095 72.7158H51.5255L52.0335 73.2238H54.0656L54.5737 72.7158H56.6057L57.1138 72.2078H58.1298L58.6378 71.6998H59.6539L61.1779 70.1757V69.6677L61.686 69.1597V68.1436L62.194 67.6356V65.6035L61.686 65.0955V63.5714L61.1779 63.0634V62.0474L60.6699 61.5393V61.0313L58.6378 58.9992H57.6218L57.1138 58.4912H52.0335L51.5255 58.9992H51.0175L50.5095 59.5073H50.0015Z" fill="#BAA4A4" fill-opacity="0.4"/><path d="M59.1456 40.2025L58.6376 40.7105H58.1296L54.5735 44.2667V44.7747L54.0654 45.2827V46.2988L54.5735 46.8068V48.3309L55.0815 48.8389V49.8549L57.6216 52.395H58.1296L59.1456 53.4111H59.6537L60.6697 54.4271H61.1777L61.6858 54.9351H62.1938L62.7018 54.4271H63.2098L63.7178 53.9191H64.2259L64.7339 53.4111H65.2419L66.2579 52.395H66.766L69.3061 49.8549V48.3309L69.8141 47.8228V47.3148L69.3061 46.8068V45.7908L68.7981 45.2827V44.7747L65.2419 41.2186H64.7339L63.7178 40.2025H59.1456Z" fill="#BAA4A4" fill-opacity="0.4"/><path d="M23.5841 16.8335L23.076 17.3415V17.8495L22.06 18.8655V19.8816L21.552 20.3896V21.4057L21.0439 21.9137V25.4698L23.5841 28.0099H24.0921L25.1081 29.026H26.1242L26.6322 29.534H30.6964L32.2204 28.0099V26.9939L32.7284 26.4859V24.9618L33.2365 24.4538V21.9137L32.7284 21.4057V20.3896L32.2204 19.8816V19.3736L31.7124 18.8655V18.3575L31.2044 17.8495V17.3415L30.6964 16.8335H30.1883L29.6803 16.3254H24.6001L24.0921 16.8335H23.5841Z" fill="#BAA4A4" fill-opacity="0.4"/></g>';
 
@@ -4446,6 +4966,7 @@ async function submitDescribeFood() {
   const ta = document.getElementById('describe-food-text');
   const userText = (ta?.value || '').trim();
   if (!userText) return;
+  if (!isAccessActive()) { dismissDescribeFoodModal(); goTo('screen-paywall'); return; }
 
 
   if (describeFoodModalMode === 'refine') {
@@ -5764,6 +6285,7 @@ async function syncMyProfileScreen() {
 }
 
 function openFoodCamera() {
+  if (!isAccessActive()) { goTo('screen-paywall'); return; }
   const appInitErr = document.getElementById('app-init-error');
   const camInput = document.getElementById('food-camera-input');
   appInitErr?.classList.remove('visible');
@@ -6353,7 +6875,9 @@ function goTo(id, opts) {
   target.classList.add('active');
   if (targetId === 'screen-main' || targetId === 'screen-lipids') void prepareMainScreenLipids();
   if (targetId === 'screen-lipids') updateLipidProfileCard();
+  if (targetId === 'screen-main') checkTrialBlocker();
   if (targetId === 'screen-my-profile') syncMyProfileScreen();
+  if (targetId === 'screen-profile') updatePricingBtnStatus();
   if (targetId === 'screen-history') void renderHistoryList();
   if (targetId === 'screen-profile') {
     if (forcedProfileGate || !profileCompleteFromStorage()) {
