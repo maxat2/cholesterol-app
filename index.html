@@ -3575,8 +3575,8 @@ function buildFullUserRow(profile, emailNormalized) {
     trig_mmol: trigMmol,
     trig_mgdl: isMg ? rawTrig : toMgdl(rawTrig, true),
     apob: rawApob,
-    body_type: profile.body_type ?? null,
-    activity_level: profile.activity ?? null,
+    body_type: segLabelToDb(profile.body_type ?? '') || null,
+    activity_level: segLabelToDb(profile.activity ?? '') || null,
     units: profileUnitsToDb(profile.units) || 'mmol',
     profile_json: profile,
     updated_at: new Date().toISOString(),
@@ -3751,8 +3751,8 @@ function getProfileFormSnapshot() {
     height: heightEl?.value ?? '',
     weight: weightEl?.value ?? '',
     statins: statinsEl?.classList.contains('on') ?? false,
-    body_type: (document.querySelector('#seg-body-type .seg-btn.active')?.textContent.trim() ?? ''),
-    activity: (document.querySelector('#seg-activity .seg-btn.active')?.textContent.trim() ?? '')
+    body_type: segLabelToDb(document.querySelector('#seg-body-type .seg-btn.active')?.textContent.trim() ?? ''),
+    activity: segLabelToDb(document.querySelector('#seg-activity .seg-btn.active')?.textContent.trim() ?? '')
   });
 }
 
@@ -4582,19 +4582,60 @@ function saveProfileToStorage() {
     weight: weightEl?.value ?? '',
     statins: statinsEl?.classList.contains('on') ?? false,
     v_apob: (document.getElementById('v-apob')?.value ?? ''),
-    body_type: (document.querySelector('#seg-body-type .seg-btn.active')?.textContent.trim() ?? 'Среднее'),
-    activity: (document.querySelector('#seg-activity .seg-btn.active')?.textContent.trim() ?? 'Средняя')
+    body_type: segLabelToDb(document.querySelector('#seg-body-type .seg-btn.active')?.textContent.trim() ?? ''),
+    activity: segLabelToDb(document.querySelector('#seg-activity .seg-btn.active')?.textContent.trim() ?? '')
   };
   try {
     localStorage.setItem(LS_USER_PROFILE, JSON.stringify(profile));
   } catch (e) {}
 }
 
+// Маппинг сохранённых значений → ключи i18n
+// Значения в БД могут быть на русском (старые записи) или на любом языке
+const SEG_VALUE_MAP = {
+  // body type
+  'Худощавый': 'profile.body_lean', 'Lean': 'profile.body_lean', 'Schlank': 'profile.body_lean',
+  'Среднее': 'profile.body_medium', 'Average': 'profile.body_medium', 'Mittel': 'profile.body_medium',
+  'Плотное': 'profile.body_heavy', 'Heavy': 'profile.body_heavy', 'Kräftig': 'profile.body_heavy',
+  // activity
+  'Низкая': 'profile.activity_low', 'Low': 'profile.activity_low', 'Niedrig': 'profile.activity_low',
+  'Средняя': 'profile.activity_medium', 'Moderate': 'profile.activity_medium', 'Mittel': 'profile.activity_medium',
+  'Высокая': 'profile.activity_high', 'High': 'profile.activity_high', 'Hoch': 'profile.activity_high',
+  // gender
+  'Мужской': 'common.male', 'Male': 'common.male', 'Männlich': 'common.male',
+  'Женский': 'common.female', 'Female': 'common.female', 'Weiblich': 'common.female',
+};
+
+function normalizeSegLabel(label) {
+  // Если есть маппинг — возвращаем переведённое значение на текущий язык
+  const key = SEG_VALUE_MAP[label];
+  return key ? t(key) : label;
+}
+
+// Нейтральные английские значения для хранения в БД
+const SEG_DB_VALUES = {
+  'profile.body_lean':     'Lean',
+  'profile.body_medium':   'Average',
+  'profile.body_heavy':    'Heavy',
+  'profile.activity_low':  'Low',
+  'profile.activity_medium': 'Moderate',
+  'profile.activity_high': 'High',
+  'common.male':   'Male',
+  'common.female': 'Female',
+};
+
+function segLabelToDb(label) {
+  // Переводим любой язык → английское значение для БД
+  const key = SEG_VALUE_MAP[label];
+  return key ? (SEG_DB_VALUES[key] || label) : label;
+}
+
 function setSegActiveByLabel(containerId, label) {
   const c = document.getElementById(containerId);
   if (!c || !label) return;
+  const normalized = normalizeSegLabel(label);
   c.querySelectorAll('.seg-btn').forEach((btn) => {
-    btn.classList.toggle('active', btn.textContent.trim() === label);
+    btn.classList.toggle('active', btn.textContent.trim() === normalized);
   });
 }
 
