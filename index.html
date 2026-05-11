@@ -1975,7 +1975,7 @@
         <div class="chol-grid" id="main-chol-grid">
         <div class="chol-mini chol-mini--empty" id="main-chol-cell-total">
           <div>
-            <div class="chol-mini-name"><span class="chol-tip" onclick="toggleTip(this)">ОХ<span class="chol-tip-box" data-i18n="tip.total">…</span></span></div>
+            <div class="chol-mini-name"><span class="chol-tip" onclick="toggleTip(this)"><span data-i18n="abbr.total">ОХ</span><span class="chol-tip-box" data-i18n="tip.total">…</span></span></div>
             <div class="chol-mini-val" id="main-chol-total-num">—</div>
           </div>
           <div class="chol-mini-foot"><span id="main-chol-total-unit">ммоль/л</span><span class="st" id="main-chol-total-st"></span></div>
@@ -1996,7 +1996,7 @@
         </div>
         <div class="chol-mini chol-mini--empty" id="main-chol-cell-trig">
           <div>
-            <div class="chol-mini-name"><span class="chol-tip" onclick="toggleTip(this)">ТГ<span class="chol-tip-box" data-i18n="tip.trig">…</span></span></div>
+            <div class="chol-mini-name"><span class="chol-tip" onclick="toggleTip(this)"><span data-i18n="abbr.trig">ТГ</span><span class="chol-tip-box" data-i18n="tip.trig">…</span></span></div>
             <div class="chol-mini-val" id="main-chol-trig-num">—</div>
           </div>
           <div class="chol-mini-foot"><span id="main-chol-trig-unit">ммоль/л</span><span class="st" id="main-chol-trig-st"></span></div>
@@ -2010,7 +2010,7 @@
         </div>
         <div class="chol-mini chol-mini--empty" id="main-chol-cell-tghdl">
           <div>
-            <div class="chol-mini-name"><span class="chol-tip" onclick="toggleTip(this)">ТГ/HDL<span class="chol-tip-box" data-i18n="tip.tghdl">…</span></span></div>
+            <div class="chol-mini-name"><span class="chol-tip" onclick="toggleTip(this)"><span data-i18n="abbr.tghdl">ТГ/HDL</span><span class="chol-tip-box" data-i18n="tip.tghdl">…</span></span></div>
             <div class="chol-mini-val" id="main-chol-tghdl-num">—</div>
           </div>
           <div class="chol-mini-foot"><span class="st" id="main-chol-tghdl-st"></span></div>
@@ -2059,7 +2059,7 @@
         <div class="chol-grid">
           <div class="chol-mini chol-mini--empty" id="mp-chol-cell-total">
             <div>
-              <div class="chol-mini-name"><span class="chol-tip" onclick="toggleTip(this)">ОХ<span class="chol-tip-box" data-i18n="tip.total">…</span></span></div>
+              <div class="chol-mini-name"><span class="chol-tip" onclick="toggleTip(this)"><span data-i18n="abbr.total">ОХ</span><span class="chol-tip-box" data-i18n="tip.total">…</span></span></div>
               <div class="chol-mini-val" id="mp-chol-total-num">—</div>
             </div>
             <div class="chol-mini-foot"><span id="mp-chol-total-unit">ммоль/л</span><span class="st" id="mp-chol-total-st"></span></div>
@@ -2080,7 +2080,7 @@
           </div>
           <div class="chol-mini chol-mini--empty" id="mp-chol-cell-trig">
             <div>
-              <div class="chol-mini-name"><span class="chol-tip" onclick="toggleTip(this)">ТГ<span class="chol-tip-box" data-i18n="tip.trig">…</span></span></div>
+              <div class="chol-mini-name"><span class="chol-tip" onclick="toggleTip(this)"><span data-i18n="abbr.trig">ТГ</span><span class="chol-tip-box" data-i18n="tip.trig">…</span></span></div>
               <div class="chol-mini-val" id="mp-chol-trig-num">—</div>
             </div>
             <div class="chol-mini-foot"><span id="mp-chol-trig-unit">ммоль/л</span><span class="st" id="mp-chol-trig-st"></span></div>
@@ -2094,7 +2094,7 @@
           </div>
           <div class="chol-mini chol-mini--empty" id="mp-chol-cell-tghdl">
             <div>
-              <div class="chol-mini-name"><span class="chol-tip" onclick="toggleTip(this)">ТГ/HDL<span class="chol-tip-box" data-i18n="tip.tghdl">…</span></span></div>
+              <div class="chol-mini-name"><span class="chol-tip" onclick="toggleTip(this)"><span data-i18n="abbr.tghdl">ТГ/HDL</span><span class="chol-tip-box" data-i18n="tip.tghdl">…</span></span></div>
               <div class="chol-mini-val" id="mp-chol-tghdl-num">—</div>
             </div>
             <div class="chol-mini-foot"><span class="st" id="mp-chol-tghdl-st"></span></div>
@@ -2477,6 +2477,11 @@ const LOCALES = {
     // Ошибки
     'error.profile_required': 'Укажите e-mail и имя, чтобы пользоваться приложением.',
 
+    // Аббревиатуры карточек холестерина
+    'abbr.total': 'ОХ',
+    'abbr.trig': 'ТГ',
+    'abbr.tghdl': 'ТГ/HDL',
+
     // Дополнительные UI строки
     'common.no_name': 'Без названия',
     'common.friend': 'друг',
@@ -2731,6 +2736,10 @@ const LOCALES = {
 
     'error.profile_required': 'Please enter your e-mail and name to use the app.',
 
+    'abbr.total': 'TC',
+    'abbr.trig': 'TG',
+    'abbr.tghdl': 'TG/HDL',
+
     'common.no_name': 'Unnamed',
     'common.friend': 'friend',
     'common.profile': 'Profile',
@@ -2968,6 +2977,10 @@ const LOCALES = {
     'week.days': ['So','Mo','Di','Mi','Do','Fr','Sa'],
 
     'error.profile_required': 'Bitte E-Mail und Name eingeben, um die App zu nutzen.',
+
+    'abbr.total': 'GC',
+    'abbr.trig': 'TG',
+    'abbr.tghdl': 'TG/HDL',
 
     'common.no_name': 'Ohne Namen',
     'common.friend': 'Freund',
