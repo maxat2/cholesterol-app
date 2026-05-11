@@ -2692,13 +2692,28 @@
       </div>
 
       <div class="pw-plans" id="pw-plans">
+        <!-- Trial (selected by default) -->
+        <div class="pw-plan selected" data-plan="trial" onclick="selectPlan(this)">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div class="pw-radio"><div class="pw-radio-dot"></div></div>
+            <div class="pw-plan-left">
+              <div class="pw-plan-name">7 дней бесплатно</div>
+              <div class="pw-plan-desc">Затем $9/мес · отмена в любой момент</div>
+            </div>
+          </div>
+          <div class="pw-plan-right">
+            <div class="pw-plan-price">$0</div>
+            <div class="pw-plan-per">сейчас</div>
+          </div>
+        </div>
+
         <!-- 1 month -->
-        <div class="pw-plan selected" data-plan="month" onclick="selectPlan(this)">
+        <div class="pw-plan" data-plan="month" onclick="selectPlan(this)">
           <div style="display:flex;align-items:center;gap:12px;">
             <div class="pw-radio"><div class="pw-radio-dot"></div></div>
             <div class="pw-plan-left">
               <div class="pw-plan-name">1 месяц</div>
-              <div class="pw-plan-desc">Попробовать без риска</div>
+              <div class="pw-plan-desc">Без пробного периода</div>
             </div>
           </div>
           <div class="pw-plan-right">
@@ -2746,7 +2761,7 @@
         </button>
       </div>
       <div class="pw-trial-note" id="pw-trial-note">
-        7 дней бесплатно, затем $9/мес. Отмена в любой момент.
+        Бесплатно сейчас · $9/мес после триала · отмена в любой момент
       </div>
       <div class="pw-restore" onclick="paywallRestore()">Восстановить покупку</div>
     </div>
@@ -3940,15 +3955,18 @@ function selectPlan(el) {
   const plan = el.dataset.plan;
   const label = document.getElementById('pw-cta-label');
   const note = document.getElementById('pw-trial-note');
-  if (plan === 'month') {
+  if (plan === 'trial') {
     if (label) label.textContent = 'Начать 7 дней бесплатно';
-    if (note) note.textContent = '7 дней бесплатно, затем $9/мес. Отмена в любой момент.';
+    if (note) note.textContent = 'Бесплатно сейчас · $9/мес после триала · отмена в любой момент';
+  } else if (plan === 'month') {
+    if (label) label.textContent = 'Купить за $9 / месяц';
+    if (note) note.textContent = 'Доступ сразу · без пробного периода · отмена в любой момент';
   } else if (plan === 'quarter') {
-    if (label) label.textContent = 'Начать 7 дней бесплатно';
-    if (note) note.textContent = '7 дней бесплатно, затем $15 за 3 месяца. Отмена в любой момент.';
+    if (label) label.textContent = 'Купить за $15 / 3 месяца';
+    if (note) note.textContent = 'Доступ сразу · экономия 44% · отмена в любой момент';
   } else if (plan === 'year') {
-    if (label) label.textContent = 'Начать 7 дней бесплатно';
-    if (note) note.textContent = '7 дней бесплатно, затем $39/год. Отмена в любой момент.';
+    if (label) label.textContent = 'Купить за $39 / год';
+    if (note) note.textContent = 'Доступ сразу · лучшая цена $3.25/мес · отмена в любой момент';
   }
 }
 
