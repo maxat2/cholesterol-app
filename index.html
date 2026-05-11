@@ -1287,6 +1287,8 @@
     border-radius: 16px;
     padding: 0 20px;
     height: 56px;
+    min-height: 56px;
+    flex-shrink: 0;
     font-family: var(--sans);
     font-size: 16px;
     font-weight: 600;
@@ -1312,7 +1314,10 @@
 
   #screen-my-profile .pricing-btn {
     margin-top: 0;
-    margin-bottom: 12px;
+    margin-bottom: 0;
+    flex-shrink: 0;
+    min-height: 56px;
+    height: 56px;
   }
 
   /* ===== SCREEN PAYWALL ===== */
