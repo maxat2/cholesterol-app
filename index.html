@@ -1649,7 +1649,7 @@
         <div class="onboarding-slide">
           <div class="onboarding-logo">cH<span class="logo-zero">0</span>lipid</div>
           <div class="onboarding-img-wrap">
-            <img class="onboarding-img" src="onboarding_1.png" alt="Добавь данные о себе" />
+            <img class="onboarding-img" src="onboarding_1.png" alt="Добавь данные о себе" data-i18n="onboarding.alt1" data-i18n-attr="alt" />
           </div>
           <div class="onboarding-text" data-i18n="onboarding.slide1">Добавь данные о&nbsp;себе<br>(идеально с&nbsp;анализами)</div>
           <div class="onboarding-dots">
@@ -1663,7 +1663,7 @@
         <div class="onboarding-slide">
           <div class="onboarding-logo">cH<span class="logo-zero">0</span>lipid</div>
           <div class="onboarding-img-wrap">
-            <img class="onboarding-img" src="onboarding_2.png" alt="Сфотографируй блюдо" />
+            <img class="onboarding-img" src="onboarding_2.png" alt="Сфотографируй блюдо" data-i18n="onboarding.alt2" data-i18n-attr="alt" />
           </div>
           <div class="onboarding-text" data-i18n="onboarding.slide2">Сфотографируй блюдо&nbsp;—<br>получи персональный разбор</div>
           <div class="onboarding-dots">
@@ -1677,7 +1677,7 @@
         <div class="onboarding-slide">
           <div class="onboarding-logo">cH<span class="logo-zero">0</span>lipid</div>
           <div class="onboarding-img-wrap">
-            <img class="onboarding-img" src="onboarding_3.png" alt="Пойми, что влияет на твой липидный профиль" />
+            <img class="onboarding-img" src="onboarding_3.png" alt="Пойми, что влияет на твой липидный профиль" data-i18n="onboarding.alt3" data-i18n-attr="alt" />
           </div>
           <div class="onboarding-text" data-i18n="onboarding.slide3">Пойми, что влияет<br>на&nbsp;твой липидный профиль</div>
           <div class="onboarding-dots">
@@ -1735,7 +1735,7 @@
       <div class="nav-skip" onclick="skipOnboardingToMain()" data-i18n="onboarding.skip">Пропустить</div>
     </div>
     <div class="nav history-top-nav profile-nav--edit" aria-hidden="true">
-      <button type="button" class="history-nav-side" onclick="goTo('screen-my-profile')" aria-label="Назад" title="Назад">
+      <button type="button" class="history-nav-side" onclick="goTo('screen-my-profile')" aria-label="Назад" title="Назад" data-i18n="nav.back" data-i18n-attr="aria-label">
         <svg width="10" height="17" viewBox="0 0 10 17" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M8.5 15.5L1.5 8.5L8.5 1.5" stroke="#1C1B1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
       <div class="history-nav-title" data-i18n="my_profile.nav">Профиль</div>
@@ -1824,14 +1824,14 @@
         </div>
       </div>
       <div class="field" id="f-ldl">
-        <div class="field-label">LDL — «плохой» холестерин (ЛПНП)</div>
+        <div class="field-label" data-i18n="profile.ldl">LDL — «плохой» холестерин (ЛПНП)</div>
         <div class="field-row">
           <input type="number" id="v-ldl" placeholder="3.3" />
           <span class="field-unit" id="field-unit-ldl">ммоль/л</span>
         </div>
       </div>
       <div class="field" id="f-hdl">
-        <div class="field-label">HDL — «хороший» холестерин (ЛПВП)</div>
+        <div class="field-label" data-i18n="profile.hdl">HDL — «хороший» холестерин (ЛПВП)</div>
         <div class="field-row">
           <input type="number" id="v-hdl" placeholder="1.3" />
           <span class="field-unit" id="field-unit-hdl">ммоль/л</span>
@@ -1894,13 +1894,13 @@
       </div>
     </div>
     <div class="bottom-nav">
-      <button type="button" class="bnav-item" onclick="navTo('screen-main',this)" aria-label="Главная">
+      <button type="button" class="bnav-item" onclick="navTo('screen-main',this)" aria-label="Главная" data-i18n="nav.main" data-i18n-attr="aria-label">
         <span class="bnav-icon" aria-hidden="true"><svg class="bnav-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3.5 8.5C3.5 9.05 3.95 9.5 4.5 9.5C5.05 9.5 5.5 9.05 5.5 8.5V6.5H7.5C8.05 6.5 8.5 6.05 8.5 5.5C8.5 4.95 8.05 4.5 7.5 4.5H5.5V2.5C5.5 1.95 5.05 1.5 4.5 1.5C3.95 1.5 3.5 1.95 3.5 2.5V4.5H1.5C0.95 4.5 0.5 4.95 0.5 5.5C0.5 6.05 0.95 6.5 1.5 6.5H3.5V8.5Z" fill="currentColor"/><path d="M13.5 17.5C15.1569 17.5 16.5 16.1569 16.5 14.5C16.5 12.8431 15.1569 11.5 13.5 11.5C11.8431 11.5 10.5 12.8431 10.5 14.5C10.5 16.1569 11.8431 17.5 13.5 17.5Z" fill="currentColor"/><path d="M21.5 6.5H18.33L17.09 5.15C16.72 4.74 16.18 4.5 15.62 4.5H9.22C9.39 4.8 9.5 5.13 9.5 5.5C9.5 6.6 8.6 7.5 7.5 7.5H6.5V8.5C6.5 9.6 5.6 10.5 4.5 10.5C4.13 10.5 3.8 10.39 3.5 10.22V20.5C3.5 21.6 4.4 22.5 5.5 22.5H21.5C22.6 22.5 23.5 21.6 23.5 20.5V8.5C23.5 7.4 22.6 6.5 21.5 6.5ZM13.5 19.5C10.74 19.5 8.5 17.26 8.5 14.5C8.5 11.74 10.74 9.5 13.5 9.5C16.26 9.5 18.5 11.74 18.5 14.5C18.5 17.26 16.26 19.5 13.5 19.5Z" fill="currentColor"/></svg></span>
       </button>
-      <button type="button" class="bnav-item" onclick="navTo('screen-history',this)" aria-label="История">
+      <button type="button" class="bnav-item" onclick="navTo('screen-history',this)" aria-label="История" data-i18n="nav.history" data-i18n-attr="aria-label">
         <span class="bnav-icon" aria-hidden="true"><svg class="bnav-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16 6V12C16 13.1 16.9 14 18 14H19V21C19 21.55 19.45 22 20 22C20.55 22 21 21.55 21 21V3.13C21 2.48 20.39 2 19.76 2.15C17.6 2.68 16 4.51 16 6ZM11 9H9V3C9 2.45 8.55 2 8 2C7.45 2 7 2.45 7 3V9H5V3C5 2.45 4.55 2 4 2C3.45 2 3 2.45 3 3V9C3 11.21 4.79 13 7 13V21C7 21.55 7.45 22 8 22C8.55 22 9 21.55 9 21V13C11.21 13 13 11.21 13 9V3C13 2.45 12.55 2 12 2C11.45 2 11 2.45 11 3V9Z" fill="currentColor"/></svg></span>
       </button>
-      <button type="button" class="bnav-item active" onclick="navTo('screen-my-profile',this)" aria-label="Профиль">
+      <button type="button" class="bnav-item active" onclick="navTo('screen-my-profile',this)" aria-label="Профиль" data-i18n="nav.profile" data-i18n-attr="aria-label">
         <span class="bnav-icon" aria-hidden="true"><svg class="bnav-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11.9892 6C13.0938 6 13.9892 5.10457 13.9892 4C13.9892 2.89543 13.0938 2 11.9892 2C10.8847 2 9.98924 2.89543 9.98924 4C9.98924 5.10457 10.8847 6 11.9892 6Z" fill="currentColor"/><path d="M15.8792 8.11C15.4892 7.72 14.8192 7 13.5192 7C13.3092 7 12.0992 7 10.9792 7C8.51924 6.99 6.46924 5.2 6.05924 2.85C5.97924 2.36 5.56924 2 5.07924 2C4.46924 2 3.98924 2.54 4.07924 3.14C4.51924 5.8 6.45924 7.95 8.98924 8.71V21C8.98924 21.55 9.43924 22 9.98924 22C10.5392 22 10.9892 21.55 10.9892 21V16H12.9892V21C12.9892 21.55 13.4392 22 13.9892 22C14.5392 22 14.9892 21.55 14.9892 21V10.05L18.2292 13.29C18.6192 13.68 19.2492 13.68 19.6392 13.29C20.0292 12.9 20.0292 12.27 19.6392 11.88L15.8792 8.11Z" fill="currentColor"/></svg></span>
       </button>
     </div>
@@ -1915,12 +1915,12 @@
       <div id="main-hero-animation">
         <img src="main_animation.svg" id="main-anim-img" alt="" style="width:100%;height:auto;display:block;" />
       </div>
-      <button type="button" class="btn-camera-wide" onclick="openFoodCamera()" aria-label="Сделать фото еды">
+      <button type="button" class="btn-camera-wide" onclick="openFoodCamera()" aria-label="Сделать фото еды" data-i18n="main.camera_btn" data-i18n-attr="aria-label">
         <svg class="cam-svg" width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2v11z" stroke="#fff" stroke-width="2" stroke-linejoin="round"/>
           <circle cx="12" cy="13" r="4" stroke="#fff" stroke-width="2"/>
         </svg>
-        Фото
+        <span data-i18n="main.photo_btn">Фото</span>
       </button>
       <div id="main-edu-wrap">
         <iframe
@@ -1932,13 +1932,13 @@
       </div>
     </div>
     <div class="bottom-nav">
-      <button type="button" class="bnav-item active" onclick="navTo('screen-main',this)" aria-label="Главная">
+      <button type="button" class="bnav-item active" onclick="navTo('screen-main',this)" aria-label="Главная" data-i18n="nav.main" data-i18n-attr="aria-label">
         <span class="bnav-icon" aria-hidden="true"><svg class="bnav-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3.5 8.5C3.5 9.05 3.95 9.5 4.5 9.5C5.05 9.5 5.5 9.05 5.5 8.5V6.5H7.5C8.05 6.5 8.5 6.05 8.5 5.5C8.5 4.95 8.05 4.5 7.5 4.5H5.5V2.5C5.5 1.95 5.05 1.5 4.5 1.5C3.95 1.5 3.5 1.95 3.5 2.5V4.5H1.5C0.95 4.5 0.5 4.95 0.5 5.5C0.5 6.05 0.95 6.5 1.5 6.5H3.5V8.5Z" fill="currentColor"/><path d="M13.5 17.5C15.1569 17.5 16.5 16.1569 16.5 14.5C16.5 12.8431 15.1569 11.5 13.5 11.5C11.8431 11.5 10.5 12.8431 10.5 14.5C10.5 16.1569 11.8431 17.5 13.5 17.5Z" fill="currentColor"/><path d="M21.5 6.5H18.33L17.09 5.15C16.72 4.74 16.18 4.5 15.62 4.5H9.22C9.39 4.8 9.5 5.13 9.5 5.5C9.5 6.6 8.6 7.5 7.5 7.5H6.5V8.5C6.5 9.6 5.6 10.5 4.5 10.5C4.13 10.5 3.8 10.39 3.5 10.22V20.5C3.5 21.6 4.4 22.5 5.5 22.5H21.5C22.6 22.5 23.5 21.6 23.5 20.5V8.5C23.5 7.4 22.6 6.5 21.5 6.5ZM13.5 19.5C10.74 19.5 8.5 17.26 8.5 14.5C8.5 11.74 10.74 9.5 13.5 9.5C16.26 9.5 18.5 11.74 18.5 14.5C18.5 17.26 16.26 19.5 13.5 19.5Z" fill="currentColor"/></svg></span>
       </button>
-      <button type="button" class="bnav-item" onclick="navTo('screen-history',this)" aria-label="История">
+      <button type="button" class="bnav-item" onclick="navTo('screen-history',this)" aria-label="История" data-i18n="nav.history" data-i18n-attr="aria-label">
         <span class="bnav-icon" aria-hidden="true"><svg class="bnav-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16 6V12C16 13.1 16.9 14 18 14H19V21C19 21.55 19.45 22 20 22C20.55 22 21 21.55 21 21V3.13C21 2.48 20.39 2 19.76 2.15C17.6 2.68 16 4.51 16 6ZM11 9H9V3C9 2.45 8.55 2 8 2C7.45 2 7 2.45 7 3V9H5V3C5 2.45 4.55 2 4 2C3.45 2 3 2.45 3 3V9C3 11.21 4.79 13 7 13V21C7 21.55 7.45 22 8 22C8.55 22 9 21.55 9 21V13C11.21 13 13 11.21 13 9V3C13 2.45 12.55 2 12 2C11.45 2 11 2.45 11 3V9Z" fill="currentColor"/></svg></span>
       </button>
-      <button type="button" class="bnav-item" onclick="navTo('screen-my-profile',this)" aria-label="Профиль">
+      <button type="button" class="bnav-item" onclick="navTo('screen-my-profile',this)" aria-label="Профиль" data-i18n="nav.profile" data-i18n-attr="aria-label">
         <span class="bnav-icon" aria-hidden="true"><svg class="bnav-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11.9892 6C13.0938 6 13.9892 5.10457 13.9892 4C13.9892 2.89543 13.0938 2 11.9892 2C10.8847 2 9.98924 2.89543 9.98924 4C9.98924 5.10457 10.8847 6 11.9892 6Z" fill="currentColor"/><path d="M15.8792 8.11C15.4892 7.72 14.8192 7 13.5192 7C13.3092 7 12.0992 7 10.9792 7C8.51924 6.99 6.46924 5.2 6.05924 2.85C5.97924 2.36 5.56924 2 5.07924 2C4.46924 2 3.98924 2.54 4.07924 3.14C4.51924 5.8 6.45924 7.95 8.98924 8.71V21C8.98924 21.55 9.43924 22 9.98924 22C10.5392 22 10.9892 21.55 10.9892 21V16H12.9892V21C12.9892 21.55 13.4392 22 13.9892 22C14.5392 22 14.9892 21.55 14.9892 21V10.05L18.2292 13.29C18.6192 13.68 19.2492 13.68 19.6392 13.29C20.0292 12.9 20.0292 12.27 19.6392 11.88L15.8792 8.11Z" fill="currentColor"/></svg></span>
       </button>
     </div>
@@ -1946,7 +1946,7 @@
 
   <div class="screen" id="screen-lipids">
     <div class="nav history-top-nav">
-      <button type="button" class="history-nav-side" onclick="goTo('screen-main')" aria-label="Назад" title="Назад">
+      <button type="button" class="history-nav-side" onclick="goTo('screen-main')" aria-label="Назад" title="Назад" data-i18n="nav.back" data-i18n-attr="aria-label">
         <svg width="10" height="17" viewBox="0 0 10 17" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M8.5 15.5L1.5 8.5L8.5 1.5" stroke="#1C1B1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
       <div class="history-nav-title" data-i18n="lipids.nav">Липидный профиль</div>
@@ -1975,42 +1975,42 @@
         <div class="chol-grid" id="main-chol-grid">
         <div class="chol-mini chol-mini--empty" id="main-chol-cell-total">
           <div>
-            <div class="chol-mini-name"><span class="chol-tip" onclick="toggleTip(this)">ОХ<span class="chol-tip-box"><strong>Общий холестерин (TC)</strong>Сумма всех фракций. Смотри не на цифру, а на соотношение LDL/HDL.</span></span></div>
+            <div class="chol-mini-name"><span class="chol-tip" onclick="toggleTip(this)">ОХ<span class="chol-tip-box" data-i18n="tip.total">…</span></span></div>
             <div class="chol-mini-val" id="main-chol-total-num">—</div>
           </div>
           <div class="chol-mini-foot"><span id="main-chol-total-unit">ммоль/л</span><span class="st" id="main-chol-total-st"></span></div>
         </div>
         <div class="chol-mini chol-mini--empty" id="main-chol-cell-ldl">
           <div>
-            <div class="chol-mini-name"><span class="chol-tip" onclick="toggleTip(this)">LDL<span class="chol-tip-box"><strong>LDL — «плохой» холестерин</strong>Липопротеины низкой плотности. Оседает в артериях. Чем ниже — тем лучше.</span></span></div>
+            <div class="chol-mini-name"><span class="chol-tip" onclick="toggleTip(this)">LDL<span class="chol-tip-box" data-i18n="tip.ldl">…</span></span></div>
             <div class="chol-mini-val" id="main-chol-ldl-num">—</div>
           </div>
           <div class="chol-mini-foot"><span id="main-chol-ldl-unit">ммоль/л</span><span class="st" id="main-chol-ldl-st"></span></div>
         </div>
         <div class="chol-mini chol-mini--empty" id="main-chol-cell-hdl">
           <div>
-            <div class="chol-mini-name"><span class="chol-tip" onclick="toggleTip(this)">HDL<span class="chol-tip-box"><strong>HDL — «хороший» холестерин</strong>Липопротеины высокой плотности. Выводит холестерин из артерий. Чем выше — тем лучше.</span></span></div>
+            <div class="chol-mini-name"><span class="chol-tip" onclick="toggleTip(this)">HDL<span class="chol-tip-box" data-i18n="tip.hdl">…</span></span></div>
             <div class="chol-mini-val" id="main-chol-hdl-num">—</div>
           </div>
           <div class="chol-mini-foot"><span id="main-chol-hdl-unit">ммоль/л</span><span class="st" id="main-chol-hdl-st"></span></div>
         </div>
         <div class="chol-mini chol-mini--empty" id="main-chol-cell-trig">
           <div>
-            <div class="chol-mini-name"><span class="chol-tip" onclick="toggleTip(this)">ТГ<span class="chol-tip-box"><strong>Триглицериды (TG)</strong>Жиры в крови. Растут от сахара и алкоголя. Сдавать строго натощак.</span></span></div>
+            <div class="chol-mini-name"><span class="chol-tip" onclick="toggleTip(this)">ТГ<span class="chol-tip-box" data-i18n="tip.trig">…</span></span></div>
             <div class="chol-mini-val" id="main-chol-trig-num">—</div>
           </div>
           <div class="chol-mini-foot"><span id="main-chol-trig-unit">ммоль/л</span><span class="st" id="main-chol-trig-st"></span></div>
         </div>
         <div class="chol-mini chol-mini--empty" id="main-chol-cell-apob">
           <div>
-            <div class="chol-mini-name"><span class="chol-tip" onclick="toggleTip(this)">ApoB<span class="chol-tip-box"><strong>Аполипопротеин B</strong>Считает число опасных частиц в крови. Точнее LDL. Цель: &lt;0.9 г/л (идеал &lt;0.7).</span></span></div>
+            <div class="chol-mini-name"><span class="chol-tip" onclick="toggleTip(this)">ApoB<span class="chol-tip-box" data-i18n="tip.apob">…</span></span></div>
             <div class="chol-mini-val" id="main-chol-apob-num">—</div>
           </div>
           <div class="chol-mini-foot"><span id="main-chol-apob-unit">г/л</span><span class="st" id="main-chol-apob-st"></span></div>
         </div>
         <div class="chol-mini chol-mini--empty" id="main-chol-cell-tghdl">
           <div>
-            <div class="chol-mini-name"><span class="chol-tip" onclick="toggleTip(this)">ТГ/HDL<span class="chol-tip-box"><strong>Индекс ТГ / HDL</strong>Простой маркер инсулинорезистентности. &lt;1.0 — отлично, &lt;2.0 — норма, &gt;3.0 — риск.</span></span></div>
+            <div class="chol-mini-name"><span class="chol-tip" onclick="toggleTip(this)">ТГ/HDL<span class="chol-tip-box" data-i18n="tip.tghdl">…</span></span></div>
             <div class="chol-mini-val" id="main-chol-tghdl-num">—</div>
           </div>
           <div class="chol-mini-foot"><span class="st" id="main-chol-tghdl-st"></span></div>
@@ -2021,13 +2021,13 @@
       </section>
     </div>
     <div class="bottom-nav">
-      <button type="button" class="bnav-item active" onclick="navTo('screen-main',this)" aria-label="Главная">
+      <button type="button" class="bnav-item active" onclick="navTo('screen-main',this)" aria-label="Главная" data-i18n="nav.main" data-i18n-attr="aria-label">
         <span class="bnav-icon" aria-hidden="true"><svg class="bnav-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3.5 8.5C3.5 9.05 3.95 9.5 4.5 9.5C5.05 9.5 5.5 9.05 5.5 8.5V6.5H7.5C8.05 6.5 8.5 6.05 8.5 5.5C8.5 4.95 8.05 4.5 7.5 4.5H5.5V2.5C5.5 1.95 5.05 1.5 4.5 1.5C3.95 1.5 3.5 1.95 3.5 2.5V4.5H1.5C0.95 4.5 0.5 4.95 0.5 5.5C0.5 6.05 0.95 6.5 1.5 6.5H3.5V8.5Z" fill="currentColor"/><path d="M13.5 17.5C15.1569 17.5 16.5 16.1569 16.5 14.5C16.5 12.8431 15.1569 11.5 13.5 11.5C11.8431 11.5 10.5 12.8431 10.5 14.5C10.5 16.1569 11.8431 17.5 13.5 17.5Z" fill="currentColor"/><path d="M21.5 6.5H18.33L17.09 5.15C16.72 4.74 16.18 4.5 15.62 4.5H9.22C9.39 4.8 9.5 5.13 9.5 5.5C9.5 6.6 8.6 7.5 7.5 7.5H6.5V8.5C6.5 9.6 5.6 10.5 4.5 10.5C4.13 10.5 3.8 10.39 3.5 10.22V20.5C3.5 21.6 4.4 22.5 5.5 22.5H21.5C22.6 22.5 23.5 21.6 23.5 20.5V8.5C23.5 7.4 22.6 6.5 21.5 6.5ZM13.5 19.5C10.74 19.5 8.5 17.26 8.5 14.5C8.5 11.74 10.74 9.5 13.5 9.5C16.26 9.5 18.5 11.74 18.5 14.5C18.5 17.26 16.26 19.5 13.5 19.5Z" fill="currentColor"/></svg></span>
       </button>
-      <button type="button" class="bnav-item" onclick="navTo('screen-history',this)" aria-label="История">
+      <button type="button" class="bnav-item" onclick="navTo('screen-history',this)" aria-label="История" data-i18n="nav.history" data-i18n-attr="aria-label">
         <span class="bnav-icon" aria-hidden="true"><svg class="bnav-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16 6V12C16 13.1 16.9 14 18 14H19V21C19 21.55 19.45 22 20 22C20.55 22 21 21.55 21 21V3.13C21 2.48 20.39 2 19.76 2.15C17.6 2.68 16 4.51 16 6ZM11 9H9V3C9 2.45 8.55 2 8 2C7.45 2 7 2.45 7 3V9H5V3C5 2.45 4.55 2 4 2C3.45 2 3 2.45 3 3V9C3 11.21 4.79 13 7 13V21C7 21.55 7.45 22 8 22C8.55 22 9 21.55 9 21V13C11.21 13 13 11.21 13 9V3C13 2.45 12.55 2 12 2C11.45 2 11 2.45 11 3V9Z" fill="currentColor"/></svg></span>
       </button>
-      <button type="button" class="bnav-item" onclick="navTo('screen-my-profile',this)" aria-label="Профиль">
+      <button type="button" class="bnav-item" onclick="navTo('screen-my-profile',this)" aria-label="Профиль" data-i18n="nav.profile" data-i18n-attr="aria-label">
         <span class="bnav-icon" aria-hidden="true"><svg class="bnav-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11.9892 6C13.0938 6 13.9892 5.10457 13.9892 4C13.9892 2.89543 13.0938 2 11.9892 2C10.8847 2 9.98924 2.89543 9.98924 4C9.98924 5.10457 10.8847 6 11.9892 6Z" fill="currentColor"/><path d="M15.8792 8.11C15.4892 7.72 14.8192 7 13.5192 7C13.3092 7 12.0992 7 10.9792 7C8.51924 6.99 6.46924 5.2 6.05924 2.85C5.97924 2.36 5.56924 2 5.07924 2C4.46924 2 3.98924 2.54 4.07924 3.14C4.51924 5.8 6.45924 7.95 8.98924 8.71V21C8.98924 21.55 9.43924 22 9.98924 22C10.5392 22 10.9892 21.55 10.9892 21V16H12.9892V21C12.9892 21.55 13.4392 22 13.9892 22C14.5392 22 14.9892 21.55 14.9892 21V10.05L18.2292 13.29C18.6192 13.68 19.2492 13.68 19.6392 13.29C20.0292 12.9 20.0292 12.27 19.6392 11.88L15.8792 8.11Z" fill="currentColor"/></svg></span>
       </button>
     </div>
@@ -2035,11 +2035,11 @@
 
   <div class="screen" id="screen-my-profile">
     <div class="nav history-top-nav">
-      <button type="button" class="history-nav-side" onclick="goTo('screen-main')" aria-label="Назад">
+      <button type="button" class="history-nav-side" onclick="goTo('screen-main')" aria-label="Назад" data-i18n="nav.back" data-i18n-attr="aria-label">
         <svg width="10" height="17" viewBox="0 0 10 17" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M8.5 15.5L1.5 8.5L8.5 1.5" stroke="#1C1B1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
       <div class="history-nav-title">Профиль</div>
-      <button type="button" class="history-nav-side" onclick="goTo('screen-profile', {mode:'edit'})" aria-label="Редактировать профиль">
+      <button type="button" class="history-nav-side" onclick="goTo('screen-profile', {mode:'edit'})" aria-label="Редактировать профиль" data-i18n="nav.edit_profile" data-i18n-attr="aria-label">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z" stroke="#1C1B1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" stroke="#1C1B1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
     </div>
@@ -2059,42 +2059,42 @@
         <div class="chol-grid">
           <div class="chol-mini chol-mini--empty" id="mp-chol-cell-total">
             <div>
-              <div class="chol-mini-name"><span class="chol-tip" onclick="toggleTip(this)">ОХ<span class="chol-tip-box"><strong>Общий холестерин (TC)</strong>Сумма всех фракций. Смотри не на цифру, а на соотношение LDL/HDL.</span></span></div>
+              <div class="chol-mini-name"><span class="chol-tip" onclick="toggleTip(this)">ОХ<span class="chol-tip-box" data-i18n="tip.total">…</span></span></div>
               <div class="chol-mini-val" id="mp-chol-total-num">—</div>
             </div>
             <div class="chol-mini-foot"><span id="mp-chol-total-unit">ммоль/л</span><span class="st" id="mp-chol-total-st"></span></div>
           </div>
           <div class="chol-mini chol-mini--empty" id="mp-chol-cell-ldl">
             <div>
-              <div class="chol-mini-name"><span class="chol-tip" onclick="toggleTip(this)">LDL<span class="chol-tip-box"><strong>LDL — «плохой» холестерин</strong>Липопротеины низкой плотности. Оседает в артериях. Чем ниже — тем лучше.</span></span></div>
+              <div class="chol-mini-name"><span class="chol-tip" onclick="toggleTip(this)">LDL<span class="chol-tip-box" data-i18n="tip.ldl">…</span></span></div>
               <div class="chol-mini-val" id="mp-chol-ldl-num">—</div>
             </div>
             <div class="chol-mini-foot"><span id="mp-chol-ldl-unit">ммоль/л</span><span class="st" id="mp-chol-ldl-st"></span></div>
           </div>
           <div class="chol-mini chol-mini--empty" id="mp-chol-cell-hdl">
             <div>
-              <div class="chol-mini-name"><span class="chol-tip" onclick="toggleTip(this)">HDL<span class="chol-tip-box"><strong>HDL — «хороший» холестерин</strong>Липопротеины высокой плотности. Выводит холестерин из артерий. Чем выше — тем лучше.</span></span></div>
+              <div class="chol-mini-name"><span class="chol-tip" onclick="toggleTip(this)">HDL<span class="chol-tip-box" data-i18n="tip.hdl">…</span></span></div>
               <div class="chol-mini-val" id="mp-chol-hdl-num">—</div>
             </div>
             <div class="chol-mini-foot"><span id="mp-chol-hdl-unit">ммоль/л</span><span class="st" id="mp-chol-hdl-st"></span></div>
           </div>
           <div class="chol-mini chol-mini--empty" id="mp-chol-cell-trig">
             <div>
-              <div class="chol-mini-name"><span class="chol-tip" onclick="toggleTip(this)">ТГ<span class="chol-tip-box"><strong>Триглицериды (TG)</strong>Жиры в крови. Растут от сахара и алкоголя. Сдавать строго натощак.</span></span></div>
+              <div class="chol-mini-name"><span class="chol-tip" onclick="toggleTip(this)">ТГ<span class="chol-tip-box" data-i18n="tip.trig">…</span></span></div>
               <div class="chol-mini-val" id="mp-chol-trig-num">—</div>
             </div>
             <div class="chol-mini-foot"><span id="mp-chol-trig-unit">ммоль/л</span><span class="st" id="mp-chol-trig-st"></span></div>
           </div>
           <div class="chol-mini chol-mini--empty" id="mp-chol-cell-apob">
             <div>
-              <div class="chol-mini-name"><span class="chol-tip" onclick="toggleTip(this)">ApoB<span class="chol-tip-box"><strong>Аполипопротеин B</strong>Считает число опасных частиц в крови. Точнее LDL. Цель: &lt;0.9 г/л (идеал &lt;0.7).</span></span></div>
+              <div class="chol-mini-name"><span class="chol-tip" onclick="toggleTip(this)">ApoB<span class="chol-tip-box" data-i18n="tip.apob">…</span></span></div>
               <div class="chol-mini-val" id="mp-chol-apob-num">—</div>
             </div>
             <div class="chol-mini-foot"><span id="mp-chol-apob-unit">г/л</span><span class="st" id="mp-chol-apob-st"></span></div>
           </div>
           <div class="chol-mini chol-mini--empty" id="mp-chol-cell-tghdl">
             <div>
-              <div class="chol-mini-name"><span class="chol-tip" onclick="toggleTip(this)">ТГ/HDL<span class="chol-tip-box"><strong>Индекс ТГ / HDL</strong>Простой маркер инсулинорезистентности. &lt;1.0 — отлично, &lt;2.0 — норма, &gt;3.0 — риск.</span></span></div>
+              <div class="chol-mini-name"><span class="chol-tip" onclick="toggleTip(this)">ТГ/HDL<span class="chol-tip-box" data-i18n="tip.tghdl">…</span></span></div>
               <div class="chol-mini-val" id="mp-chol-tghdl-num">—</div>
             </div>
             <div class="chol-mini-foot"><span class="st" id="mp-chol-tghdl-st"></span></div>
@@ -2108,52 +2108,52 @@
           <div class="ref-card-title" data-i18n="lipids.ref_title">Референсные значения</div>
           <div class="ref-divider"></div>
           <div class="ref-row">
-            <span class="ref-row-name"><span class="chol-tip" onclick="toggleTip(this)">ОХ — Общий холестерин<span class="chol-tip-box"><strong>Total Cholesterol (TC)</strong>Сумма всех фракций. Важен не сам по себе — смотри соотношение LDL и HDL.</span></span></span>
+            <span class="ref-row-name"><span class="chol-tip" onclick="toggleTip(this)" data-i18n="ref.total">ОХ — Общий холестерин<span class="chol-tip-box" data-i18n="ref.total_tip">…</span></span></span>
             <div class="ref-row-right">
               <span class="ref-row-val" id="ref-val-total">3.10 – 5.20</span>
               <span class="ref-row-unit" id="ref-unit-total">ммоль/л</span>
             </div>
           </div>
           <div class="ref-row">
-            <span class="ref-row-name"><span class="chol-tip" onclick="toggleTip(this)">HDL — «хороший» холестерин (муж.)<span class="chol-tip-box"><strong>HDL (ЛПВП) — мужчины</strong>Выводит холестерин из артерий. Чем выше — тем лучше.</span></span></span>
+            <span class="ref-row-name"><span class="chol-tip" onclick="toggleTip(this)" data-i18n="ref.hdl_m">HDL — «хороший» холестерин (муж.)<span class="chol-tip-box" data-i18n="ref.hdl_m_tip">…</span></span></span>
             <div class="ref-row-right">
               <span class="ref-row-val" id="ref-val-hdl-m">1.00 – 1.55</span>
               <span class="ref-row-unit" id="ref-unit-hdl-m">ммоль/л</span>
             </div>
           </div>
           <div class="ref-row">
-            <span class="ref-row-name"><span class="chol-tip" onclick="toggleTip(this)">HDL — «хороший» холестерин (жен.)<span class="chol-tip-box"><strong>HDL (ЛПВП) — женщины</strong>Норма выше, чем у мужчин. Чем выше — тем лучше.</span></span></span>
+            <span class="ref-row-name"><span class="chol-tip" onclick="toggleTip(this)" data-i18n="ref.hdl_f">HDL — «хороший» холестерин (жен.)<span class="chol-tip-box" data-i18n="ref.hdl_f_tip">…</span></span></span>
             <div class="ref-row-right">
               <span class="ref-row-val" id="ref-val-hdl-f">1.20 – 1.80</span>
               <span class="ref-row-unit" id="ref-unit-hdl-f">ммоль/л</span>
             </div>
           </div>
           <div class="ref-row">
-            <span class="ref-row-name"><span class="chol-tip" onclick="toggleTip(this)">LDL — «плохой» холестерин<span class="chol-tip-box"><strong>LDL (ЛПНП)</strong>Основная цель лечения. Оседает в артериях. При риске ССЗ цель &lt;1.8 ммоль/л.</span></span></span>
+            <span class="ref-row-name"><span class="chol-tip" onclick="toggleTip(this)" data-i18n="ref.ldl">LDL — «плохой» холестерин<span class="chol-tip-box" data-i18n="ref.ldl_tip">…</span></span></span>
             <div class="ref-row-right">
               <span class="ref-row-val" id="ref-val-ldl">0.00 – 3.30</span>
               <span class="ref-row-unit" id="ref-unit-ldl">ммоль/л</span>
             </div>
           </div>
           <div class="ref-row">
-            <span class="ref-row-name"><span class="chol-tip" onclick="toggleTip(this)">ТГ — Триглицериды<span class="chol-tip-box"><strong>Triglycerides (TG)</strong>Жиры в крови. Растут от сахара и алкоголя. Сдавать только натощак.</span></span></span>
+            <span class="ref-row-name"><span class="chol-tip" onclick="toggleTip(this)" data-i18n="ref.trig">ТГ — Триглицериды<span class="chol-tip-box" data-i18n="ref.trig_tip">…</span></span></span>
             <div class="ref-row-right">
               <span class="ref-row-val" id="ref-val-trig">0.41 – 1.70</span>
               <span class="ref-row-unit" id="ref-unit-trig">ммоль/л</span>
             </div>
           </div>
           <div class="ref-row">
-            <span class="ref-row-name"><span class="chol-tip" onclick="toggleTip(this)">ApoB — Аполипопротеин B<span class="chol-tip-box"><strong>Apolipoprotein B</strong>Считает число опасных частиц. Точнее LDL. Цель по Attia: &lt;0.7 г/л.</span></span></span>
+            <span class="ref-row-name"><span class="chol-tip" onclick="toggleTip(this)" data-i18n="ref.apob">ApoB — Аполипопротеин B<span class="chol-tip-box" data-i18n="ref.apob_tip">…</span></span></span>
             <div class="ref-row-right">
               <span class="ref-row-val">&lt; 0.9</span>
               <span class="ref-row-unit">г/л</span>
             </div>
           </div>
           <div class="ref-row">
-            <span class="ref-row-name"><span class="chol-tip" onclick="toggleTip(this)">ТГ/HDL — индекс риска<span class="chol-tip-box"><strong>TG/HDL ratio</strong>Маркер инсулинорезистентности. Считается автоматически из твоих данных.</span></span></span>
+            <span class="ref-row-name"><span class="chol-tip" onclick="toggleTip(this)" data-i18n="ref.tghdl">ТГ/HDL — индекс риска<span class="chol-tip-box" data-i18n="ref.tghdl_tip">…</span></span></span>
             <div class="ref-row-right">
               <span class="ref-row-val">&lt; 2.0</span>
-              <span class="ref-row-unit">(идеал &lt;1.0)</span>
+              <span class="ref-row-unit"><span data-i18n="ref.ideal">(идеал &lt;1.0)</span></span>
             </div>
           </div>
           <div class="ref-card-note">Источники: Helix, KDL, ESC/EAS, Mayo Clinic, AHA 2026. Разные лаборатории могут использовать немного разные диапазоны. Точный диапазон всегда смотрите в бланке своей лаборатории. Конверсия: холестерин ммоль/л × 38.67 = мг/дл, триглицериды × 88.57 = мг/дл.</div>
@@ -2161,13 +2161,13 @@
       </section>
     </div>
     <div class="bottom-nav">
-      <button type="button" class="bnav-item" onclick="navTo('screen-main',this)" aria-label="Главная">
+      <button type="button" class="bnav-item" onclick="navTo('screen-main',this)" aria-label="Главная" data-i18n="nav.main" data-i18n-attr="aria-label">
         <span class="bnav-icon" aria-hidden="true"><svg class="bnav-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3.5 8.5C3.5 9.05 3.95 9.5 4.5 9.5C5.05 9.5 5.5 9.05 5.5 8.5V6.5H7.5C8.05 6.5 8.5 6.05 8.5 5.5C8.5 4.95 8.05 4.5 7.5 4.5H5.5V2.5C5.5 1.95 5.05 1.5 4.5 1.5C3.95 1.5 3.5 1.95 3.5 2.5V4.5H1.5C0.95 4.5 0.5 4.95 0.5 5.5C0.5 6.05 0.95 6.5 1.5 6.5H3.5V8.5Z" fill="currentColor"/><path d="M13.5 17.5C15.1569 17.5 16.5 16.1569 16.5 14.5C16.5 12.8431 15.1569 11.5 13.5 11.5C11.8431 11.5 10.5 12.8431 10.5 14.5C10.5 16.1569 11.8431 17.5 13.5 17.5Z" fill="currentColor"/><path d="M21.5 6.5H18.33L17.09 5.15C16.72 4.74 16.18 4.5 15.62 4.5H9.22C9.39 4.8 9.5 5.13 9.5 5.5C9.5 6.6 8.6 7.5 7.5 7.5H6.5V8.5C6.5 9.6 5.6 10.5 4.5 10.5C4.13 10.5 3.8 10.39 3.5 10.22V20.5C3.5 21.6 4.4 22.5 5.5 22.5H21.5C22.6 22.5 23.5 21.6 23.5 20.5V8.5C23.5 7.4 22.6 6.5 21.5 6.5ZM13.5 19.5C10.74 19.5 8.5 17.26 8.5 14.5C8.5 11.74 10.74 9.5 13.5 9.5C16.26 9.5 18.5 11.74 18.5 14.5C18.5 17.26 16.26 19.5 13.5 19.5Z" fill="currentColor"/></svg></span>
       </button>
-      <button type="button" class="bnav-item" onclick="navTo('screen-history',this)" aria-label="История">
+      <button type="button" class="bnav-item" onclick="navTo('screen-history',this)" aria-label="История" data-i18n="nav.history" data-i18n-attr="aria-label">
         <span class="bnav-icon" aria-hidden="true"><svg class="bnav-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16 6V12C16 13.1 16.9 14 18 14H19V21C19 21.55 19.45 22 20 22C20.55 22 21 21.55 21 21V3.13C21 2.48 20.39 2 19.76 2.15C17.6 2.68 16 4.51 16 6ZM11 9H9V3C9 2.45 8.55 2 8 2C7.45 2 7 2.45 7 3V9H5V3C5 2.45 4.55 2 4 2C3.45 2 3 2.45 3 3V9C3 11.21 4.79 13 7 13V21C7 21.55 7.45 22 8 22C8.55 22 9 21.55 9 21V13C11.21 13 13 11.21 13 9V3C13 2.45 12.55 2 12 2C11.45 2 11 2.45 11 3V9Z" fill="currentColor"/></svg></span>
       </button>
-      <button type="button" class="bnav-item active" onclick="navTo('screen-my-profile',this)" aria-label="Профиль">
+      <button type="button" class="bnav-item active" onclick="navTo('screen-my-profile',this)" aria-label="Профиль" data-i18n="nav.profile" data-i18n-attr="aria-label">
         <span class="bnav-icon" aria-hidden="true"><svg class="bnav-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11.9892 6C13.0938 6 13.9892 5.10457 13.9892 4C13.9892 2.89543 13.0938 2 11.9892 2C10.8847 2 9.98924 2.89543 9.98924 4C9.98924 5.10457 10.8847 6 11.9892 6Z" fill="currentColor"/><path d="M15.8792 8.11C15.4892 7.72 14.8192 7 13.5192 7C13.3092 7 12.0992 7 10.9792 7C8.51924 6.99 6.46924 5.2 6.05924 2.85C5.97924 2.36 5.56924 2 5.07924 2C4.46924 2 3.98924 2.54 4.07924 3.14C4.51924 5.8 6.45924 7.95 8.98924 8.71V21C8.98924 21.55 9.43924 22 9.98924 22C10.5392 22 10.9892 21.55 10.9892 21V16H12.9892V21C12.9892 21.55 13.4392 22 13.9892 22C14.5392 22 14.9892 21.55 14.9892 21V10.05L18.2292 13.29C18.6192 13.68 19.2492 13.68 19.6392 13.29C20.0292 12.9 20.0292 12.27 19.6392 11.88L15.8792 8.11Z" fill="currentColor"/></svg></span>
       </button>
     </div>
@@ -2180,7 +2180,7 @@
         <div class="result-loader-text" id="result-loader-text">Анализируем фото…</div>
       </div>
       <div class="result-photo" id="result-photo-wrap" style="position:relative;">
-        <button type="button" class="result-back-btn" onclick="backFromResult()" aria-label="Назад" title="Назад">
+        <button type="button" class="result-back-btn" onclick="backFromResult()" aria-label="Назад" title="Назад" data-i18n="nav.back" data-i18n-attr="aria-label">
           <svg width="10" height="17" viewBox="0 0 10 17" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M8.5 15.5L1.5 8.5L8.5 1.5" stroke="#1C1B1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
         <div class="result-photo-placeholder" id="result-photo-placeholder" aria-hidden="true">
@@ -2221,13 +2221,13 @@
       </div>
     </div>
     <div class="bottom-nav">
-      <button type="button" class="bnav-item" onclick="navTo('screen-main',this)" aria-label="Главная">
+      <button type="button" class="bnav-item" onclick="navTo('screen-main',this)" aria-label="Главная" data-i18n="nav.main" data-i18n-attr="aria-label">
         <span class="bnav-icon" aria-hidden="true"><svg class="bnav-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3.5 8.5C3.5 9.05 3.95 9.5 4.5 9.5C5.05 9.5 5.5 9.05 5.5 8.5V6.5H7.5C8.05 6.5 8.5 6.05 8.5 5.5C8.5 4.95 8.05 4.5 7.5 4.5H5.5V2.5C5.5 1.95 5.05 1.5 4.5 1.5C3.95 1.5 3.5 1.95 3.5 2.5V4.5H1.5C0.95 4.5 0.5 4.95 0.5 5.5C0.5 6.05 0.95 6.5 1.5 6.5H3.5V8.5Z" fill="currentColor"/><path d="M13.5 17.5C15.1569 17.5 16.5 16.1569 16.5 14.5C16.5 12.8431 15.1569 11.5 13.5 11.5C11.8431 11.5 10.5 12.8431 10.5 14.5C10.5 16.1569 11.8431 17.5 13.5 17.5Z" fill="currentColor"/><path d="M21.5 6.5H18.33L17.09 5.15C16.72 4.74 16.18 4.5 15.62 4.5H9.22C9.39 4.8 9.5 5.13 9.5 5.5C9.5 6.6 8.6 7.5 7.5 7.5H6.5V8.5C6.5 9.6 5.6 10.5 4.5 10.5C4.13 10.5 3.8 10.39 3.5 10.22V20.5C3.5 21.6 4.4 22.5 5.5 22.5H21.5C22.6 22.5 23.5 21.6 23.5 20.5V8.5C23.5 7.4 22.6 6.5 21.5 6.5ZM13.5 19.5C10.74 19.5 8.5 17.26 8.5 14.5C8.5 11.74 10.74 9.5 13.5 9.5C16.26 9.5 18.5 11.74 18.5 14.5C18.5 17.26 16.26 19.5 13.5 19.5Z" fill="currentColor"/></svg></span>
       </button>
-      <button type="button" class="bnav-item active" onclick="navTo('screen-history',this)" aria-label="История">
+      <button type="button" class="bnav-item active" onclick="navTo('screen-history',this)" aria-label="История" data-i18n="nav.history" data-i18n-attr="aria-label">
         <span class="bnav-icon" aria-hidden="true"><svg class="bnav-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16 6V12C16 13.1 16.9 14 18 14H19V21C19 21.55 19.45 22 20 22C20.55 22 21 21.55 21 21V3.13C21 2.48 20.39 2 19.76 2.15C17.6 2.68 16 4.51 16 6ZM11 9H9V3C9 2.45 8.55 2 8 2C7.45 2 7 2.45 7 3V9H5V3C5 2.45 4.55 2 4 2C3.45 2 3 2.45 3 3V9C3 11.21 4.79 13 7 13V21C7 21.55 7.45 22 8 22C8.55 22 9 21.55 9 21V13C11.21 13 13 11.21 13 9V3C13 2.45 12.55 2 12 2C11.45 2 11 2.45 11 3V9Z" fill="currentColor"/></svg></span>
       </button>
-      <button type="button" class="bnav-item" onclick="navTo('screen-my-profile',this)" aria-label="Профиль">
+      <button type="button" class="bnav-item" onclick="navTo('screen-my-profile',this)" aria-label="Профиль" data-i18n="nav.profile" data-i18n-attr="aria-label">
         <span class="bnav-icon" aria-hidden="true"><svg class="bnav-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11.9892 6C13.0938 6 13.9892 5.10457 13.9892 4C13.9892 2.89543 13.0938 2 11.9892 2C10.8847 2 9.98924 2.89543 9.98924 4C9.98924 5.10457 10.8847 6 11.9892 6Z" fill="currentColor"/><path d="M15.8792 8.11C15.4892 7.72 14.8192 7 13.5192 7C13.3092 7 12.0992 7 10.9792 7C8.51924 6.99 6.46924 5.2 6.05924 2.85C5.97924 2.36 5.56924 2 5.07924 2C4.46924 2 3.98924 2.54 4.07924 3.14C4.51924 5.8 6.45924 7.95 8.98924 8.71V21C8.98924 21.55 9.43924 22 9.98924 22C10.5392 22 10.9892 21.55 10.9892 21V16H12.9892V21C12.9892 21.55 13.4392 22 13.9892 22C14.5392 22 14.9892 21.55 14.9892 21V10.05L18.2292 13.29C18.6192 13.68 19.2492 13.68 19.6392 13.29C20.0292 12.9 20.0292 12.27 19.6392 11.88L15.8792 8.11Z" fill="currentColor"/></svg></span>
       </button>
     </div>
@@ -2235,7 +2235,7 @@
 
   <div class="screen" id="screen-history">
     <div class="nav history-top-nav">
-      <button type="button" class="history-nav-side" onclick="goTo('screen-main')" aria-label="Назад" title="Назад">
+      <button type="button" class="history-nav-side" onclick="goTo('screen-main')" aria-label="Назад" title="Назад" data-i18n="nav.back" data-i18n-attr="aria-label">
         <svg width="10" height="17" viewBox="0 0 10 17" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M8.5 15.5L1.5 8.5L8.5 1.5" stroke="#1C1B1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
       <div class="history-nav-title" data-i18n="history.title">История</div>
@@ -2286,13 +2286,13 @@
       <div id="history-list"></div>
     </div>
     <div class="bottom-nav">
-      <button type="button" class="bnav-item" onclick="navTo('screen-main',this)" aria-label="Главная">
+      <button type="button" class="bnav-item" onclick="navTo('screen-main',this)" aria-label="Главная" data-i18n="nav.main" data-i18n-attr="aria-label">
         <span class="bnav-icon" aria-hidden="true"><svg class="bnav-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3.5 8.5C3.5 9.05 3.95 9.5 4.5 9.5C5.05 9.5 5.5 9.05 5.5 8.5V6.5H7.5C8.05 6.5 8.5 6.05 8.5 5.5C8.5 4.95 8.05 4.5 7.5 4.5H5.5V2.5C5.5 1.95 5.05 1.5 4.5 1.5C3.95 1.5 3.5 1.95 3.5 2.5V4.5H1.5C0.95 4.5 0.5 4.95 0.5 5.5C0.5 6.05 0.95 6.5 1.5 6.5H3.5V8.5Z" fill="currentColor"/><path d="M13.5 17.5C15.1569 17.5 16.5 16.1569 16.5 14.5C16.5 12.8431 15.1569 11.5 13.5 11.5C11.8431 11.5 10.5 12.8431 10.5 14.5C10.5 16.1569 11.8431 17.5 13.5 17.5Z" fill="currentColor"/><path d="M21.5 6.5H18.33L17.09 5.15C16.72 4.74 16.18 4.5 15.62 4.5H9.22C9.39 4.8 9.5 5.13 9.5 5.5C9.5 6.6 8.6 7.5 7.5 7.5H6.5V8.5C6.5 9.6 5.6 10.5 4.5 10.5C4.13 10.5 3.8 10.39 3.5 10.22V20.5C3.5 21.6 4.4 22.5 5.5 22.5H21.5C22.6 22.5 23.5 21.6 23.5 20.5V8.5C23.5 7.4 22.6 6.5 21.5 6.5ZM13.5 19.5C10.74 19.5 8.5 17.26 8.5 14.5C8.5 11.74 10.74 9.5 13.5 9.5C16.26 9.5 18.5 11.74 18.5 14.5C18.5 17.26 16.26 19.5 13.5 19.5Z" fill="currentColor"/></svg></span>
       </button>
-      <button type="button" class="bnav-item active" onclick="navTo('screen-history',this)" aria-label="История">
+      <button type="button" class="bnav-item active" onclick="navTo('screen-history',this)" aria-label="История" data-i18n="nav.history" data-i18n-attr="aria-label">
         <span class="bnav-icon" aria-hidden="true"><svg class="bnav-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16 6V12C16 13.1 16.9 14 18 14H19V21C19 21.55 19.45 22 20 22C20.55 22 21 21.55 21 21V3.13C21 2.48 20.39 2 19.76 2.15C17.6 2.68 16 4.51 16 6ZM11 9H9V3C9 2.45 8.55 2 8 2C7.45 2 7 2.45 7 3V9H5V3C5 2.45 4.55 2 4 2C3.45 2 3 2.45 3 3V9C3 11.21 4.79 13 7 13V21C7 21.55 7.45 22 8 22C8.55 22 9 21.55 9 21V13C11.21 13 13 11.21 13 9V3C13 2.45 12.55 2 12 2C11.45 2 11 2.45 11 3V9Z" fill="currentColor"/></svg></span>
       </button>
-      <button type="button" class="bnav-item" onclick="navTo('screen-my-profile',this)" aria-label="Профиль">
+      <button type="button" class="bnav-item" onclick="navTo('screen-my-profile',this)" aria-label="Профиль" data-i18n="nav.profile" data-i18n-attr="aria-label">
         <span class="bnav-icon" aria-hidden="true"><svg class="bnav-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11.9892 6C13.0938 6 13.9892 5.10457 13.9892 4C13.9892 2.89543 13.0938 2 11.9892 2C10.8847 2 9.98924 2.89543 9.98924 4C9.98924 5.10457 10.8847 6 11.9892 6Z" fill="currentColor"/><path d="M15.8792 8.11C15.4892 7.72 14.8192 7 13.5192 7C13.3092 7 12.0992 7 10.9792 7C8.51924 6.99 6.46924 5.2 6.05924 2.85C5.97924 2.36 5.56924 2 5.07924 2C4.46924 2 3.98924 2.54 4.07924 3.14C4.51924 5.8 6.45924 7.95 8.98924 8.71V21C8.98924 21.55 9.43924 22 9.98924 22C10.5392 22 10.9892 21.55 10.9892 21V16H12.9892V21C12.9892 21.55 13.4392 22 13.9892 22C14.5392 22 14.9892 21.55 14.9892 21V10.05L18.2292 13.29C18.6192 13.68 19.2492 13.68 19.6392 13.29C20.0292 12.9 20.0292 12.27 19.6392 11.88L15.8792 8.11Z" fill="currentColor"/></svg></span>
       </button>
     </div>
@@ -2476,6 +2476,64 @@ const LOCALES = {
 
     // Ошибки
     'error.profile_required': 'Укажите e-mail и имя, чтобы пользоваться приложением.',
+
+    // Кнопка Фото + нижняя навигация
+    'main.photo_btn': 'Фото',
+    'nav.main': 'Главная',
+    'nav.history': 'История',
+    'nav.profile': 'Профиль',
+    'nav.back': 'Назад',
+    'nav.edit_profile': 'Редактировать профиль',
+
+    // Профиль - поля LDL/HDL
+    'profile.ldl': 'LDL — «плохой» холестерин (ЛПНП)',
+    'profile.hdl': 'HDL — «хороший» холестерин (ЛПВП)',
+
+    // Таймер авторизации
+    'auth.seconds': 'с',
+
+    // Tooltips холестерина (краткие - для chol-tip-box)
+    'tip.total': '<strong>Общий холестерин (TC)</strong>Сумма всех фракций. Смотри не на цифру, а на соотношение LDL/HDL.',
+    'tip.ldl': '<strong>LDL — «плохой» холестерин</strong>Липопротеины низкой плотности. Оседает в артериях. Чем ниже — тем лучше.',
+    'tip.hdl': '<strong>HDL — «хороший» холестерин</strong>Липопротеины высокой плотности. Выводит холестерин из артерий. Чем выше — тем лучше.',
+    'tip.trig': '<strong>Триглицериды (TG)</strong>Жиры в крови. Растут от сахара и алкоголя. Сдавать строго натощак.',
+    'tip.apob': '<strong>Аполипопротеин B</strong>Считает число опасных частиц в крови. Точнее LDL. Цель: <0.9 г/л (идеал <0.7).',
+    'tip.tghdl': '<strong>Индекс ТГ / HDL</strong>Простой маркер инсулинорезистентности. <1.0 — отлично, <2.0 — норма, >3.0 — риск.',
+
+    // Ref таблица
+    'ref.total': 'ОХ — Общий холестерин',
+    'ref.total_tip': '<strong>Total Cholesterol (TC)</strong>Сумма всех фракций. Важен не сам по себе — смотри соотношение LDL и HDL.',
+    'ref.hdl_m': 'HDL — «хороший» холестерин (муж.)',
+    'ref.hdl_m_tip': '<strong>HDL (ЛПВП) — мужчины</strong>Выводит холестерин из артерий. Чем выше — тем лучше.',
+    'ref.hdl_f': 'HDL — «хороший» холестерин (жен.)',
+    'ref.hdl_f_tip': '<strong>HDL (ЛПВП) — женщины</strong>Норма выше, чем у мужчин. Чем выше — тем лучше.',
+    'ref.ldl': 'LDL — «плохой» холестерин',
+    'ref.ldl_tip': '<strong>LDL (ЛПНП)</strong>Основная цель лечения. Оседает в артериях. При риске ССЗ цель <1.8 ммоль/л.',
+    'ref.trig': 'ТГ — Триглицериды',
+    'ref.trig_tip': '<strong>Triglycerides (TG)</strong>Жиры в крови. Растут от сахара и алкоголя. Сдавать только натощак.',
+    'ref.apob': 'ApoB — Аполипопротеин B',
+    'ref.apob_tip': '<strong>Apolipoprotein B</strong>Считает число опасных частиц. Точнее LDL. Цель по Attia: <0.7 г/л.',
+    'ref.tghdl': 'ТГ/HDL — индекс риска',
+    'ref.tghdl_tip': '<strong>TG/HDL ratio</strong>Маркер инсулинорезистентности. Считается автоматически из твоих данных.',
+    'ref.ideal': '(идеал <1.0)',
+
+    // Результат анализа
+    'result.vision_prefix': 'Вижу на фото: ',
+    'result.error_no_key': 'Ошибка: ключ API не загружен',
+    'result.error_analyze': 'Ошибка анализа',
+    'result.error_settings': 'Настройки приложения не загрузились. Попробуйте закрыть и открыть приложение заново.',
+    'result.error_code': 'Код ошибки: ',
+    'result.error_parse': 'Не удалось разобрать ответ модели — попробуйте ещё раз',
+    'result.error_parse2': 'Не удалось разобрать ответ модели: ',
+    'result.error_api': 'Ошибка API',
+    'result.refine_suffix': '\n\nПользователь уточняет детали блюда: ',
+    'result.refine_suffix2': '\nПересмотри оценку с учётом этого уточнения.',
+    'result.text_prefix': '\n\nПользователь описал еду словами (фото нет):\n',
+
+    // Онбординг alt
+    'onboarding.alt1': 'Добавь данные о себе',
+    'onboarding.alt2': 'Сфотографируй блюдо',
+    'onboarding.alt3': 'Пойми, что влияет на твой липидный профиль',
   },
 
   en: {
@@ -2602,6 +2660,57 @@ const LOCALES = {
     'week.days': ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],
 
     'error.profile_required': 'Please enter your e-mail and name to use the app.',
+
+    'main.photo_btn': 'Photo',
+    'nav.main': 'Home',
+    'nav.history': 'History',
+    'nav.profile': 'Profile',
+    'nav.back': 'Back',
+    'nav.edit_profile': 'Edit profile',
+
+    'profile.ldl': 'LDL — "bad" cholesterol',
+    'profile.hdl': 'HDL — "good" cholesterol',
+
+    'auth.seconds': 's',
+
+    'tip.total': '<strong>Total Cholesterol (TC)</strong>Sum of all fractions. Focus on the LDL/HDL ratio, not the absolute number.',
+    'tip.ldl': '<strong>LDL — "bad" cholesterol</strong>Low-density lipoproteins. Deposits in arteries. Lower is better.',
+    'tip.hdl': '<strong>HDL — "good" cholesterol</strong>High-density lipoproteins. Removes cholesterol from arteries. Higher is better.',
+    'tip.trig': '<strong>Triglycerides (TG)</strong>Blood fats. Rise with sugar and alcohol. Fast before testing.',
+    'tip.apob': '<strong>Apolipoprotein B</strong>Counts dangerous particles in blood. More precise than LDL. Target: <0.9 g/L (ideal <0.7).',
+    'tip.tghdl': '<strong>TG / HDL index</strong>Simple insulin-resistance marker. <1.0 excellent, <2.0 normal, >3.0 risk.',
+
+    'ref.total': 'TC — Total Cholesterol',
+    'ref.total_tip': '<strong>Total Cholesterol (TC)</strong>Sum of all fractions. Focus on LDL/HDL ratio, not the number.',
+    'ref.hdl_m': 'HDL — good cholesterol (male)',
+    'ref.hdl_m_tip': '<strong>HDL (male)</strong>Removes cholesterol from arteries. Higher is better.',
+    'ref.hdl_f': 'HDL — good cholesterol (female)',
+    'ref.hdl_f_tip': '<strong>HDL (female)</strong>Normal range is higher than males. Higher is better.',
+    'ref.ldl': 'LDL — bad cholesterol',
+    'ref.ldl_tip': '<strong>LDL</strong>Primary treatment target. Deposits in arteries. For CVD risk target <1.8 mmol/L.',
+    'ref.trig': 'TG — Triglycerides',
+    'ref.trig_tip': '<strong>Triglycerides (TG)</strong>Blood fats. Rise with sugar and alcohol. Fast before testing.',
+    'ref.apob': 'ApoB — Apolipoprotein B',
+    'ref.apob_tip': '<strong>Apolipoprotein B</strong>Counts dangerous particles. More precise than LDL. Attia target: <0.7 g/L.',
+    'ref.tghdl': 'TG/HDL — risk index',
+    'ref.tghdl_tip': '<strong>TG/HDL ratio</strong>Insulin resistance marker. Calculated automatically from your data.',
+    'ref.ideal': '(ideal <1.0)',
+
+    'result.vision_prefix': 'I see in the photo: ',
+    'result.error_no_key': 'Error: API key not loaded',
+    'result.error_analyze': 'Analysis error',
+    'result.error_settings': 'App settings failed to load. Try closing and reopening the app.',
+    'result.error_code': 'Error code: ',
+    'result.error_parse': 'Could not parse model response — please try again',
+    'result.error_parse2': 'Could not parse model response: ',
+    'result.error_api': 'API error',
+    'result.refine_suffix': '\n\nUser is clarifying food details: ',
+    'result.refine_suffix2': '\nPlease revise your assessment based on this clarification.',
+    'result.text_prefix': '\n\nUser described food in words (no photo):\n',
+
+    'onboarding.alt1': 'Add your data',
+    'onboarding.alt2': 'Photograph your meal',
+    'onboarding.alt3': 'Understand what affects your lipid profile',
   },
 
   de: {
@@ -2728,6 +2837,57 @@ const LOCALES = {
     'week.days': ['So','Mo','Di','Mi','Do','Fr','Sa'],
 
     'error.profile_required': 'Bitte E-Mail und Name eingeben, um die App zu nutzen.',
+
+    'main.photo_btn': 'Foto',
+    'nav.main': 'Start',
+    'nav.history': 'Verlauf',
+    'nav.profile': 'Profil',
+    'nav.back': 'Zurück',
+    'nav.edit_profile': 'Profil bearbeiten',
+
+    'profile.ldl': 'LDL — „schlechtes" Cholesterin',
+    'profile.hdl': 'HDL — „gutes" Cholesterin',
+
+    'auth.seconds': 's',
+
+    'tip.total': '<strong>Gesamtcholesterin (TC)</strong>Summe aller Fraktionen. Achte auf das LDL/HDL-Verhältnis.',
+    'tip.ldl': '<strong>LDL — „schlechtes" Cholesterin</strong>Lagert sich in Arterien ab. Je niedriger, desto besser.',
+    'tip.hdl': '<strong>HDL — „gutes" Cholesterin</strong>Transportiert Cholesterin aus den Arterien. Je höher, desto besser.',
+    'tip.trig': '<strong>Triglyzeride (TG)</strong>Blutfette. Steigen durch Zucker und Alkohol. Nüchtern messen.',
+    'tip.apob': '<strong>Apolipoprotein B</strong>Zählt gefährliche Partikel. Präziser als LDL. Ziel: <0,9 g/L (ideal <0,7).',
+    'tip.tghdl': '<strong>TG / HDL-Index</strong>Insulinresistenz-Marker. <1,0 ausgezeichnet, <2,0 normal, >3,0 Risiko.',
+
+    'ref.total': 'Gesamtcholesterin',
+    'ref.total_tip': '<strong>Gesamtcholesterin (TC)</strong>Summe aller Fraktionen. LDL/HDL-Verhältnis ist wichtiger.',
+    'ref.hdl_m': 'HDL — gutes Cholesterin (männl.)',
+    'ref.hdl_m_tip': '<strong>HDL (Männer)</strong>Transportiert Cholesterin aus den Arterien. Je höher, desto besser.',
+    'ref.hdl_f': 'HDL — gutes Cholesterin (weibl.)',
+    'ref.hdl_f_tip': '<strong>HDL (Frauen)</strong>Normalwert höher als bei Männern. Je höher, desto besser.',
+    'ref.ldl': 'LDL — schlechtes Cholesterin',
+    'ref.ldl_tip': '<strong>LDL</strong>Primäres Behandlungsziel. Lagert sich in Arterien ab. Bei KHK-Risiko Ziel <1,8 mmol/L.',
+    'ref.trig': 'TG — Triglyzeride',
+    'ref.trig_tip': '<strong>Triglyzeride (TG)</strong>Blutfette. Steigen durch Zucker und Alkohol. Nur nüchtern messen.',
+    'ref.apob': 'ApoB — Apolipoprotein B',
+    'ref.apob_tip': '<strong>Apolipoprotein B</strong>Zählt gefährliche Partikel. Präziser als LDL. Attia-Ziel: <0,7 g/L.',
+    'ref.tghdl': 'TG/HDL — Risikoindex',
+    'ref.tghdl_tip': '<strong>TG/HDL-Verhältnis</strong>Insulinresistenz-Marker. Wird automatisch berechnet.',
+    'ref.ideal': '(ideal <1,0)',
+
+    'result.vision_prefix': 'Ich sehe auf dem Foto: ',
+    'result.error_no_key': 'Fehler: API-Schlüssel nicht geladen',
+    'result.error_analyze': 'Analysefehler',
+    'result.error_settings': 'App-Einstellungen konnten nicht geladen werden. Bitte App schließen und neu öffnen.',
+    'result.error_code': 'Fehlercode: ',
+    'result.error_parse': 'Modellantwort konnte nicht verarbeitet werden — bitte erneut versuchen',
+    'result.error_parse2': 'Modellantwort konnte nicht verarbeitet werden: ',
+    'result.error_api': 'API-Fehler',
+    'result.refine_suffix': '\n\nNutzer präzisiert Lebensmitteldetails: ',
+    'result.refine_suffix2': '\nBitte Bewertung entsprechend überarbeiten.',
+    'result.text_prefix': '\n\nNutzer hat das Essen beschrieben (kein Foto):\n',
+
+    'onboarding.alt1': 'Daten hinzufügen',
+    'onboarding.alt2': 'Gericht fotografieren',
+    'onboarding.alt3': 'Verstehe dein Lipidprofil',
   },
 };
 
@@ -4142,7 +4302,7 @@ async function submitDescribeFood() {
       verdict: 'error',
       title: noKey2 ? 'Ошибка: ключ API не загружен' : 'Ошибка анализа',
       summary: noKey2
-        ? 'Настройки приложения не загрузились. Попробуйте закрыть и открыть приложение заново.'
+        ? t('result.error_settings')
         : errMsg2,
       vision: 'Код ошибки: ' + errMsg2,
       education: '',
@@ -5570,7 +5730,7 @@ function parseModelJson(raw) {
       try { return JSON.parse(attempt); } catch {}
     }
     // Если восстановить не удалось — возвращаем error verdict
-    throw new Error('Не удалось разобрать ответ модели — попробуйте ещё раз');
+    throw new Error(t('result.error_parse'));
   }
 }
 
@@ -5636,9 +5796,9 @@ async function analyzeFoodPhoto(dataUrl, userClarification) {
   const clar = userClarification != null ? String(userClarification).trim() : '';
   if (clar) {
     prompt +=
-      '\n\nПользователь уточняет детали блюда: ' +
+      t('result.refine_suffix') +
       clar +
-      '\nПересмотри оценку с учётом этого уточнения.';
+      t('result.refine_suffix2');
   }
 
   const res = await fetch('/api/analyze', {
@@ -5662,14 +5822,14 @@ async function analyzeFoodPhoto(dataUrl, userClarification) {
 
   const body = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const msg = body.error?.message || res.statusText || 'Ошибка API';
+    const msg = body.error?.message || res.statusText || t('result.error_api');
     throw new Error(msg);
   }
   const raw = body.choices?.[0]?.message?.content;
   try {
     return parseModelJson(raw);
   } catch (e) {
-    throw new Error('Не удалось разобрать ответ модели: ' + (e.message || e));
+    throw new Error(t('result.error_parse2') + (e.message || e));
   }
 }
 
@@ -5677,13 +5837,13 @@ async function analyzeFoodFromText(userText, userClarification) {
   const saveBtn = document.getElementById('result-btn-save-history');
   if (saveBtn) saveBtn.disabled = false;
   let text =
-    buildVisionPrompt() + '\n\nПользователь описал еду словами (фото нет):\n' + userText;
+    buildVisionPrompt() + t('result.text_prefix') + userText;
   const clar = userClarification != null ? String(userClarification).trim() : '';
   if (clar) {
     text +=
-      '\n\nПользователь уточняет детали блюда: ' +
+      t('result.refine_suffix') +
       clar +
-      '\nПересмотри оценку с учётом этого уточнения.';
+      t('result.refine_suffix2');
   }
   const res = await fetch('/api/analyze', {
     method: 'POST',
@@ -5703,14 +5863,14 @@ async function analyzeFoodFromText(userText, userClarification) {
 
   const body = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const msg = body.error?.message || res.statusText || 'Ошибка API';
+    const msg = body.error?.message || res.statusText || t('result.error_api');
     throw new Error(msg);
   }
   const raw = body.choices?.[0]?.message?.content;
   try {
     return parseModelJson(raw);
   } catch (e) {
-    throw new Error('Не удалось разобрать ответ модели: ' + (e.message || e));
+    throw new Error(t('result.error_parse2') + (e.message || e));
   }
 }
 
@@ -5738,7 +5898,7 @@ function applyResultToUI(data) {
     const vis = data.vision != null ? String(data.vision).trim() : '';
     const sum = data.summary != null ? String(data.summary).trim() : '';
     let summaryText = '';
-    if (vis !== '') summaryText = 'Вижу на фото: ' + vis;
+    if (vis !== '') summaryText = t('result.vision_prefix') + vis;
     if (sum !== '') {
       if (summaryText !== '') summaryText += '\n\n';
       summaryText += sum;
@@ -5861,11 +6021,11 @@ async function confirmCaptureAndAnalyze() {
     const noKey = !openaiApiKey;
     applyResultToUI({
       verdict: 'error',
-      title: noKey ? 'Ошибка: ключ API не загружен' : 'Ошибка анализа',
+      title: noKey ? t('result.error_no_key') : t('result.error_analyze'),
       summary: noKey
-        ? 'Настройки приложения не загрузились. Попробуйте закрыть и открыть приложение заново.'
+        ? t('result.error_settings')
         : errMsg,
-      vision: 'Код ошибки: ' + errMsg,
+      vision: t('result.error_code') + errMsg,
       education: '',
       nuances: '',
       upgrade: '',
@@ -6093,10 +6253,10 @@ async function submitAuthEmail() {
   }
   let countdown = 60;
   sendBtn.disabled = true;
-  sendBtn.textContent = `${t('auth.retry_in')} ${countdown}с`;
+  sendBtn.textContent = `${t('auth.retry_in')} ${countdown}${t('auth.seconds')}`;
   const timer = setInterval(() => {
     countdown--;
-    sendBtn.textContent = `${t('auth.retry_in')} ${countdown}с`;
+    sendBtn.textContent = `${t('auth.retry_in')} ${countdown}${t('auth.seconds')}`;
     if (countdown <= 0) {
       clearInterval(timer);
       authResendCountdownTimer = null;
