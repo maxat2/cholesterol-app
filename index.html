@@ -2014,8 +2014,8 @@
 
   <div class="screen" id="screen-auth">
     <div class="trial-banner">
-      <strong>7 дней бесплатно</strong> — затем от $9/мес
-      <div class="trial-banner-sub">Без обязательств · Отмена в любой момент</div>
+      <span data-i18n="auth.trial_banner">7 дней бесплатно — затем от $9/мес</span>
+      <div class="trial-banner-sub" data-i18n="auth.trial_banner_sub">Без обязательств · Отмена в любой момент</div>
     </div>
     <div class="auth-screen-inner">
       <div class="auth-status" id="auth-status" role="status" aria-live="polite"></div>
@@ -2666,28 +2666,28 @@
       <div class="pw-header">
         <button type="button" class="pw-back-btn" onclick="goTo('screen-my-profile')">
           <svg width="10" height="17" viewBox="0 0 10 17" fill="none"><path d="M8.5 15.5L1.5 8.5L8.5 1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          Назад
+          <span data-i18n="paywall.back">Назад</span>
         </button>
-        <div class="pw-title">Начни с&nbsp;7&nbsp;дней<br>бесплатно</div>
-        <div class="pw-subtitle">Потом от $9/мес — отмена в&nbsp;любой момент</div>
+        <div class="pw-title" data-i18n="paywall.title">Начни с&nbsp;7&nbsp;дней<br>бесплатно</div>
+        <div class="pw-subtitle" data-i18n="paywall.subtitle">Потом от $9/мес — отмена в&nbsp;любой момент</div>
       </div>
 
       <div class="pw-features">
         <div class="pw-feature-row">
           <div class="pw-feature-icon">📸</div>
-          <span>Безлимитный анализ фото еды</span>
+          <span data-i18n="paywall.feature1">Безлимитный анализ фото еды</span>
         </div>
         <div class="pw-feature-row">
           <div class="pw-feature-icon">🧬</div>
-          <span>Персональный разбор под твой липидный профиль</span>
+          <span data-i18n="paywall.feature2">Персональный разбор под твой липидный профиль</span>
         </div>
         <div class="pw-feature-row">
           <div class="pw-feature-icon">📊</div>
-          <span>История и динамика по дням</span>
+          <span data-i18n="paywall.feature3">История и динамика по дням</span>
         </div>
         <div class="pw-feature-row">
           <div class="pw-feature-icon">🔔</div>
-          <span>Итог дня и рекомендации</span>
+          <span data-i18n="paywall.feature4">Итог дня и рекомендации</span>
         </div>
       </div>
 
@@ -2697,13 +2697,13 @@
           <div style="display:flex;align-items:center;gap:12px;">
             <div class="pw-radio"><div class="pw-radio-dot"></div></div>
             <div class="pw-plan-left">
-              <div class="pw-plan-name">7 дней бесплатно</div>
-              <div class="pw-plan-desc">Затем $9/мес · отмена в любой момент</div>
+              <div class="pw-plan-name" data-i18n="paywall.plan_trial_name">7 дней бесплатно</div>
+              <div class="pw-plan-desc" data-i18n="paywall.plan_trial_desc">Затем $9/мес · отмена в любой момент</div>
             </div>
           </div>
           <div class="pw-plan-right">
             <div class="pw-plan-price">$0</div>
-            <div class="pw-plan-per">сейчас</div>
+            <div class="pw-plan-per" data-i18n="paywall.plan_trial_per">сейчас</div>
           </div>
         </div>
 
@@ -2712,58 +2712,58 @@
           <div style="display:flex;align-items:center;gap:12px;">
             <div class="pw-radio"><div class="pw-radio-dot"></div></div>
             <div class="pw-plan-left">
-              <div class="pw-plan-name">1 месяц</div>
-              <div class="pw-plan-desc">Без пробного периода</div>
+              <div class="pw-plan-name" data-i18n="paywall.plan_month_name">1 месяц</div>
+              <div class="pw-plan-desc" data-i18n="paywall.plan_month_desc">Без пробного периода</div>
             </div>
           </div>
           <div class="pw-plan-right">
             <div class="pw-plan-price">$9</div>
-            <div class="pw-plan-per">/ месяц</div>
+            <div class="pw-plan-per" data-i18n="paywall.plan_month_per">/ месяц</div>
           </div>
         </div>
 
         <!-- 3 months -->
         <div class="pw-plan" data-plan="quarter" onclick="selectPlan(this)">
-          <div class="pw-plan-badge">Выгода 44%</div>
+          <div class="pw-plan-badge" data-i18n="paywall.plan_quarter_badge">Выгода 44%</div>
           <div style="display:flex;align-items:center;gap:12px;">
             <div class="pw-radio"><div class="pw-radio-dot"></div></div>
             <div class="pw-plan-left">
-              <div class="pw-plan-name">3 месяца</div>
-              <div class="pw-plan-desc">$5/мес вместо $9</div>
+              <div class="pw-plan-name" data-i18n="paywall.plan_quarter_name">3 месяца</div>
+              <div class="pw-plan-desc" data-i18n="paywall.plan_quarter_desc">$5/мес вместо $9</div>
             </div>
           </div>
           <div class="pw-plan-right">
             <div class="pw-plan-price">$15</div>
-            <div class="pw-plan-per">/ 3 месяца</div>
+            <div class="pw-plan-per" data-i18n="paywall.plan_quarter_per">/ 3 месяца</div>
           </div>
         </div>
 
         <!-- 1 year -->
         <div class="pw-plan" data-plan="year" onclick="selectPlan(this)">
-          <div class="pw-plan-badge">Лучшая цена</div>
+          <div class="pw-plan-badge" data-i18n="paywall.plan_year_badge">Лучшая цена</div>
           <div style="display:flex;align-items:center;gap:12px;">
             <div class="pw-radio"><div class="pw-radio-dot"></div></div>
             <div class="pw-plan-left">
-              <div class="pw-plan-name">1 год</div>
-              <div class="pw-plan-desc">$3.25/мес вместо $9</div>
+              <div class="pw-plan-name" data-i18n="paywall.plan_year_name">1 год</div>
+              <div class="pw-plan-desc" data-i18n="paywall.plan_year_desc">$3.25/мес вместо $9</div>
             </div>
           </div>
           <div class="pw-plan-right">
             <div class="pw-plan-price">$39</div>
-            <div class="pw-plan-per">/ год</div>
+            <div class="pw-plan-per" data-i18n="paywall.plan_year_per">/ год</div>
           </div>
         </div>
       </div>
 
       <div class="pw-cta-wrap">
         <button type="button" class="pw-cta-btn" id="pw-cta-btn" onclick="paywallStartTrial()">
-          <span id="pw-cta-label">Начать 7 дней бесплатно</span>
+          <span id="pw-cta-label" data-i18n="paywall.cta_trial">Начать 7 дней бесплатно</span>
         </button>
       </div>
-      <div class="pw-trial-note" id="pw-trial-note">
+      <div class="pw-trial-note" id="pw-trial-note" data-i18n="paywall.note_trial">
         Бесплатно сейчас · $9/мес после триала · отмена в любой момент
       </div>
-      <div class="pw-restore" onclick="paywallRestore()">Восстановить покупку</div>
+      <div class="pw-restore" onclick="paywallRestore()" data-i18n="paywall.restore">Восстановить покупку</div>
     </div>
   </div>
   <!-- END SCREEN PAYWALL -->
@@ -3068,6 +3068,49 @@ const LOCALES = {
     'onboarding.alt1': 'Добавь данные о себе',
     'onboarding.alt2': 'Сфотографируй блюдо',
     'onboarding.alt3': 'Пойми, что влияет на твой липидный профиль',
+
+    // Баннер триала (экран авторизации)
+    'auth.trial_banner': '7 дней бесплатно — затем от $9/мес',
+    'auth.trial_banner_sub': 'Без обязательств · Отмена в любой момент',
+
+    // Paywall
+    'paywall.back': 'Назад',
+    'paywall.title': 'Начни с\u00a07\u00a0дней\nбесплатно',
+    'paywall.subtitle': 'Потом от $9/мес — отмена в\u00a0любой момент',
+    'paywall.feature1': 'Безлимитный анализ фото еды',
+    'paywall.feature2': 'Персональный разбор под твой липидный профиль',
+    'paywall.feature3': 'История и динамика по дням',
+    'paywall.feature4': 'Итог дня и рекомендации',
+    'paywall.plan_trial_name': '7 дней бесплатно',
+    'paywall.plan_trial_desc': 'Затем $9/мес · отмена в любой момент',
+    'paywall.plan_trial_per': 'сейчас',
+    'paywall.plan_month_name': '1 месяц',
+    'paywall.plan_month_desc': 'Без пробного периода',
+    'paywall.plan_month_per': '/ месяц',
+    'paywall.plan_quarter_name': '3 месяца',
+    'paywall.plan_quarter_desc': '$5/мес вместо $9',
+    'paywall.plan_quarter_per': '/ 3 месяца',
+    'paywall.plan_quarter_badge': 'Выгода 44%',
+    'paywall.plan_year_name': '1 год',
+    'paywall.plan_year_desc': '$3.25/мес вместо $9',
+    'paywall.plan_year_per': '/ год',
+    'paywall.plan_year_badge': 'Лучшая цена',
+    'paywall.cta_trial': 'Начать 7 дней бесплатно',
+    'paywall.cta_month': 'Купить за $9 / месяц',
+    'paywall.cta_quarter': 'Купить за $15 / 3 месяца',
+    'paywall.cta_year': 'Купить за $39 / год',
+    'paywall.note_trial': 'Бесплатно сейчас · $9/мес после триала · отмена в любой момент',
+    'paywall.note_month': 'Доступ сразу · без пробного периода · отмена в любой момент',
+    'paywall.note_quarter': 'Доступ сразу · экономия 44% · отмена в любой момент',
+    'paywall.note_year': 'Доступ сразу · лучшая цена $3.25/мес · отмена в любой момент',
+    'paywall.restore': 'Восстановить покупку',
+
+    // Daily summary — секции
+    'daily.good_label': 'Что работало',
+    'daily.bad_label': 'Что мешало',
+    'daily.hidden_label': 'Паттерн дня',
+    'daily.conclusion_label': 'Итог',
+    'daily.tip_label': 'Совет на завтра',
   },
 
   en: {
@@ -3317,6 +3360,49 @@ const LOCALES = {
     'onboarding.alt1': 'Add your data',
     'onboarding.alt2': 'Photograph your meal',
     'onboarding.alt3': 'Understand what affects your lipid profile',
+
+    // Auth banner
+    'auth.trial_banner': '7 days free — then from $9/mo',
+    'auth.trial_banner_sub': 'No commitment · Cancel anytime',
+
+    // Paywall
+    'paywall.back': 'Back',
+    'paywall.title': 'Start with\u00a07\u00a0days free',
+    'paywall.subtitle': 'Then from $9/mo — cancel anytime',
+    'paywall.feature1': 'Unlimited food photo analysis',
+    'paywall.feature2': 'Personalised breakdown for your lipid profile',
+    'paywall.feature3': 'History and daily dynamics',
+    'paywall.feature4': 'Daily summary and recommendations',
+    'paywall.plan_trial_name': '7 days free',
+    'paywall.plan_trial_desc': 'Then $9/mo · cancel anytime',
+    'paywall.plan_trial_per': 'now',
+    'paywall.plan_month_name': '1 month',
+    'paywall.plan_month_desc': 'No trial period',
+    'paywall.plan_month_per': '/ month',
+    'paywall.plan_quarter_name': '3 months',
+    'paywall.plan_quarter_desc': '$5/mo instead of $9',
+    'paywall.plan_quarter_per': '/ 3 months',
+    'paywall.plan_quarter_badge': '44% saving',
+    'paywall.plan_year_name': '1 year',
+    'paywall.plan_year_desc': '$3.25/mo instead of $9',
+    'paywall.plan_year_per': '/ year',
+    'paywall.plan_year_badge': 'Best price',
+    'paywall.cta_trial': 'Start 7 days free',
+    'paywall.cta_month': 'Buy for $9 / month',
+    'paywall.cta_quarter': 'Buy for $15 / 3 months',
+    'paywall.cta_year': 'Buy for $39 / year',
+    'paywall.note_trial': 'Free now · $9/mo after trial · cancel anytime',
+    'paywall.note_month': 'Instant access · no trial · cancel anytime',
+    'paywall.note_quarter': 'Instant access · save 44% · cancel anytime',
+    'paywall.note_year': 'Instant access · best price $3.25/mo · cancel anytime',
+    'paywall.restore': 'Restore purchase',
+
+    // Daily summary sections
+    'daily.good_label': 'What worked',
+    'daily.bad_label': 'What held back',
+    'daily.hidden_label': "Day's pattern",
+    'daily.conclusion_label': 'Summary',
+    'daily.tip_label': 'Tip for tomorrow',
   },
 
   de: {
@@ -3566,6 +3652,49 @@ const LOCALES = {
     'onboarding.alt1': 'Daten hinzufügen',
     'onboarding.alt2': 'Gericht fotografieren',
     'onboarding.alt3': 'Verstehe dein Lipidprofil',
+
+    // Auth banner
+    'auth.trial_banner': '7 Tage kostenlos — dann ab $9/Monat',
+    'auth.trial_banner_sub': 'Keine Verpflichtung · Jederzeit kündbar',
+
+    // Paywall
+    'paywall.back': 'Zurück',
+    'paywall.title': 'Starte mit\u00a07\u00a0Tagen kostenlos',
+    'paywall.subtitle': 'Dann ab $9/Monat — jederzeit kündbar',
+    'paywall.feature1': 'Unbegrenzte Lebensmittelfoto-Analyse',
+    'paywall.feature2': 'Persönliche Auswertung für dein Lipidprofil',
+    'paywall.feature3': 'Verlauf und tägliche Dynamik',
+    'paywall.feature4': 'Tageszusammenfassung und Empfehlungen',
+    'paywall.plan_trial_name': '7 Tage kostenlos',
+    'paywall.plan_trial_desc': 'Dann $9/Monat · jederzeit kündbar',
+    'paywall.plan_trial_per': 'jetzt',
+    'paywall.plan_month_name': '1 Monat',
+    'paywall.plan_month_desc': 'Kein Testzeitraum',
+    'paywall.plan_month_per': '/ Monat',
+    'paywall.plan_quarter_name': '3 Monate',
+    'paywall.plan_quarter_desc': '$5/Monat statt $9',
+    'paywall.plan_quarter_per': '/ 3 Monate',
+    'paywall.plan_quarter_badge': '44% Ersparnis',
+    'paywall.plan_year_name': '1 Jahr',
+    'paywall.plan_year_desc': '$3,25/Monat statt $9',
+    'paywall.plan_year_per': '/ Jahr',
+    'paywall.plan_year_badge': 'Bester Preis',
+    'paywall.cta_trial': '7 Tage kostenlos starten',
+    'paywall.cta_month': 'Kaufen für $9 / Monat',
+    'paywall.cta_quarter': 'Kaufen für $15 / 3 Monate',
+    'paywall.cta_year': 'Kaufen für $39 / Jahr',
+    'paywall.note_trial': 'Jetzt kostenlos · $9/Monat nach dem Test · jederzeit kündbar',
+    'paywall.note_month': 'Sofortiger Zugang · kein Test · jederzeit kündbar',
+    'paywall.note_quarter': 'Sofortiger Zugang · 44% sparen · jederzeit kündbar',
+    'paywall.note_year': 'Sofortiger Zugang · bester Preis $3,25/Monat · jederzeit kündbar',
+    'paywall.restore': 'Kauf wiederherstellen',
+
+    // Daily summary sections
+    'daily.good_label': 'Was funktioniert hat',
+    'daily.bad_label': 'Was gebremst hat',
+    'daily.hidden_label': 'Tagesmuster',
+    'daily.conclusion_label': 'Fazit',
+    'daily.tip_label': 'Tipp für morgen',
   },
 };
 
@@ -3956,17 +4085,17 @@ function selectPlan(el) {
   const label = document.getElementById('pw-cta-label');
   const note = document.getElementById('pw-trial-note');
   if (plan === 'trial') {
-    if (label) label.textContent = 'Начать 7 дней бесплатно';
-    if (note) note.textContent = 'Бесплатно сейчас · $9/мес после триала · отмена в любой момент';
+    if (label) label.textContent = t('paywall.cta_trial');
+    if (note) note.textContent = t('paywall.note_trial');
   } else if (plan === 'month') {
-    if (label) label.textContent = 'Купить за $9 / месяц';
-    if (note) note.textContent = 'Доступ сразу · без пробного периода · отмена в любой момент';
+    if (label) label.textContent = t('paywall.cta_month');
+    if (note) note.textContent = t('paywall.note_month');
   } else if (plan === 'quarter') {
-    if (label) label.textContent = 'Купить за $15 / 3 месяца';
-    if (note) note.textContent = 'Доступ сразу · экономия 44% · отмена в любой момент';
+    if (label) label.textContent = t('paywall.cta_quarter');
+    if (note) note.textContent = t('paywall.note_quarter');
   } else if (plan === 'year') {
-    if (label) label.textContent = 'Купить за $39 / год';
-    if (note) note.textContent = 'Доступ сразу · лучшая цена $3.25/мес · отмена в любой момент';
+    if (label) label.textContent = t('paywall.cta_year');
+    if (note) note.textContent = t('paywall.note_year');
   }
 }
 
@@ -4245,8 +4374,8 @@ function dbSexToGenderLabel(sex) {
 
 function dbUnitsToLabel(units) {
   const u = String(units || '').toLowerCase();
-  if (u === 'mgdl' || u.includes('mg')) return 'мг/дл';
-  return 'ммоль/л';
+  // Возвращаем data-i18n ключ — не зависит от языка интерфейса
+  return (u === 'mgdl' || u.includes('mg')) ? 'seg.mgdl' : 'seg.mmol';
 }
 
 /** Заполняет форму профиля из строки users (ответ Supabase). */
@@ -4335,7 +4464,7 @@ function getProfileFormSnapshot() {
     v_apob: (document.getElementById('v-apob')?.value ?? ''),
     dontKnowOn: !!dontKnowOn,
     gender: genderEl ? genderEl.textContent.trim() : t('common.male'),
-    units: unitsEl ? unitsEl.textContent.trim() : 'ммоль/л',
+    units: unitsEl ? (unitsEl.getAttribute('data-i18n') === 'seg.mgdl' ? 'mgdl' : 'mmol') : 'mmol',
     age: ageEl?.value ?? '',
     height: heightEl?.value ?? '',
     weight: weightEl?.value ?? '',
@@ -5167,7 +5296,7 @@ function saveProfileToStorage() {
     v_trig: vTrig?.value ?? '',
     dontKnowOn: !!dontKnowOn,
     gender: genderEl ? genderEl.textContent.trim() : 'Мужской',
-    units: unitsEl ? unitsEl.textContent.trim() : 'ммоль/л',
+    units: unitsEl ? (unitsEl.getAttribute('data-i18n') === 'seg.mgdl' ? 'mgdl' : 'mmol') : 'mmol',
     age: ageEl?.value ?? '',
     height: heightEl?.value ?? '',
     weight: weightEl?.value ?? '',
@@ -5225,6 +5354,13 @@ function segLabelToDb(label) {
 function setSegActiveByLabel(containerId, label) {
   const c = document.getElementById(containerId);
   if (!c || !label) return;
+  // Для seg-units используем data-i18n ключ (не зависит от языка)
+  if (containerId === 'seg-units') {
+    c.querySelectorAll('.seg-btn').forEach((btn) => {
+      btn.classList.toggle('active', btn.getAttribute('data-i18n') === label);
+    });
+    return;
+  }
   const normalized = normalizeSegLabel(label);
   c.querySelectorAll('.seg-btn').forEach((btn) => {
     btn.classList.toggle('active', btn.textContent.trim() === normalized);
@@ -5271,7 +5407,7 @@ function loadProfileFromStorage() {
     dontKnowOn = !!p.dontKnowOn;
     applyDontKnowVisual();
     setSegActiveByLabel('seg-gender', p.gender || t('common.male'));
-    setSegActiveByLabel('seg-units', p.units || 'ммоль/л');
+    setSegActiveByLabel('seg-units', dbUnitsToLabel(p.units || 'mmol'));
     setSegActiveByLabel('seg-locale', LOCALE === 'ru' ? 'Русский' : LOCALE === 'de' ? 'Deutsch' : 'English');
     const st = document.getElementById('toggle-statins');
     if (st) st.classList.toggle('on', !!p.statins);
@@ -5671,23 +5807,23 @@ async function renderHistoryList() {
             </div>
           ` : ''}
           ${goodItems.length ? `
-            <div class="daily-summary-section-label" style="margin-top:12px;">Что работало</div>
-            ${goodItems.map(t => `<div class="daily-summary-row"><span class="daily-summary-row-icon">✓</span><span>${t}</span></div>`).join('')}
+            <div class="daily-summary-section-label" style="margin-top:12px;">${t('daily.good_label')}</div>
+            ${goodItems.map(item => `<div class="daily-summary-row"><span class="daily-summary-row-icon">✓</span><span>${item}</span></div>`).join('')}
           ` : ''}
           ${badItems.length ? `
-            <div class="daily-summary-section-label" style="margin-top:12px;">Что мешало</div>
-            ${badItems.map(t => `<div class="daily-summary-row"><span class="daily-summary-row-icon">–</span><span>${t}</span></div>`).join('')}
+            <div class="daily-summary-section-label" style="margin-top:12px;">${t('daily.bad_label')}</div>
+            ${badItems.map(item => `<div class="daily-summary-row"><span class="daily-summary-row-icon">–</span><span>${item}</span></div>`).join('')}
           ` : ''}
           ${hiddenPattern ? `
-            <div class="daily-summary-section-label" style="margin-top:12px;">Паттерн дня</div>
+            <div class="daily-summary-section-label" style="margin-top:12px;">${t('daily.hidden_label')}</div>
             <div class="daily-summary-hidden">${hiddenPattern}</div>
           ` : ''}
           ${conclusion ? `
-            <div class="daily-summary-section-label" style="margin-top:12px;">Итог</div>
+            <div class="daily-summary-section-label" style="margin-top:12px;">${t('daily.conclusion_label')}</div>
             <div class="daily-summary-conclusion">${conclusion}</div>
           ` : ''}
           ${tip ? `
-            <div class="daily-summary-section-label" style="margin-top:12px;">Совет на завтра</div>
+            <div class="daily-summary-section-label" style="margin-top:12px;">${t('daily.tip_label')}</div>
             <div class="daily-summary-row"><span class="daily-summary-row-icon">📌</span><span>${tip}</span></div>
           ` : ''}
         </div>`;
@@ -6963,9 +7099,9 @@ function setSeg(id, el) {
   const container = document.getElementById(id);
   const screenProfile = document.getElementById('screen-profile');
   if (!container) return;
-  // Определяем текущие единицы ДО переключения
+  // Определяем текущие единицы ДО переключения (через data-i18n, не зависит от языка)
   const wasMgdl = id === 'seg-units'
-    ? container.querySelector('.seg-btn.active')?.textContent.trim() === 'мг/дл'
+    ? container.querySelector('.seg-btn.active')?.getAttribute('data-i18n') === 'seg.mgdl'
     : false;
   container.querySelectorAll('.seg-btn').forEach((b) => b.classList.remove('active'));
   el.classList.add('active');
