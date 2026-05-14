@@ -1499,6 +1499,41 @@
     color: var(--muted);
     padding: 8px 20px 16px;
   }
+  /* ── Paywall — активная подписка ───────────── */
+  .pw-active-wrap {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 24px 24px;
+    text-align: center;
+  }
+  .pw-active-wrap.visible { display: flex; }
+  .pw-active-icon {
+    width: 64px; height: 64px; border-radius: 50%;
+    background: #E8F5E9; display: flex; align-items: center;
+    justify-content: center; font-size: 30px; margin-bottom: 16px;
+  }
+  .pw-active-title {
+    font-size: 20px; font-weight: 700; color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .pw-active-plan {
+    font-size: 14px; color: var(--muted); margin-bottom: 4px;
+  }
+  .pw-active-until {
+    font-size: 13px; color: var(--muted2); margin-bottom: 28px;
+  }
+  .pw-manage-btn {
+    width: 100%; padding: 14px 20px;
+    background: transparent; color: var(--accent);
+    border: 1.5px solid var(--accent); border-radius: 14px;
+    font-size: 15px; font-weight: 600; cursor: pointer;
+    margin-bottom: 12px; font-family: var(--sans);
+    -webkit-tap-highlight-color: transparent;
+    transition: opacity 0.15s;
+  }
+  .pw-manage-btn:active { opacity: 0.7; }
+
   .pw-restore {
     text-align: center;
     font-family: var(--sans);
@@ -2697,6 +2732,16 @@
         </div>
       </div>
 
+      <!-- Активная подписка — показывается вместо планов -->
+      <div class="pw-active-wrap" id="pw-active-wrap">
+        <div class="pw-active-icon">✓</div>
+        <div class="pw-active-title" data-i18n="paywall.active_title">Подписка активна</div>
+        <div class="pw-active-plan" id="pw-active-plan-label"></div>
+        <div class="pw-active-until" id="pw-active-until-label"></div>
+        <button type="button" class="pw-manage-btn" onclick="paywallManage()" data-i18n="paywall.manage_btn">Управление подпиской</button>
+        <div class="pw-restore" onclick="paywallRestore()" data-i18n="paywall.restore" style="margin-top:0;">Восстановить покупку</div>
+      </div>
+
       <div class="pw-plans" id="pw-plans">
         <!-- Trial (selected by default) -->
         <div class="pw-plan selected" data-plan="trial" onclick="selectPlan(this)">
@@ -3110,6 +3155,10 @@ const LOCALES = {
     'paywall.note_quarter': 'Доступ сразу · экономия 44% · отмена в любой момент',
     'paywall.note_year': 'Доступ сразу · лучшая цена $3.25/мес · отмена в любой момент',
     'paywall.restore': 'Восстановить покупку',
+    'paywall.active_title': 'Подписка активна',
+    'paywall.active_until': 'Действует до {date}',
+    'paywall.manage_btn': 'Управление подпиской',
+    'paywall.activated': '✓ Подписка активирована',
 
     // Daily summary — секции
     'daily.good_label': 'Что работало',
@@ -3429,6 +3478,10 @@ const LOCALES = {
     'paywall.note_quarter': 'Instant access · save 44% · cancel anytime',
     'paywall.note_year': 'Instant access · best price $3.25/mo · cancel anytime',
     'paywall.restore': 'Restore purchase',
+    'paywall.active_title': 'Subscription active',
+    'paywall.active_until': 'Valid until {date}',
+    'paywall.manage_btn': 'Manage subscription',
+    'paywall.activated': '✓ Subscription activated',
 
     // Daily summary sections
     'daily.good_label': 'What worked',
@@ -3748,6 +3801,10 @@ const LOCALES = {
     'paywall.note_quarter': 'Sofortiger Zugang · 44% sparen · jederzeit kündbar',
     'paywall.note_year': 'Sofortiger Zugang · bester Preis $3,25/Monat · jederzeit kündbar',
     'paywall.restore': 'Kauf wiederherstellen',
+    'paywall.active_title': 'Abonnement aktiv',
+    'paywall.active_until': 'Gültig bis {date}',
+    'paywall.manage_btn': 'Abonnement verwalten',
+    'paywall.activated': '✓ Abonnement aktiviert',
 
     // Daily summary sections
     'daily.good_label': 'Was funktioniert hat',
@@ -4120,6 +4177,7 @@ const ASSET_NO_IMAGE_BIG = 'no_image_big.svg';
 // ===== MONETIZATION / TRIAL =====
 const LS_TRIAL_START = 'ch_trial_start';
 const LS_PAID_UNTIL = 'ch_paid_until';
+const LS_ACTIVE_PLAN = 'ch_active_plan';
 const TRIAL_DAYS = 7;
 
 function getTrialStart() {
@@ -4181,6 +4239,62 @@ function checkTrialBlocker() {
   }
 }
 
+// ── Синхронизация состояния paywall (покупка vs активна) ────────────────────
+function syncPaywallState() {
+  const s = getTrialStatus();
+  const isPaid = s.plan === 'paid';
+
+  // Элементы покупки
+  const purchaseEls = ['pw-plans', 'pw-cta-btn', 'pw-trial-note'];
+  purchaseEls.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = isPaid ? 'none' : '';
+  });
+  // Заголовок и subtitle
+  const title = document.querySelector('#screen-paywall .pw-title');
+  const subtitle = document.querySelector('#screen-paywall .pw-subtitle');
+  const features = document.querySelector('#screen-paywall .pw-features');
+  const restoreEl = document.querySelector('#screen-paywall > div > .pw-restore');
+  if (title) title.style.display = isPaid ? 'none' : '';
+  if (subtitle) subtitle.style.display = isPaid ? 'none' : '';
+  if (features) features.style.display = isPaid ? 'none' : '';
+  if (restoreEl) restoreEl.style.display = isPaid ? 'none' : '';
+
+  // Блок активной подписки
+  const activeWrap = document.getElementById('pw-active-wrap');
+  if (activeWrap) activeWrap.classList.toggle('visible', isPaid);
+
+  if (isPaid) {
+    // Название плана
+    const planKey = localStorage.getItem(LS_ACTIVE_PLAN) || 'month';
+    const planNames = {
+      trial: t('paywall.plan_trial_name'),
+      month: t('paywall.plan_month_name'),
+      quarter: t('paywall.plan_quarter_name'),
+      year: t('paywall.plan_year_name'),
+    };
+    const planLabel = document.getElementById('pw-active-plan-label');
+    if (planLabel) planLabel.textContent = planNames[planKey] || planKey;
+
+    // Дата продления
+    const paidUntil = parseInt(localStorage.getItem(LS_PAID_UNTIL) || '0', 10);
+    const untilLabel = document.getElementById('pw-active-until-label');
+    if (untilLabel && paidUntil) {
+      const dateStr = new Intl.DateTimeFormat(LOCALE, { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(paidUntil));
+      untilLabel.textContent = t('paywall.active_until', { date: dateStr });
+    }
+  }
+}
+
+function paywallManage() {
+  // Открывает управление подпиской в платёжном провайдере
+  // При подключении реального провайдера — заменить URL:
+  // iOS: 'itms-apps://apps.apple.com/account/subscriptions'
+  // Android: 'https://play.google.com/store/account/subscriptions'
+  // LemonSqueezy / Stripe: ссылка на customer portal
+  alert('[STUB] Управление подпиской — здесь будет ссылка в магазин или customer portal');
+}
+
 // Paywall plan selection
 function selectPlan(el) {
   document.querySelectorAll('.pw-plan').forEach(p => p.classList.remove('selected'));
@@ -4205,9 +4319,10 @@ function selectPlan(el) {
 
 function paywallStartTrial() {
   // STUB — здесь будет редирект на платёжный сервис
+  // После успешной оплаты провайдер вызывает: activateSubscription(plan, paidUntilTimestamp)
   const selected = document.querySelector('.pw-plan.selected');
-  const plan = selected ? selected.dataset.plan : 'month';
-  alert(`[STUB] Оплата плана: ${plan}\nСюда подключишь LemonSqueezy / Google Play / Apple StoreKit`);
+  const plan = selected ? selected.dataset.plan : 'trial';
+  alert(`[STUB] Оплата плана: ${plan}\nПосле успешной оплаты вызови: activateSubscription('${plan}', Date.now() + 30*864e5)`);
 }
 
 function paywallRestore() {
@@ -4215,14 +4330,33 @@ function paywallRestore() {
   alert('[STUB] Восстановление покупки — сюда подключишь API платёжного сервиса');
 }
 
-// Симуляция активации для тестирования (DEV only)
-// Вызови в консоли: devActivatePaid(30) — активирует на 30 дней
-window.devActivatePaid = function(days) {
-  const until = Date.now() + days * 24 * 60 * 60 * 1000;
+/**
+ * Хук активации подписки — вызывается любым платёжным провайдером после успешной оплаты.
+ * @param {string} plan  — 'trial' | 'month' | 'quarter' | 'year'
+ * @param {number} until — timestamp (ms) до которого активна подписка
+ */
+function activateSubscription(plan, until) {
   localStorage.setItem(LS_PAID_UNTIL, String(until));
+  localStorage.setItem(LS_ACTIVE_PLAN, plan);
   updatePricingBtnStatus();
   checkTrialBlocker();
-  console.log(`[dev] Paid access activated for ${days} days`);
+  syncPaywallState();
+  // Toast — подтверждение
+  const toast = document.getElementById('offline-toast');
+  if (toast) {
+    toast.textContent = t('paywall.activated');
+    toast.classList.add('visible');
+    setTimeout(() => toast.classList.remove('visible'), 3000);
+  }
+  console.log(`[sub] activated: plan=${plan}, until=${new Date(until).toLocaleDateString()}`);
+}
+
+// Симуляция активации для тестирования (DEV only)
+// Вызови в консоли: devActivatePaid(30) — активирует на 30 дней
+window.devActivatePaid = function(days, plan) {
+  const until = Date.now() + days * 24 * 60 * 60 * 1000;
+  activateSubscription(plan || 'month', until);
+  console.log(`[dev] Paid access activated for ${days} days, plan=${plan || 'month'}`);
 };
 window.devExpireTrial = function() {
   localStorage.setItem(LS_TRIAL_START, String(Date.now() - (TRIAL_DAYS + 1) * 24 * 60 * 60 * 1000));
@@ -7149,6 +7283,7 @@ function goTo(id, opts) {
   if (targetId === 'screen-main' || targetId === 'screen-lipids') void prepareMainScreenLipids();
   if (targetId === 'screen-lipids') updateLipidProfileCard();
   if (targetId === 'screen-main') checkTrialBlocker();
+  if (targetId === 'screen-paywall') syncPaywallState();
   if (targetId === 'screen-my-profile') { syncMyProfileScreen(); updatePricingBtnStatus(); }
   if (targetId === 'screen-profile') updatePricingBtnStatus();
   if (targetId === 'screen-history') void renderHistoryList();
