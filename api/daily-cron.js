@@ -18,8 +18,8 @@
  */
 
 export const config = {
-  runtime: 'nodejs20.x',
-  maxDuration: 60, // секунд — крон может работать дольше обычного запроса
+  runtime: 'nodejs',
+  maxDuration: 60,
 };
 
 // ── Зависимости (устанавливаются через npm install web-push @supabase/supabase-js) ──
