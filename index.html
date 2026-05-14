@@ -2239,9 +2239,9 @@
     <!-- Trial expired blocker -->
     <div class="trial-expired-overlay" id="trial-expired-overlay">
       <div class="trial-expired-icon">🔒</div>
-      <div class="trial-expired-title">Пробный период завершён</div>
-      <div class="trial-expired-text">Твои 7 дней истекли. Выбери план чтобы продолжить анализировать еду и следить за холестерином.</div>
-      <button type="button" class="trial-expired-btn" onclick="goTo('screen-paywall')">Выбрать план →</button>
+      <div class="trial-expired-title" data-i18n="trial.expired_title">Пробный период завершён</div>
+      <div class="trial-expired-text" data-i18n="trial.expired_text">Твои 7 дней истекли. Выбери план чтобы продолжить анализировать еду и следить за холестерином.</div>
+      <button type="button" class="trial-expired-btn" onclick="goTo('screen-paywall')" data-i18n="trial.expired_btn">Выбрать план →</button>
     </div>
     <div class="main-wrap">
       <div class="main-header main-header--hero">
@@ -2774,10 +2774,10 @@
       <div class="purchase-icon-wrap">
         <div class="purchase-icon-inner">!</div>
       </div>
-      <div class="purchase-title">Покупка</div>
-      <p class="purchase-text">Обычно за 30 дней можно научиться определять еду. Поэтому это единоразовый платёж за приложение. Это дешевле, чем сходить к диетологу!</p>
+      <div class="purchase-title" data-i18n="purchase.title">Покупка</div>
+      <p class="purchase-text" data-i18n="purchase.text">Обычно за 30 дней можно научиться определять еду. Поэтому это единоразовый платёж за приложение. Это дешевле, чем сходить к диетологу!</p>
       <button type="button" class="btn-primary btn-primary--split" onclick="dismissPurchaseModal()">
-        <span>Купить</span>
+        <span data-i18n="purchase.btn">Купить</span>
         <span>$29</span>
       </button>
     </div>
@@ -3111,6 +3111,15 @@ const LOCALES = {
     'daily.hidden_label': 'Паттерн дня',
     'daily.conclusion_label': 'Итог',
     'daily.tip_label': 'Совет на завтра',
+    // Trial expired overlay
+    'trial.expired_title': 'Пробный период завершён',
+    'trial.expired_text': 'Твои 7 дней истекли. Выбери план чтобы продолжить анализировать еду и следить за холестерином.',
+    'trial.expired_btn': 'Выбрать план →',
+
+    // Purchase modal
+    'purchase.title': 'Покупка',
+    'purchase.text': 'Обычно за 30 дней можно научиться определять еду. Поэтому это единоразовый платёж за приложение. Это дешевле, чем сходить к диетологу!',
+    'purchase.btn': 'Купить',
   },
 
   en: {
@@ -3403,6 +3412,15 @@ const LOCALES = {
     'daily.hidden_label': "Day's pattern",
     'daily.conclusion_label': 'Summary',
     'daily.tip_label': 'Tip for tomorrow',
+    // Trial expired overlay
+    'trial.expired_title': 'Trial period ended',
+    'trial.expired_text': 'Your 7 days are up. Choose a plan to continue analysing food and tracking your cholesterol.',
+    'trial.expired_btn': 'Choose a plan →',
+
+    // Purchase modal
+    'purchase.title': 'Purchase',
+    'purchase.text': 'It usually takes 30 days to learn how to read your food. This is a one-time payment for the app — cheaper than one visit to a dietitian!',
+    'purchase.btn': 'Buy',
   },
 
   de: {
@@ -3695,6 +3713,15 @@ const LOCALES = {
     'daily.hidden_label': 'Tagesmuster',
     'daily.conclusion_label': 'Fazit',
     'daily.tip_label': 'Tipp für morgen',
+    // Trial expired overlay
+    'trial.expired_title': 'Testzeitraum beendet',
+    'trial.expired_text': 'Deine 7 Tage sind abgelaufen. Wähle einen Plan, um weiter Essen zu analysieren und deinen Cholesterinspiegel zu verfolgen.',
+    'trial.expired_btn': 'Plan wählen →',
+
+    // Purchase modal
+    'purchase.title': 'Kauf',
+    'purchase.text': 'In der Regel reichen 30 Tage, um Essen richtig einzuschätzen. Das ist eine Einmalzahlung für die App – günstiger als ein Besuch beim Ernährungsberater!',
+    'purchase.btn': 'Kaufen',
   },
 };
 
@@ -5295,7 +5322,7 @@ function saveProfileToStorage() {
     v_hdl: vHdl?.value ?? '',
     v_trig: vTrig?.value ?? '',
     dontKnowOn: !!dontKnowOn,
-    gender: genderEl ? genderEl.textContent.trim() : 'Мужской',
+    gender: genderEl ? genderEl.textContent.trim() : t('common.male'),
     units: unitsEl ? (unitsEl.getAttribute('data-i18n') === 'seg.mgdl' ? 'mgdl' : 'mmol') : 'mmol',
     age: ageEl?.value ?? '',
     height: heightEl?.value ?? '',
@@ -5571,7 +5598,7 @@ function profileNameForMotivation() {
     const n = p.name != null ? String(p.name).trim() : '';
     return n || t('common.friend');
   } catch (e) {
-    return 'друг';
+    return t('common.friend');
   }
 }
 
@@ -5794,7 +5821,7 @@ async function renderHistoryList() {
       card.innerHTML = `
         <div class="daily-summary-header" onclick="(function(h){const b=h.closest('.daily-summary-card').querySelector('.daily-summary-body');const c=h.querySelector('.daily-summary-chevron');if(b.style.display==='none'){b.style.display='block';c.style.transform='rotate(180deg)';}else{b.style.display='none';c.style.transform='rotate(0deg)';};})(this)">
           <svg class="daily-summary-chevron" width="16" height="16" viewBox="0 0 16 16" fill="none" style="transition:transform 0.2s;flex-shrink:0;"><path d="M4 6L8 10L12 6" stroke="#9E9E9E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          <span class="daily-summary-label-text" data-i18n="history.daily_report">ОТЧЕТ ЗА ДЕНЬ</span>
+          <span class="daily-summary-label-text">${t('history.daily_report')}</span>
           <span class="daily-summary-score-inline">${sc}/10</span>
         </div>
         <div class="daily-summary-body" style="display:none;">
