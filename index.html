@@ -2498,7 +2498,7 @@
     <div class="result-screen-inner">
       <div id="result-loader" class="result-loader-overlay" style="display:none;">
         <div class="result-loader-spinner"></div>
-        <div class="result-loader-text" id="result-loader-text">Анализируем фото…</div>
+        <div class="result-loader-text" id="result-loader-text" data-i18n="result.analyzing_photo">Анализируем фото…</div>
       </div>
       <div class="result-photo" id="result-photo-wrap" style="position:relative;">
         <button type="button" class="result-back-btn" onclick="backFromResult()" aria-label="Назад" title="Назад" data-i18n="nav.back" data-i18n-attr="aria-label">
@@ -3093,6 +3093,11 @@ const LOCALES = {
     'daily.alert_fiber': 'Клетчатки — мало',
     'daily.alert_vegetables': 'Овощей — мало',
     'daily.alert_protein': 'Белка — мало',
+
+    // Статусы подписки
+    'subscription.active': 'Активна',
+    'subscription.expired': 'Истекла',
+    'subscription.trial_days': 'Пробный · {n}д',
     // Trial expired overlay
     'trial.expired_title': 'Пробный период завершён',
     'trial.expired_text': 'Твои 7 дней истекли. Выбери план чтобы продолжить анализировать еду и следить за холестерином.',
@@ -3399,6 +3404,11 @@ const LOCALES = {
     'daily.alert_fiber': 'Fibre — low',
     'daily.alert_vegetables': 'Vegetables — low',
     'daily.alert_protein': 'Protein — low',
+
+    // Subscription statuses
+    'subscription.active': 'Active',
+    'subscription.expired': 'Expired',
+    'subscription.trial_days': 'Trial · {n}d',
     // Trial expired overlay
     'trial.expired_title': 'Trial period ended',
     'trial.expired_text': 'Your 7 days are up. Choose a plan to continue analysing food and tracking your cholesterol.',
@@ -3705,6 +3715,11 @@ const LOCALES = {
     'daily.alert_fiber': 'Ballaststoffe — wenig',
     'daily.alert_vegetables': 'Gemüse — wenig',
     'daily.alert_protein': 'Protein — wenig',
+
+    // Abonnement-Status
+    'subscription.active': 'Aktiv',
+    'subscription.expired': 'Abgelaufen',
+    'subscription.trial_days': 'Test · {n}T',
     // Trial expired overlay
     'trial.expired_title': 'Testzeitraum beendet',
     'trial.expired_text': 'Deine 7 Tage sind abgelaufen. Wähle einen Plan, um weiter Essen zu analysieren und deinen Cholesterinspiegel zu verfolgen.',
@@ -3739,6 +3754,7 @@ function setLocale(lang) {
   if (!LOCALES[lang]) return;
   LOCALE = lang;
   localStorage.setItem('userLocale', lang);
+  document.documentElement.lang = lang;
   applyLocaleToDOM();
   updateCardsLang();
 }
@@ -4087,11 +4103,11 @@ function updatePricingBtnStatus() {
   const s = getTrialStatus();
   let text, bg, color;
   if (s.plan === 'paid') {
-    text = 'Active'; bg = '#22C55E'; color = '#fff';
+    text = t('subscription.active'); bg = '#22C55E'; color = '#fff';
   } else if (s.plan === 'trial') {
-    text = `Trial · ${s.daysLeft}д`; bg = '#fff'; color = '#000';
+    text = t('subscription.trial_days', { n: s.daysLeft }); bg = '#fff'; color = '#000';
   } else {
-    text = 'Expired'; bg = '#ff3b30'; color = '#fff';
+    text = t('subscription.expired'); bg = '#ff3b30'; color = '#fff';
   }
   ['pricing-btn-status', 'my-profile-pricing-status'].forEach(id => {
     const btn = document.getElementById(id);
@@ -5545,8 +5561,8 @@ function formatHistoryDateRu(iso) {
     let dayPart;
     if (diffDays === 0) dayPart = t('history.today');
     else if (diffDays === 1) dayPart = t('history.yesterday');
-    else dayPart = dt.toLocaleDateString(LOCALE + '-' + LOCALE.toUpperCase(), { day: 'numeric', month: 'long' });
-    const timePart = dt.toLocaleTimeString(LOCALE + '-' + LOCALE.toUpperCase(), { hour: '2-digit', minute: '2-digit' });
+    else dayPart = new Intl.DateTimeFormat(LOCALE, { day: 'numeric', month: 'long' }).format(dt);
+    const timePart = new Intl.DateTimeFormat(LOCALE, { hour: '2-digit', minute: '2-digit' }).format(dt);
     return `${dayPart} ${t('history.at')} ${timePart}`;
   } catch (e) {
     return '—';
@@ -5563,9 +5579,7 @@ function getDateLabel(isoString) {
   if (date.toDateString() === today.toDateString()) return t('history.today');
   if (date.toDateString() === yesterday.toDateString()) return t('history.yesterday');
 
-  return date
-    .toLocaleDateString(LOCALE + '-' + LOCALE.toUpperCase(), { day: 'numeric', month: 'long' })
-    .replace(' г.', '').replace('.', '');
+  return new Intl.DateTimeFormat(LOCALE, { day: 'numeric', month: 'long' }).format(date);
 }
 
 function profileNameForMotivation() {
