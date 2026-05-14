@@ -7177,11 +7177,15 @@ function goTo(id, opts) {
   syncBottomNavForScreen(targetId);
   // Android back / Telegram WebApp back — пишем в историю браузера
   // только если переход инициирован пользователем (не внутренний редирект)
+  // Входные экраны (auth, onboarding) не пишем — назад с них не нужно
+  const NO_HISTORY_SCREENS = ['screen-auth', 'screen-onboarding', 'screen-profile'];
   if (!opts || !opts._noHistory) {
-    try {
-      window.history.pushState({ screen: targetId }, '', window.location.pathname);
-    } catch (e) {
-      // about:srcdoc или другие ограниченные среды — молча игнорируем
+    if (!NO_HISTORY_SCREENS.includes(targetId)) {
+      try {
+        window.history.pushState({ screen: targetId }, '', window.location.pathname);
+      } catch (e) {
+        // about:srcdoc или другие ограниченные среды — молча игнорируем
+      }
     }
   }
 }
