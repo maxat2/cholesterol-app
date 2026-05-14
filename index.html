@@ -3767,8 +3767,24 @@ function applyLocaleToDOM() {
     const key = el.getAttribute('data-i18n');
     const attr = el.getAttribute('data-i18n-attr');
     const val = t(key);
-    if (attr) { el.setAttribute(attr, val); }
-    else { el.innerHTML = val; }
+    if (attr) {
+      el.setAttribute(attr, val);
+    } else if (el.querySelector('[data-i18n]')) {
+      // Элемент содержит вложенные data-i18n узлы (например chol-tip-box внутри chol-tip).
+      // Обновляем только первый текстовый узел, не трогая дочерние элементы.
+      let firstText = null;
+      for (const node of el.childNodes) {
+        if (node.nodeType === Node.TEXT_NODE) { firstText = node; break; }
+      }
+      if (firstText) {
+        firstText.textContent = val;
+      } else {
+        // Нет текстового узла — создаём перед первым дочерним элементом
+        el.insertBefore(document.createTextNode(val), el.firstChild);
+      }
+    } else {
+      el.innerHTML = val;
+    }
   });
   // Обновляем заголовок страницы
   document.title = t('app.title');
