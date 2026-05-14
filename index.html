@@ -1150,6 +1150,31 @@
     flex-shrink: 0;
   }
 
+  /* ── Offline toast ─────────────────────────── */
+  .offline-toast {
+    position: fixed; bottom: calc(80px + env(safe-area-inset-bottom));
+    left: 50%; transform: translateX(-50%) translateY(20px);
+    background: #1C1B1F; color: #fff;
+    font-size: 13px; font-weight: 500;
+    padding: 10px 18px; border-radius: 20px;
+    white-space: nowrap; pointer-events: none;
+    opacity: 0; transition: opacity 0.25s, transform 0.25s;
+    z-index: 9999;
+  }
+  .offline-toast.visible {
+    opacity: 1; transform: translateX(-50%) translateY(0);
+  }
+
+  /* ── Camera denied banner ───────────────────── */
+  .camera-denied-banner {
+    position: absolute; bottom: 100px; left: 16px; right: 16px;
+    background: #1C1B1F; color: #fff; border-radius: 14px;
+    padding: 14px 16px; font-size: 13px; line-height: 1.5;
+    display: none; z-index: 100;
+  }
+  .camera-denied-banner.visible { display: block; }
+  .camera-denied-title { font-weight: 600; margin-bottom: 4px; }
+
   .bottom-nav {
     display: flex;
     background: var(--bg);
@@ -1902,7 +1927,11 @@
 </head>
 <body>
 
-<input type="file" id="food-camera-input" accept="image/*" capture="environment" style="display:none" />
+<input type="file" id="food-camera-input" accept="image/*" style="display:none" />
+<div class="camera-denied-banner" id="camera-denied-banner">
+  <div class="camera-denied-title" data-i18n="camera.denied_title">Нет доступа к камере</div>
+  <div data-i18n="camera.denied_text">Разрешите доступ к камере в настройках браузера и попробуйте снова.</div>
+</div>
 
 <div class="app-wrap">
 <div class="phone" style="position:relative;">
@@ -3098,6 +3127,14 @@ const LOCALES = {
     'subscription.active': 'Активна',
     'subscription.expired': 'Истекла',
     'subscription.trial_days': 'Пробный · {n}д',
+
+    // Offline
+    'offline.no_connection': '⚡ Нет интернета — попробуйте позже',
+    'offline.connected': '✓ Соединение восстановлено',
+
+    // Camera
+    'camera.denied_title': 'Нет доступа к камере',
+    'camera.denied_text': 'Разрешите доступ к камере в настройках браузера и попробуйте снова.',
     // Trial expired overlay
     'trial.expired_title': 'Пробный период завершён',
     'trial.expired_text': 'Твои 7 дней истекли. Выбери план чтобы продолжить анализировать еду и следить за холестерином.',
@@ -3409,6 +3446,14 @@ const LOCALES = {
     'subscription.active': 'Active',
     'subscription.expired': 'Expired',
     'subscription.trial_days': 'Trial · {n}d',
+
+    // Offline
+    'offline.no_connection': '⚡ No internet — please try again later',
+    'offline.connected': '✓ Connection restored',
+
+    // Camera
+    'camera.denied_title': 'Camera access denied',
+    'camera.denied_text': 'Please allow camera access in your browser settings and try again.',
     // Trial expired overlay
     'trial.expired_title': 'Trial period ended',
     'trial.expired_text': 'Your 7 days are up. Choose a plan to continue analysing food and tracking your cholesterol.',
@@ -3720,6 +3765,14 @@ const LOCALES = {
     'subscription.active': 'Aktiv',
     'subscription.expired': 'Abgelaufen',
     'subscription.trial_days': 'Test · {n}T',
+
+    // Offline
+    'offline.no_connection': '⚡ Kein Internet — bitte später versuchen',
+    'offline.connected': '✓ Verbindung wiederhergestellt',
+
+    // Kamera
+    'camera.denied_title': 'Kein Kamerazugriff',
+    'camera.denied_text': 'Bitte erlaube den Kamerazugriff in den Browsereinstellungen und versuche es erneut.',
     // Trial expired overlay
     'trial.expired_title': 'Testzeitraum beendet',
     'trial.expired_text': 'Deine 7 Tage sind abgelaufen. Wähle einen Plan, um weiter Essen zu analysieren und deinen Cholesterinspiegel zu verfolgen.',
@@ -6460,10 +6513,43 @@ async function syncMyProfileScreen() {
 
 function openFoodCamera() {
   if (!isAccessActive()) { goTo('screen-paywall'); return; }
+
   const appInitErr = document.getElementById('app-init-error');
   const camInput = document.getElementById('food-camera-input');
+  const deniedBanner = document.getElementById('camera-denied-banner');
   appInitErr?.classList.remove('visible');
-  camInput?.click();
+  deniedBanner?.classList.remove('visible');
+
+  // На мобильных устройствах — принудительно открываем камеру (capture=environment)
+  // На десктопе — открываем файловый диалог без capture (нет камеры для еды)
+  const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  if (isMobile) {
+    camInput.setAttribute('capture', 'environment');
+  } else {
+    camInput.removeAttribute('capture');
+  }
+
+  // Проверяем поддержку getUserMedia для определения разрешения камеры
+  if (isMobile && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(stream => {
+        // Разрешение есть — останавливаем стрим (нам нужен только факт разрешения) и открываем input
+        stream.getTracks().forEach(t => t.stop());
+        camInput?.click();
+      })
+      .catch(err => {
+        if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+          // Пользователь запретил — показываем объяснение
+          deniedBanner?.classList.add('visible');
+        } else {
+          // Другая ошибка (нет камеры и т.д.) — просто открываем file picker
+          camInput?.click();
+        }
+      });
+  } else {
+    // Десктоп или браузер без getUserMedia — сразу file picker
+    camInput?.click();
+  }
 }
 
 function updateLipidProfileCard() {
@@ -6778,6 +6864,9 @@ function showResultLoader(message) {
 }
 
 async function analyzeFoodPhoto(dataUrl, userClarification) {
+  if (window.checkOnlineBeforeFetch && !window.checkOnlineBeforeFetch()) {
+    throw new Error(t('offline.no_connection'));
+  }
   const saveBtn = document.getElementById('result-btn-save-history');
   if (saveBtn) saveBtn.disabled = false;
   let prompt = buildVisionPrompt();
@@ -6822,6 +6911,9 @@ async function analyzeFoodPhoto(dataUrl, userClarification) {
 }
 
 async function analyzeFoodFromText(userText, userClarification) {
+  if (window.checkOnlineBeforeFetch && !window.checkOnlineBeforeFetch()) {
+    throw new Error(t('offline.no_connection'));
+  }
   const saveBtn = document.getElementById('result-btn-save-history');
   if (saveBtn) saveBtn.disabled = false;
   let text =
@@ -7083,6 +7175,15 @@ function goTo(id, opts) {
     }
   }
   syncBottomNavForScreen(targetId);
+  // Android back / Telegram WebApp back — пишем в историю браузера
+  // только если переход инициирован пользователем (не внутренний редирект)
+  if (!opts || !opts._noHistory) {
+    try {
+      window.history.pushState({ screen: targetId }, '', window.location.pathname);
+    } catch (e) {
+      // about:srcdoc или другие ограниченные среды — молча игнорируем
+    }
+  }
 }
 function navTo(id, el) {
   goTo(id, id === 'screen-profile' ? { mode: 'edit' } : undefined);
@@ -7404,6 +7505,53 @@ function finishOnboarding() {
 }
 
 // Touch swipe support for onboarding
+// ── Back button (Android / Telegram WebApp) ─────────────────────────────────
+window.addEventListener('popstate', (e) => {
+  const screen = e.state && e.state.screen;
+  if (screen) {
+    goTo(screen, { _noHistory: true });
+  }
+});
+
+// ── Offline / online detection ────────────────────────────────────────────────
+(function initOfflineDetection() {
+  // Создаём toast-элемент
+  const toast = document.createElement('div');
+  toast.className = 'offline-toast';
+  toast.id = 'offline-toast';
+  toast.setAttribute('role', 'status');
+  toast.setAttribute('aria-live', 'polite');
+  document.body.appendChild(toast);
+
+  let hideTimer = null;
+
+  function showOfflineToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('visible');
+    clearTimeout(hideTimer);
+  }
+  function hideOfflineToast() {
+    toast.classList.remove('visible');
+  }
+
+  window.addEventListener('offline', () => {
+    showOfflineToast(t('offline.no_connection'));
+  });
+  window.addEventListener('online', () => {
+    showOfflineToast(t('offline.connected'));
+    hideTimer = setTimeout(hideOfflineToast, 2500);
+  });
+
+  // Экспортируем для использования перед fetch
+  window.checkOnlineBeforeFetch = function() {
+    if (!navigator.onLine) {
+      showOfflineToast(t('offline.no_connection'));
+      return false;
+    }
+    return true;
+  };
+})();
+
 (function initOnboardingSwipe() {
   let startX = 0;
   let isDragging = false;
