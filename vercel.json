@@ -1,9 +1,6 @@
 {
   "rewrites": [
-    {
-      "source": "/((?!.*\\.).*)",
-      "destination": "/index.html"
-    }
+    { "source": "/((?!.*\\.).*)", "destination": "/index.html" }
   ],
   "headers": [
     {
@@ -11,6 +8,12 @@
       "headers": [
         { "key": "Cache-Control", "value": "no-store" }
       ]
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/daily-cron",
+      "schedule": "0 19 * * *"
     }
   ]
 }

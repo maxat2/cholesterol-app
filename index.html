@@ -4033,6 +4033,8 @@ supabaseClient.auth.onAuthStateChange(async (event, session) => {
 async function handleAuthSession(session) {
   authNavigationDone = true;
   setStoredUserId(session.user.id);
+  // Запланировать запрос на Web Push уведомления
+  setTimeout(() => schedulePushRegistration(), 100);
   const loc = window.location;
   if (loc.hash.includes('access_token') || loc.search.includes('access_token') || loc.hash.includes('type=')) {
     window.history.replaceState({}, document.title, loc.pathname);
@@ -7644,6 +7646,82 @@ function finishOnboarding() {
 }
 
 // Touch swipe support for onboarding
+// ── Web Push — регистрация уведомлений ──────────────────────────────────────
+const VAPID_PUBLIC_KEY = 'BJ0icyiIjFg9o7bQA8n8p59XyuxbyhcfOHAXqKD5qI3Exz4IHAWSCGCbw62XoQlAM0JbFFYhZPPsVjQQRSQdeHY';
+
+async function registerPushSubscription() {
+  // Проверяем поддержку
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+    console.log('[push] Браузер не поддерживает Web Push');
+    return;
+  }
+  if (!VAPID_PUBLIC_KEY || VAPID_PUBLIC_KEY.includes('PASTE_YOUR')) {
+    console.log('[push] VAPID ключ не настроен');
+    return;
+  }
+
+  try {
+    // Регистрируем Service Worker
+    const reg = await navigator.serviceWorker.register('/sw.js');
+    await navigator.serviceWorker.ready;
+
+    // Запрашиваем разрешение
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') {
+      console.log('[push] Разрешение отклонено');
+      return;
+    }
+
+    // Создаём подписку
+    const sub = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+    });
+
+    // Сохраняем в Supabase
+    const uid = getStoredUserId();
+    if (!uid) return;
+
+    const deviceHint = /iPhone|iPad/i.test(navigator.userAgent) ? 'ios_safari' :
+                       /Android/i.test(navigator.userAgent) ? 'android_chrome' : 'desktop';
+
+    const { error } = await supabaseClient
+      .from('push_subscriptions')
+      .upsert({
+        user_id: uid,
+        subscription: sub.toJSON(),
+        device_hint: deviceHint,
+      }, { onConflict: 'user_id,subscription->endpoint' });
+
+    if (error) console.warn('[push] Ошибка сохранения подписки:', error.message);
+    else console.log('[push] Подписка сохранена успешно');
+
+  } catch (err) {
+    console.warn('[push] Ошибка регистрации:', err.message);
+  }
+}
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const rawData = window.atob(base64);
+  return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
+}
+
+// Запрашиваем разрешение на уведомления через 30 секунд после входа
+// (не сразу — чтобы не пугать нового пользователя)
+function schedulePushRegistration() {
+  const uid = getStoredUserId();
+  if (!uid) return;
+  // Не запрашиваем повторно если уже есть разрешение
+  if (Notification.permission === 'granted') {
+    registerPushSubscription();
+    return;
+  }
+  if (Notification.permission === 'denied') return;
+  setTimeout(() => registerPushSubscription(), 30000);
+}
+
 // ── Back button (Android / Telegram WebApp) ─────────────────────────────────
 window.addEventListener('popstate', (e) => {
   const screen = e.state && e.state.screen;
@@ -7651,6 +7729,16 @@ window.addEventListener('popstate', (e) => {
     goTo(screen, { _noHistory: true });
   }
 });
+
+// ── Service Worker — сообщение от SW при тапе на уведомление ────────────────
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.addEventListener('message', (event) => {
+    if (event.data?.type === 'OPEN_DAILY_REPORT') {
+      // Открываем экран истории где лежит отчёт
+      goTo('screen-history');
+    }
+  });
+}
 
 // ── Offline / online detection ────────────────────────────────────────────────
 (function initOfflineDetection() {
