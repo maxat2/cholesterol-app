@@ -4577,9 +4577,27 @@ window.devActivatePaid = function(days, plan) {
 window.devExpireTrial = function() {
   localStorage.setItem(LS_TRIAL_START, String(Date.now() - (TRIAL_DAYS + 1) * 24 * 60 * 60 * 1000));
   localStorage.removeItem(LS_PAID_UNTIL);
+  localStorage.removeItem(LS_ACTIVE_PLAN);
   updatePricingBtnStatus();
   checkTrialBlocker();
   console.log('[dev] Trial expired');
+};
+
+// Полный сброс в активный триал (чистит и localStorage и Supabase)
+window.devResetToTrial = async function() {
+  localStorage.removeItem(LS_TRIAL_START);
+  localStorage.removeItem(LS_PAID_UNTIL);
+  localStorage.removeItem(LS_ACTIVE_PLAN);
+  const uid = getStoredUserId();
+  if (uid && supabaseClient) {
+    await supabaseClient.from('users').update({ paid_until: null, active_plan: null }).eq('id', uid);
+    console.log('[dev] Supabase subscription cleared');
+  }
+  updatePricingBtnStatus();
+  checkTrialBlocker();
+  syncPaywallState();
+  console.log('[dev] Reset to fresh trial — reload to see full effect');
+  location.reload();
 };
 // ===== END MONETIZATION =====
 
