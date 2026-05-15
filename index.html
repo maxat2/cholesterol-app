@@ -6515,19 +6515,19 @@ const log  = (...args) => DEV_MODE && console.log(...args);
 const warn = (...args) => DEV_MODE && console.warn(...args);
 
 // ─── Telegram Mini App ───────────────────────────────────────────────────────
-const isTelegram = !!(window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData);
+function isTelegram() {
+  try {
+    return !!(window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData && window.Telegram.WebApp.initData.length > 0);
+  } catch(e) { return false; }
+}
 
 async function loginWithTelegram() {
   const tg = window.Telegram.WebApp;
   tg.ready();
   tg.expand();
 
-  const initData = tg.initDataUnsafe;
-  const tgUser = initData.user;
-
-  // Скрываем экран авторизации пока идёт вход
-  const authScreen = document.getElementById('screen-auth');
-  if (authScreen) authScreen.style.display = 'none';
+  const tgUser = tg.initDataUnsafe?.user;
+  alert('loginWithTelegram | user: ' + (tgUser ? tgUser.first_name : 'NO USER'));
 
   try {
     const res = await fetch('/api/telegram-auth', {
@@ -6536,32 +6536,35 @@ async function loginWithTelegram() {
       body: JSON.stringify({ initData: tg.initData }),
     });
 
-    if (!res.ok) throw new Error('Auth failed');
+    alert('fetch done | status: ' + res.status);
+
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error('Auth failed: ' + res.status + ' ' + errText);
+    }
 
     const { user } = await res.json();
+    alert('user: ' + JSON.stringify(user).slice(0, 100));
 
-    // Сохраняем профиль в localStorage
     const profile = {
       id: user.id,
-      name: user.name || tgUser.first_name || '',
+      name: user.name || (tgUser && tgUser.first_name) || '',
       telegram_id: user.telegram_id,
       active_plan: user.active_plan || 'trial',
       paid_until: user.paid_until || null,
       trial_start: user.trial_start || new Date().toISOString(),
-      tg_user_id: tgUser.id,
+      tg_user_id: tgUser && tgUser.id,
     };
     localStorage.setItem('ch_profile', JSON.stringify(profile));
-
-    // Восстанавливаем состояние подписки
     if (user.active_plan) localStorage.setItem('ch_active_plan', user.active_plan);
     if (user.paid_until) localStorage.setItem('ch_paid_until', new Date(user.paid_until).getTime());
     if (user.trial_start) localStorage.setItem('ch_trial_start', new Date(user.trial_start).getTime());
+    try { localStorage.setItem('ch_onboarding_done', '1'); } catch(e) {}
 
     authNavigationDone = true;
     goTo('screen-main');
   } catch (e) {
-    console.error('[telegram] auth error', e);
-    // Fallback — показываем обычный экран входа
+    alert('ERROR: ' + e.message);
     goTo('screen-auth');
   }
 }
@@ -7842,7 +7845,7 @@ async function bootstrapApp() {
   log('[bootstrap] старт');
 
   // Telegram Mini App — авторизуемся через Telegram, пропускаем screen-auth
-  if (isTelegram) {
+  if (isTelegram()) {
     await loginWithTelegram();
     return;
   }
@@ -8123,13 +8126,6 @@ if ('serviceWorker' in navigator) {
 // Применяем локализацию сразу при загрузке
 applyLocaleToDOM();
 updateCardsLang();
-
-// ДИАГНОСТИКА — удалить после теста
-const _tg = window.Telegram;
-const _tgWA = _tg && _tg.WebApp;
-const _initData = _tgWA && _tgWA.initData;
-alert('TG: ' + !!_tg + ' | WA: ' + !!_tgWA + ' | initData: ' + (typeof _initData) + ' | len: ' + (_initData ? _initData.length : 'n/a'));
-
 bootstrapApp();
 
 
