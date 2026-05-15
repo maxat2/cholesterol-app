@@ -2795,7 +2795,6 @@
               <span id="pw-change-cta-label" data-i18n="paywall.change_cta">Перейти на этот план</span>
             </button>
           </div>
-          <div class="pw-restore" onclick="paywallRestore()" data-i18n="paywall.restore">Восстановить покупку</div>
         </div>
 
       </div>
@@ -2872,7 +2871,7 @@
       <div class="pw-trial-note" id="pw-trial-note" data-i18n="paywall.note_trial">
         Бесплатно сейчас · $9/мес после триала · отмена в любой момент
       </div>
-      <div class="pw-restore" onclick="paywallRestore()" data-i18n="paywall.restore">Восстановить покупку</div>
+
     </div>
   </div>
   <!-- END SCREEN PAYWALL -->
@@ -4463,10 +4462,7 @@ function paywallStartTrial() {
   alert(`[STUB] Оплата плана: ${plan}\nПосле успешной оплаты вызови: activateSubscription('${plan}', Date.now() + 30*864e5)`);
 }
 
-function paywallRestore() {
-  // STUB — восстановление покупки
-  alert('[STUB] Восстановление покупки — сюда подключишь API платёжного сервиса');
-}
+
 
 /**
  * Хук активации подписки — вызывается любым платёжным провайдером после успешной оплаты.
@@ -4479,6 +4475,20 @@ function activateSubscription(plan, until) {
   updatePricingBtnStatus();
   checkTrialBlocker();
   syncPaywallState();
+
+  // Сохраняем в Supabase чтобы подписка работала на всех устройствах
+  const uid = getStoredUserId();
+  if (uid && supabaseClient) {
+    const untilIso = new Date(until).toISOString();
+    supabaseClient.from('users')
+      .update({ paid_until: untilIso, active_plan: plan })
+      .eq('id', uid)
+      .then(({ error }) => {
+        if (error) console.warn('[sub] Ошибка сохранения подписки в Supabase:', error.message);
+        else console.log(`[sub] Подписка сохранена в Supabase: plan=${plan}, until=${untilIso}`);
+      });
+  }
+
   // Toast — подтверждение
   const toast = document.getElementById('offline-toast');
   if (toast) {
@@ -4805,6 +4815,23 @@ function applySupabaseUserRowToForm(row) {
   applyDontKnowVisual();
   updateName((nameEl?.value || '').trim());
   syncUnitsUI();
+
+  // Подписка — автоматически подтягиваем из Supabase при входе
+  if (row.paid_until) {
+    const paidTs = new Date(row.paid_until).getTime();
+    if (paidTs > Date.now()) {
+      const plan = row.active_plan || 'month';
+      // Только если данные из БД свежее чем локальные
+      const localPaidUntil = parseInt(localStorage.getItem(LS_PAID_UNTIL) || '0', 10);
+      if (paidTs > localPaidUntil) {
+        localStorage.setItem(LS_PAID_UNTIL, String(paidTs));
+        localStorage.setItem(LS_ACTIVE_PLAN, plan);
+        console.log(`[sub] Подписка подтянута из Supabase: plan=${plan}, until=${new Date(paidTs).toLocaleDateString()}`);
+      }
+    }
+  }
+  updatePricingBtnStatus();
+  checkTrialBlocker();
 }
 
 let profileAutofillFromSupabase = false;
