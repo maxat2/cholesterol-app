@@ -3233,6 +3233,7 @@ const LOCALES = {
 
     // Offline
     'offline.no_connection': '⚡ Нет интернета — попробуйте позже',
+    'error.rate_limit': 'Дневной лимит 20 запросов исчерпан. Попробуйте завтра.',
     'offline.connected': '✓ Соединение восстановлено',
 
     // Camera
@@ -3564,6 +3565,7 @@ const LOCALES = {
 
     // Offline
     'offline.no_connection': '⚡ No internet — please try again later',
+    'error.rate_limit': 'Daily limit of 20 requests reached. Try again tomorrow.',
     'offline.connected': '✓ Connection restored',
 
     // Camera
@@ -3895,6 +3897,7 @@ const LOCALES = {
 
     // Offline
     'offline.no_connection': '⚡ Kein Internet — bitte später versuchen',
+    'error.rate_limit': 'Tageslimit von 20 Anfragen erreicht. Versuche es morgen wieder.',
     'offline.connected': '✓ Verbindung wiederhergestellt',
 
     // Kamera
@@ -4042,7 +4045,7 @@ const __supabaseSdk = supabase;
       const backed = readCookie();
       if (backed) {
         _setItem.call(localStorage, SB_KEY, backed);
-        console.log('[auth] сессия восстановлена из куки в localStorage');
+        log('[auth] сессия восстановлена из куки в localStorage');
       }
     }
   } catch (e) {}
@@ -4061,7 +4064,7 @@ let bootstrapDone = false;
 let authNavigationDone = false;
 
 supabaseClient.auth.onAuthStateChange(async (event, session) => {
-  console.log('[auth]', event, session?.user?.email ?? 'no session');
+  log('[auth]', event, session?.user?.email ?? 'no session');
 
   if (event === 'INITIAL_SESSION') {
     if (session) {
@@ -4069,10 +4072,10 @@ supabaseClient.auth.onAuthStateChange(async (event, session) => {
     } else {
       // Токен мог истечь — SDK делает refresh по сети и вернёт SIGNED_IN.
       // Ждём до 10 секунд прежде чем показать экран входа.
-      console.log('[auth] INITIAL_SESSION без сессии — ждём refresh токена до 10с');
+      log('[auth] INITIAL_SESSION без сессии — ждём refresh токена до 10с');
       setTimeout(() => {
         if (!authNavigationDone) {
-          console.log('[auth] refresh не пришёл за 10с → screen-auth');
+          log('[auth] refresh не пришёл за 10с → screen-auth');
           // Показываем онбординг новым пользователям перед экраном входа
           if (!isOnboardingDone()) {
             showOnboarding();
@@ -4114,7 +4117,7 @@ async function handleAuthSession(session) {
   // не ждём ответа от БД. Данные подгрузятся в фоне.
   const cachedProfile = localStorage.getItem('cholesterol_app_user_profile');
   if (cachedProfile) {
-    console.log('[auth] handleAuthSession: профиль в кэше, сразу goTo screen-main');
+    log('[auth] handleAuthSession: профиль в кэше, сразу goTo screen-main');
     try { loadProfileFromStorage(); } catch(e) {}
     // Не перебиваем экран если пользователь уже на каком-то экране приложения
     // (например вернулся из сна на screen-result — TOKEN_REFRESHED не должен его сбрасывать)
@@ -4131,7 +4134,7 @@ async function handleAuthSession(session) {
 
   // Новый пользователь — ждём БД с таймаутом 5 секунд
   try {
-    console.log('[auth] handleAuthSession: новый пользователь, запрос профиля');
+    log('[auth] handleAuthSession: новый пользователь, запрос профиля');
     const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000));
     const query = supabaseClient.from('users').select('*').eq('id', session.user.id).maybeSingle();
     const { data: userRow, error } = await Promise.race([query, timeout]);
@@ -4168,7 +4171,7 @@ async function handleAuthSession(session) {
       goTo('screen-profile', { mode: 'onboarding' });
     }
   } catch (e) {
-    console.warn('[auth] DB timeout/error, going to onboarding', e);
+    warn('[auth] DB timeout/error, going to onboarding', e);
     // Даже при ошибке подставляем email
     const emailFromGoogle = session.user.email || '';
     if (emailFromGoogle) {
@@ -4206,7 +4209,7 @@ async function refreshDeviceContext() {
       cachedDeviceContext = { ...info };
     }
   } catch (e) {
-    console.warn('[device] geo', e);
+    warn('[device] geo', e);
   }
   return cachedDeviceContext;
 }
@@ -4225,7 +4228,7 @@ function getDeviceInfoForUpsert() {
 }
 
 deviceContextPromise = refreshDeviceContext().catch((e) => {
-  console.warn('[device] refreshDeviceContext', e);
+  warn('[device] refreshDeviceContext', e);
   return cachedDeviceContext;
 });
 
@@ -4238,7 +4241,7 @@ async function loadOpenAiKeyFromSupabase() {
       .eq('key', 'openai_api_key')
       .single();
     if (error) {
-      console.warn('[supabase] app_settings error:', error);
+      warn('[supabase] app_settings error:', error);
       return false;
     }
     const v = data?.value != null ? String(data.value).trim() : '';
@@ -4246,7 +4249,7 @@ async function loadOpenAiKeyFromSupabase() {
     openaiApiKey = v;
     return true;
   } catch (e) {
-    console.warn(e);
+    warn(e);
     return false;
   }
 }
@@ -4550,8 +4553,8 @@ function activateSubscription(plan, until) {
       .update({ paid_until: untilIso, active_plan: plan })
       .eq('id', uid)
       .then(({ error }) => {
-        if (error) console.warn('[sub] Ошибка сохранения подписки в Supabase:', error.message);
-        else console.log(`[sub] Подписка сохранена в Supabase: plan=${plan}, until=${untilIso}`);
+        if (error) warn('[sub] Ошибка сохранения подписки в Supabase:', error.message);
+        else log(`[sub] Подписка сохранена в Supabase: plan=${plan}, until=${untilIso}`);
       });
   }
 
@@ -4562,7 +4565,7 @@ function activateSubscription(plan, until) {
     toast.classList.add('visible');
     setTimeout(() => toast.classList.remove('visible'), 3000);
   }
-  console.log(`[sub] activated: plan=${plan}, until=${new Date(until).toLocaleDateString()}`);
+  log(`[sub] activated: plan=${plan}, until=${new Date(until).toLocaleDateString()}`);
 }
 
 // Симуляция активации для тестирования (DEV only)
@@ -4570,7 +4573,7 @@ function activateSubscription(plan, until) {
 window.devActivatePaid = function(days, plan) {
   const until = Date.now() + days * 24 * 60 * 60 * 1000;
   activateSubscription(plan || 'month', until);
-  console.log(`[dev] Paid access activated for ${days} days, plan=${plan || 'month'}`);
+  log(`[dev] Paid access activated for ${days} days, plan=${plan || 'month'}`);
 };
 window.devExpireTrial = function() {
   localStorage.setItem(LS_TRIAL_START, String(Date.now() - (TRIAL_DAYS + 1) * 24 * 60 * 60 * 1000));
@@ -4578,7 +4581,7 @@ window.devExpireTrial = function() {
   localStorage.removeItem(LS_ACTIVE_PLAN);
   updatePricingBtnStatus();
   checkTrialBlocker();
-  console.log('[dev] Trial expired');
+  log('[dev] Trial expired');
 };
 
 // Полный сброс в активный триал (чистит и localStorage и Supabase)
@@ -4589,12 +4592,12 @@ window.devResetToTrial = async function() {
   const uid = getStoredUserId();
   if (uid && supabaseClient) {
     await supabaseClient.from('users').update({ paid_until: null, active_plan: null }).eq('id', uid);
-    console.log('[dev] Supabase subscription cleared');
+    log('[dev] Supabase subscription cleared');
   }
   updatePricingBtnStatus();
   checkTrialBlocker();
   syncPaywallState();
-  console.log('[dev] Reset to fresh trial — reload to see full effect');
+  log('[dev] Reset to fresh trial — reload to see full effect');
   location.reload();
 };
 // ===== END MONETIZATION =====
@@ -4910,7 +4913,7 @@ function applySupabaseUserRowToForm(row) {
       if (paidTs > localPaidUntil) {
         localStorage.setItem(LS_PAID_UNTIL, String(paidTs));
         localStorage.setItem(LS_ACTIVE_PLAN, plan);
-        console.log(`[sub] Подписка подтянута из Supabase: plan=${plan}, until=${new Date(paidTs).toLocaleDateString()}`);
+        log(`[sub] Подписка подтянута из Supabase: plan=${plan}, until=${new Date(paidTs).toLocaleDateString()}`);
       }
     }
   }
@@ -5009,7 +5012,7 @@ async function tryAutofillProfileFromSupabaseEmail() {
   const { data, error } = await supabaseClient.from('users').select('*').eq('email', email).maybeSingle();
   if (seq !== emailAutofillSeq) return;
   if (error) {
-    console.warn('[supabase] users autofill', error);
+    warn('[supabase] users autofill', error);
     refreshProfileEditBaselineAfterAutofill();
     return;
   }
@@ -5057,7 +5060,7 @@ async function upsertUserToSupabase() {
   try {
     await deviceContextPromise;
   } catch (e) {
-    console.warn('[device] context', e);
+    warn('[device] context', e);
   }
 
   const {
@@ -5093,7 +5096,7 @@ async function upsertUserToSupabase() {
     .eq('id', uid)
     .maybeSingle();
   if (selErr) {
-    console.warn('[supabase] users select', selErr);
+    warn('[supabase] users select', selErr);
     return null;
   }
 
@@ -5104,7 +5107,7 @@ async function upsertUserToSupabase() {
     const patch = buildMergedUserUpdate(existing, profile);
     const { error: upErr } = await supabaseClient.from('users').update(patch).eq('id', uid);
     if (upErr) {
-      console.warn('[supabase] users update', upErr);
+      warn('[supabase] users update', upErr);
       return null;
     }
     return uid;
@@ -5123,7 +5126,7 @@ async function upsertUserToSupabase() {
       .select('id')
       .single();
     if (insErr) {
-      console.warn('[supabase] users insert (email only)', insErr);
+      warn('[supabase] users insert (email only)', insErr);
       return null;
     }
     if (ins && ins.id) {
@@ -5139,7 +5142,7 @@ async function upsertUserToSupabase() {
     .select('id')
     .single();
   if (crErr) {
-    console.warn('[supabase] users insert', crErr);
+    warn('[supabase] users insert', crErr);
     return null;
   }
   if (created && created.id) {
@@ -5166,7 +5169,7 @@ async function refreshMealsCacheFromSupabase() {
     .eq('user_id', uid)
     .order('created_at', { ascending: true });
   if (error) {
-    console.warn('[supabase] meals select', error);
+    warn('[supabase] meals select', error);
     return;
   }
   const fromServer = (data || []).map(mealRowToLocal);
@@ -5181,12 +5184,12 @@ async function refreshMealsCacheFromSupabase() {
     if (!isDaily) return true;
     const dk = m.summary_date || m.summaryDate || (m.at && m.at.slice(0, 10)) || '';
     if (!dk || !seenDates[dk]) { seenDates[dk] = true; return true; }
-    console.log('[merge] удалён дубль daily summary за', dk);
+    log('[merge] удалён дубль daily summary за', dk);
     return false;
   });
   setMealHistory(deduped);
   // Фоновая синхронизация несинхронизированных записей
-  syncPendingMeals().catch(e => console.warn('[sync] фоновая ошибка', e));
+  syncPendingMeals().catch(e => warn('[sync] фоновая ошибка', e));
 }
 
 
@@ -5224,7 +5227,7 @@ function buildDailySummaryPrompt(meals, profile) {
     : (parseFloat(p.bmi) < 23 && parseFloat(p.ldl) >= 3.5
         ? '\nLMHR-КОНТЕКСТ: Возможный LMHR-профиль (низкий ИМТ + высокий LDL): с осторожностью относись к насыщенным жирам.'
         : '');
-  const mealsList = meals.map((m, i) =>
+  const mealsList = meals.slice(0, 10).map((m, i) =>
     (i+1) + '. ' + (m.title || t('common.no_name')) + ' — ' + (m.score ?? '?') + '/10\n' +
     '   Состав: ' + (m.vision || '—') + '\n' +
     '   Резюме: ' + (m.summary || '—')
@@ -5285,7 +5288,7 @@ async function generateDailySummary() {
   const meals = getMealsForDate(today);
   if (meals.length < 2) return;
 
-  console.log('[daily] генерируем итог дня, блюд:', meals.length);
+  log('[daily] генерируем итог дня, блюд:', meals.length);
 
   // Показываем временную карточку-заглушку
   const listEl = document.getElementById('history-list');
@@ -5302,7 +5305,7 @@ async function generateDailySummary() {
     const prompt = buildDailySummaryPrompt(meals);
     const res = await fetch('/api/analyze', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'X-User-Id': getStoredUserId() || '' },
       body: JSON.stringify({
         model: 'gpt-4o',
         max_tokens: 1000,
@@ -5358,14 +5361,14 @@ async function generateDailySummary() {
       const hist = getMealHistory();
       const idx = hist.findIndex(m => m.is_daily_summary && m.summary_date === today && !m.supabaseId);
       if (idx !== -1) { hist[idx].supabaseId = data.id; setMealHistory(hist); }
-      console.log('[daily] итог дня сохранён → ' + data.id);
+      log('[daily] итог дня сохранён → ' + data.id);
     }
 
     // Перерисовываем историю
     await renderHistoryList();
 
   } catch(e) {
-    console.warn('[daily] ошибка генерации итога', e);
+    warn('[daily] ошибка генерации итога', e);
     if (genCard) genCard.remove();
   }
 }
@@ -5376,7 +5379,7 @@ async function syncPendingMeals() {
   const all = getMealHistory();
   const pending = all.filter(m => !m.supabaseId && m.verdict && m.verdict !== 'error');
   if (!pending.length) return;
-  console.log(`[sync] найдено ${pending.length} несинхронизированных записей`);
+  log(`[sync] найдено ${pending.length} несинхронизированных записей`);
 
   for (const meal of pending) {
     try {
@@ -5410,7 +5413,7 @@ async function syncPendingMeals() {
         .single();
 
       if (error) {
-        console.warn('[sync] ошибка вставки', error.message, error.details);
+        warn('[sync] ошибка вставки', error.message, error.details);
         continue;
       }
 
@@ -5423,11 +5426,11 @@ async function syncPendingMeals() {
           delete updated.photoBase64;
           next[idx] = updated;
           setMealHistory(next);
-          console.log(`[sync] запись ${meal.title} синхронизирована → ${data.id}`);
+          log(`[sync] запись ${meal.title} синхронизирована → ${data.id}`);
         }
       }
     } catch (e) {
-      console.warn('[sync] ошибка при синхронизации записи', meal.title, e);
+      warn('[sync] ошибка при синхронизации записи', meal.title, e);
     }
   }
 }
@@ -5599,8 +5602,8 @@ async function submitDescribeFood() {
     window.scrollTo(0, 0);
     document.querySelector('#screen-result .result-screen-inner').scrollTo(0, 0);
     showResultLoader(t('common.refining'));
-    console.log('[refine] уточнение отправлено:', userText);
-    console.log('[refine] есть фото:', !!lastMealPhotoDataUrl);
+    log('[refine] уточнение отправлено:', userText);
+    log('[refine] есть фото:', !!lastMealPhotoDataUrl);
     const loaderText = document.getElementById('result-loader-text');
     try {
       let data;
@@ -5892,7 +5895,7 @@ async function saveProfileAndStart() {
   try {
     await upsertUserToSupabase();
   } catch (e) {
-    console.warn(e);
+    warn(e);
   }
   if (profileScreenMode === 'edit') {
     captureProfileEditBaseline();
@@ -5975,12 +5978,12 @@ function setMealHistory(arr) {
   try {
     localStorage.setItem(LS_MEAL_HISTORY, JSON.stringify(slim));
   } catch (e) {
-    console.warn('[localStorage] quota exceeded, trimming...', e);
+    warn('[localStorage] quota exceeded, trimming...', e);
     const trimmed = slim.slice(-20);
     try {
       localStorage.setItem(LS_MEAL_HISTORY, JSON.stringify(trimmed));
     } catch (e2) {
-      console.warn('[localStorage] still failed after trim', e2);
+      warn('[localStorage] still failed after trim', e2);
     }
   }
 }
@@ -6170,9 +6173,9 @@ async function renderHistoryList() {
 
   try {
     await refreshMealsCacheFromSupabase();
-    generateDailySummary().catch(e => console.warn('[daily]', e));
+    generateDailySummary().catch(e => warn('[daily]', e));
   } catch (e) {
-    console.warn(e);
+    warn(e);
   }
 
   const listEl = document.getElementById('history-list');
@@ -6432,7 +6435,7 @@ async function saveMealToHistoryAndGoMain() {
           .single();
 
         if (error) {
-          console.warn('[supabase] meals insert (text)', error);
+          warn('[supabase] meals insert (text)', error);
         } else if (data && data.id) {
           const next = getMealHistory();
           const idx = next.findIndex((m) => m.at === atIso && !m.supabaseId);
@@ -6468,7 +6471,7 @@ async function saveMealToHistoryAndGoMain() {
           .single();
 
         if (error) {
-          console.warn('[supabase] meals insert', error);
+          warn('[supabase] meals insert', error);
         } else if (data && data.id) {
           const next = getMealHistory();
           const idx = next.findIndex((m) => m.at === atIso && !m.supabaseId);
@@ -6481,7 +6484,7 @@ async function saveMealToHistoryAndGoMain() {
         }
       }
     } catch (e) {
-      console.warn('[save meal] compress/upload/insert', e);
+      warn('[save meal] compress/upload/insert', e);
       const saveBtn = document.getElementById('result-btn-save-history');
       if (saveBtn) saveBtn.disabled = false;
     }
@@ -6502,6 +6505,13 @@ function backFromResult() {
 
 /** Значения «я не знаю»: все в зелёной зоне по ESC/AHA (HDL ≥1.5 ммоль/л для нормы). */
 const AVG = { total: 5.0, ldl: 3.0, hdl: 1.5, trig: 1.3 };
+
+// ── Режим отладки ─────────────────────────────────────────────────────────────
+// false = продакшен (логи скрыты)
+// true  = разработка (логи видны в консоли)
+const DEV_MODE = false;
+const log  = (...args) => DEV_MODE && console.log(...args);
+const warn = (...args) => DEV_MODE && console.warn(...args);
 let dontKnowOn = false;
 let lastFoodObjectUrl = null;
 
@@ -6692,13 +6702,13 @@ async function prepareMainScreenLipids() {
   stack.classList.add('is-loading');
   try {
     const { data, error } = await supabaseClient.from('users').select('*').eq('id', uid).maybeSingle();
-    if (error) console.warn('[supabase] users hydrate main', error);
+    if (error) warn('[supabase] users hydrate main', error);
     else if (data) {
       applySupabaseUserRowToForm(data);
       saveProfileToStorage();
     }
   } catch (e) {
-    console.warn(e);
+    warn(e);
   } finally {
     if (seq !== mainLipidsHydrateSeq) return;
     stack.classList.remove('is-loading');
@@ -7107,7 +7117,7 @@ function buildVisionPrompt() {
 - никаких markdown
 - никаких пояснений вне JSON
 - Все текстовые поля JSON (title, vision, summary, education, nuances, upgrade, effect) пиши на языке: ${localeName}`;
-  console.log('[prompt]', out);
+  log('[prompt]', out);
   return out;
 }
 
@@ -7143,13 +7153,13 @@ async function compressPhoto(dataUrl, maxSize = 800, quality = 0.7) {
         resolve(canvas.toDataURL('image/jpeg', quality));
       } catch (e) {
         // Если canvas упал (iOS ограничение) — возвращаем оригинал
-        console.warn('[compress] canvas failed, using original', e);
+        warn('[compress] canvas failed, using original', e);
         resolve(dataUrl);
       }
     };
     img.onerror = () => {
       // Если изображение не загрузилось — возвращаем оригинал
-      console.warn('[compress] image load failed, using original');
+      warn('[compress] image load failed, using original');
       resolve(dataUrl);
     };
     img.src = dataUrl;
@@ -7262,7 +7272,7 @@ async function analyzeFoodPhoto(dataUrl, userClarification) {
 
   const res = await fetch('/api/analyze', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'X-User-Id': getStoredUserId() || '' },
     body: JSON.stringify({
       model: 'gpt-4o',
       response_format: { type: 'json_object' },
@@ -7309,7 +7319,7 @@ async function analyzeFoodFromText(userText, userClarification) {
   }
   const res = await fetch('/api/analyze', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'X-User-Id': getStoredUserId() || '' },
     body: JSON.stringify({
       model: 'gpt-4o',
       response_format: { type: 'json_object' },
@@ -7699,7 +7709,7 @@ async function signInWithGoogleAuth() {
       skipBrowserRedirect: false
     }
   });
-  console.log('[google] запускаем OAuth redirect');
+  log('[google] запускаем OAuth redirect');
 }
 
 async function submitAuthEmail() {
@@ -7715,12 +7725,12 @@ async function submitAuthEmail() {
   sendBtn.disabled = true;
   let success = false;
   try {
-    console.log('[auth] отправляем magic link на:', email);
+    log('[auth] отправляем magic link на:', email);
     const { error } = await supabaseClient.auth.signInWithOtp({
       email,
       options: { emailRedirectTo: 'https://cholesterol-app.vercel.app' }
     });
-    console.log('[auth] результат:', error ? 'ошибка: ' + error.message : 'успешно отправлено');
+    log('[auth] результат:', error ? 'ошибка: ' + error.message : 'успешно отправлено');
     if (error) throw error;
     if (status) status.textContent = t('auth.check_email');
     success = true;
@@ -7756,7 +7766,7 @@ async function logoutFromApp() {
   try {
     await supabaseClient.auth.signOut();
   } catch (e) {
-    console.warn('[auth] signOut', e);
+    warn('[auth] signOut', e);
   }
   localStorage.clear();
   goTo('screen-auth');
@@ -7775,7 +7785,7 @@ function clearBtnLoading(btn) {
 }
 
 async function bootstrapApp() {
-  console.log('[bootstrap] старт');
+  log('[bootstrap] старт');
   // Показываем онбординг при первом запуске (до авторизации).
   // Если supabase уже установил навигацию через onAuthStateChange — не перебиваем.
   // Используем небольшой таймаут чтобы дать supabase шанс сработать синхронно (INITIAL_SESSION).
@@ -7898,11 +7908,11 @@ const VAPID_PUBLIC_KEY = 'BJ0icyiIjFg9o7bQA8n8p59XyuxbyhcfOHAXqKD5qI3Exz4IHAWSCG
 async function registerPushSubscription() {
   // Проверяем поддержку
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-    console.log('[push] Браузер не поддерживает Web Push');
+    log('[push] Браузер не поддерживает Web Push');
     return;
   }
   if (!VAPID_PUBLIC_KEY || VAPID_PUBLIC_KEY.includes('PASTE_YOUR')) {
-    console.log('[push] VAPID ключ не настроен');
+    log('[push] VAPID ключ не настроен');
     return;
   }
 
@@ -7914,7 +7924,7 @@ async function registerPushSubscription() {
     // Запрашиваем разрешение
     const permission = await Notification.requestPermission();
     if (permission !== 'granted') {
-      console.log('[push] Разрешение отклонено');
+      log('[push] Разрешение отклонено');
       return;
     }
 
@@ -7939,11 +7949,11 @@ async function registerPushSubscription() {
         device_hint: deviceHint,
       }, { onConflict: 'user_id,subscription->endpoint' });
 
-    if (error) console.warn('[push] Ошибка сохранения подписки:', error.message);
-    else console.log('[push] Подписка сохранена успешно');
+    if (error) warn('[push] Ошибка сохранения подписки:', error.message);
+    else log('[push] Подписка сохранена успешно');
 
   } catch (err) {
-    console.warn('[push] Ошибка регистрации:', err.message);
+    warn('[push] Ошибка регистрации:', err.message);
   }
 }
 
