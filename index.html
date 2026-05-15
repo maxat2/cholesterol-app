@@ -2155,6 +2155,15 @@
           <input type="email" id="input-email" placeholder="you@example.com" readonly tabindex="-1" style="color:var(--muted);" />
         </div>
       </div>
+      <div class="field" id="field-wrap-tg-username" style="display:none;opacity:0.6;pointer-events:none;">
+        <div class="field-label" style="display:flex;justify-content:space-between;align-items:center;">
+          Telegram
+          <span style="font-size:11px;color:var(--muted2);font-weight:400;">не изменяется</span>
+        </div>
+        <div class="field-row">
+          <input type="text" id="input-tg-username" readonly tabindex="-1" style="color:var(--muted);" />
+        </div>
+      </div>
       <div class="field" id="field-wrap-name">
         <div class="field-label" data-i18n="profile.name">Имя</div>
         <div class="field-row">
@@ -5889,6 +5898,32 @@ function loadProfileFromStorage() {
   }
 }
 
+async function upsertTelegramProfile() {
+  const raw = localStorage.getItem(LS_USER_PROFILE);
+  if (!raw) return;
+  const profile = JSON.parse(raw);
+  if (!profile.telegram_id) return;
+  const headers = {
+    'Content-Type': 'application/json',
+    'apikey': SUPABASE_ANON_KEY,
+    'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+    'Prefer': 'return=minimal',
+  };
+  const patch = {
+    name: profile.name || '',
+    age: profile.age ? parseInt(profile.age) : null,
+    height_cm: profile.height ? parseFloat(profile.height) : null,
+    weight_kg: profile.weight ? parseFloat(profile.weight) : null,
+    sex: (profile.gender === 'Мужской' || profile.gender === 'male') ? 'male'
+       : (profile.gender === 'Женский' || profile.gender === 'female') ? 'female' : null,
+    units: profile.units || 'mmol',
+  };
+  try {
+    await fetch(SUPABASE_URL + '/rest/v1/users?telegram_id=eq.' + profile.telegram_id,
+      { method: 'PATCH', headers, body: JSON.stringify(patch) });
+  } catch(e) { warn('[tg] upsert error', e); }
+}
+
 async function saveProfileAndStart() {
   const emailEl = document.getElementById('input-email');
   const nameEl = document.getElementById('input-name');
@@ -5904,7 +5939,11 @@ async function saveProfileAndStart() {
   saveProfileToStorage();
   profileAutofillFromSupabase = false;
   try {
-    await upsertUserToSupabase();
+    if (isTelegram()) {
+      await upsertTelegramProfile();
+    } else {
+      await upsertUserToSupabase();
+    }
   } catch (e) {
     warn(e);
   }
