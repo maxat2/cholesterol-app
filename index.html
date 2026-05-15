@@ -2155,15 +2155,6 @@
           <input type="email" id="input-email" placeholder="you@example.com" readonly tabindex="-1" style="color:var(--muted);" />
         </div>
       </div>
-      <div class="field" id="field-wrap-tg-username" style="display:none;opacity:0.6;pointer-events:none;">
-        <div class="field-label" style="display:flex;justify-content:space-between;align-items:center;">
-          Telegram
-          <span style="font-size:11px;color:var(--muted2);font-weight:400;">не изменяется</span>
-        </div>
-        <div class="field-row">
-          <input type="text" id="input-tg-username" readonly tabindex="-1" style="color:var(--muted);" />
-        </div>
-      </div>
       <div class="field" id="field-wrap-name">
         <div class="field-label" data-i18n="profile.name">Имя</div>
         <div class="field-row">
@@ -5759,8 +5750,16 @@ function saveProfileToStorage() {
   const heightEl = document.getElementById('input-height');
   const weightEl = document.getElementById('input-weight');
   const statinsEl = document.getElementById('toggle-statins');
-  const profile = {
-    email: emailEl?.value ?? '',
+
+  // Читаем существующий профиль чтобы сохранить telegram_id и другие поля
+  let existing = {};
+  try {
+    const raw = localStorage.getItem(LS_USER_PROFILE);
+    if (raw) existing = JSON.parse(raw);
+  } catch(e) {}
+
+  const profile = Object.assign({}, existing, {
+    email: emailEl?.value ?? existing.email ?? '',
     name: nameEl?.value ?? '',
     v_total: vTotal?.value || String(AVG.total),
     v_ldl: vLdl?.value || String(AVG.ldl),
@@ -5776,7 +5775,7 @@ function saveProfileToStorage() {
     v_apob: (document.getElementById('v-apob')?.value ?? ''),
     body_type: segLabelToDb(document.querySelector('#seg-body-type .seg-btn.active')?.textContent.trim() ?? ''),
     activity: segLabelToDb(document.querySelector('#seg-activity .seg-btn.active')?.textContent.trim() ?? '')
-  };
+  });
   try {
     localStorage.setItem(LS_USER_PROFILE, JSON.stringify(profile));
   } catch (e) {}
@@ -5890,35 +5889,6 @@ function loadProfileFromStorage() {
   }
 }
 
-async function upsertTelegramProfile() {
-  const raw = localStorage.getItem(LS_USER_PROFILE);
-  if (!raw) return;
-  const profile = JSON.parse(raw);
-  if (!profile.telegram_id) return;
-
-  const headers = {
-    'Content-Type': 'application/json',
-    'apikey': SUPABASE_ANON_KEY,
-    'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
-    'Prefer': 'return=minimal',
-  };
-
-  const patch = {
-    name: profile.name || '',
-    age: profile.age ? parseInt(profile.age) : null,
-    height_cm: profile.height ? parseFloat(profile.height) : null,
-    weight_kg: profile.weight ? parseFloat(profile.weight) : null,
-    sex: (profile.gender === 'Мужской' || profile.gender === 'male') ? 'male'
-       : (profile.gender === 'Женский' || profile.gender === 'female') ? 'female' : null,
-    units: profile.units || 'mmol',
-  };
-
-  await fetch(
-    SUPABASE_URL + '/rest/v1/users?telegram_id=eq.' + profile.telegram_id,
-    { method: 'PATCH', headers, body: JSON.stringify(patch) }
-  );
-}
-
 async function saveProfileAndStart() {
   const emailEl = document.getElementById('input-email');
   const nameEl = document.getElementById('input-name');
@@ -5929,15 +5899,12 @@ async function saveProfileAndStart() {
   wrapN?.classList.remove('field--error');
   const name = (nameEl?.value ?? '').trim();
   const email = (emailEl?.value ?? '').trim();
+  // Имя и email не обязательны — просто сохраняем что есть
   errEl?.classList.remove('visible');
   saveProfileToStorage();
   profileAutofillFromSupabase = false;
   try {
-    if (isTelegram()) {
-      await upsertTelegramProfile();
-    } else {
-      await upsertUserToSupabase();
-    }
+    await upsertUserToSupabase();
   } catch (e) {
     warn(e);
   }
@@ -6570,12 +6537,7 @@ async function loginWithTelegram() {
   tg.expand();
 
   const tgUser = tg.initDataUnsafe?.user;
-
-  // Ставим язык из Telegram сразу
-  const tgLang = tgUser?.language_code?.slice(0, 2).toLowerCase();
-  if (tgLang && typeof LOCALES !== 'undefined' && LOCALES[tgLang]) {
-    setLocale(tgLang);
-  }
+  alert('loginWithTelegram | user: ' + (tgUser ? tgUser.first_name : 'NO USER'));
 
   try {
     const res = await fetch('/api/telegram-auth', {
@@ -6584,55 +6546,49 @@ async function loginWithTelegram() {
       body: JSON.stringify({ initData: tg.initData }),
     });
 
-    if (!res.ok) throw new Error('Auth failed: ' + res.status);
     const data = await res.json();
-    if (!data.user) throw new Error('No user in response');
+    alert('response: ' + JSON.stringify(data).substring(0, 150));
+
+    if (!res.ok || !data.user) {
+      throw new Error('Auth failed: ' + JSON.stringify(data));
+    }
 
     const user = data.user;
-
-    // Мерджим с существующим профилем (не затираем заполненные поля)
-    const existingRaw = localStorage.getItem(LS_USER_PROFILE);
-    const existing = existingRaw ? JSON.parse(existingRaw) : {};
-    const profile = Object.assign({}, existing, {
-      name: existing.name || user.name || (tgUser && tgUser.first_name) || '',
-      email: existing.email || '',
+    const profile = {
+      id: user.id,
+      name: user.name || (tgUser && tgUser.first_name) || '',
       telegram_id: user.telegram_id,
       tg_user_id: tgUser && tgUser.id,
       tg_username: tgUser && tgUser.username,
-      active_plan: user.active_plan || existing.active_plan || 'trial',
-      paid_until: user.paid_until || existing.paid_until || null,
-      trial_start: user.trial_start || existing.trial_start || new Date().toISOString(),
-    });
-    localStorage.setItem(LS_USER_PROFILE, JSON.stringify(profile));
+      active_plan: user.active_plan || 'trial',
+      paid_until: user.paid_until || null,
+      trial_start: user.trial_start || new Date().toISOString(),
+    };
+    localStorage.setItem('ch_profile', JSON.stringify(profile));
     if (user.active_plan) localStorage.setItem('ch_active_plan', user.active_plan);
     if (user.paid_until) localStorage.setItem('ch_paid_until', new Date(user.paid_until).getTime());
     if (user.trial_start) localStorage.setItem('ch_trial_start', new Date(user.trial_start).getTime());
     try { localStorage.setItem('ch_onboarding_done', '1'); } catch(e) {}
 
-    authNavigationDone = true;
+    // Показываем @username вместо email в профиле
+    const emailWrap = document.getElementById('field-wrap-email');
+    const tgWrap = document.getElementById('field-wrap-tg-username');
+    const tgInput = document.getElementById('input-tg-username');
+    if (emailWrap) emailWrap.style.display = 'none';
+    if (tgWrap) tgWrap.style.display = '';
+    if (tgInput) tgInput.value = tgUser?.username ? '@' + tgUser.username : tgUser?.first_name || '';
 
-    // Если профиль не заполнен (нет имени/возраста) — показываем профиль
-    const profileFilled = !!(profile.name && profile.age);
-    if (!profileFilled) {
-      goTo('screen-profile', { mode: 'onboarding' });
-    } else {
-      goTo('screen-main');
+    // Язык из Telegram — после goTo чтобы DOM был готов
+    authNavigationDone = true;
+    goTo('screen-main');
+
+    const tgLang = tgUser?.language_code?.slice(0, 2).toLowerCase();
+    if (tgLang && typeof LOCALES !== 'undefined' && LOCALES[tgLang]) {
+      setLocale(tgLang);
     }
 
-    // Обновляем UI профиля
-    requestAnimationFrame(() => {
-      const emailWrap = document.getElementById('field-wrap-email');
-      const tgWrap = document.getElementById('field-wrap-tg-username');
-      const tgInput = document.getElementById('input-tg-username');
-      if (emailWrap) emailWrap.style.display = 'none';
-      if (tgWrap) tgWrap.style.display = '';
-      if (tgInput) tgInput.value = tgUser?.username ? '@' + tgUser.username : tgUser?.first_name || '';
-      const localeLabel = LOCALE === 'ru' ? 'Русский' : LOCALE === 'de' ? 'Deutsch' : 'English';
-      if (typeof setSegActiveByLabel === 'function') setSegActiveByLabel('seg-locale', localeLabel);
-    });
-
   } catch (e) {
-    console.error('[telegram] auth error', e);
+    alert('ERROR: ' + e.message);
     goTo('screen-auth');
   }
 }
