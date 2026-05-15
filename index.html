@@ -4077,7 +4077,6 @@ supabaseClient.auth.onAuthStateChange(async (event, session) => {
       setTimeout(() => {
         if (!authNavigationDone) {
           log('[auth] refresh не пришёл за 10с → screen-auth');
-          if (isTelegram()) return;
           // Показываем онбординг новым пользователям перед экраном входа
           if (!isOnboardingDone()) {
             showOnboarding();
@@ -6516,27 +6515,19 @@ const log  = (...args) => DEV_MODE && console.log(...args);
 const warn = (...args) => DEV_MODE && console.warn(...args);
 
 // ─── Telegram Mini App ───────────────────────────────────────────────────────
-function isTelegram() {
-  try {
-    return !!(window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData && window.Telegram.WebApp.initData.length > 0);
-  } catch(e) { return false; }
-}
+const isTelegram = !!(window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData);
 
 async function loginWithTelegram() {
   const tg = window.Telegram.WebApp;
   tg.ready();
   tg.expand();
 
-  // Пропускаем онбординг в Telegram
-  markOnboardingDone();
+  const initData = tg.initDataUnsafe;
+  const tgUser = initData.user;
 
-  const tgUser = tg.initDataUnsafe?.user;
-
-  if (!tgUser) {
-    console.error('[telegram] нет данных пользователя');
-    goTo('screen-auth');
-    return;
-  }
+  // Скрываем экран авторизации пока идёт вход
+  const authScreen = document.getElementById('screen-auth');
+  if (authScreen) authScreen.style.display = 'none';
 
   try {
     const res = await fetch('/api/telegram-auth', {
@@ -6545,7 +6536,7 @@ async function loginWithTelegram() {
       body: JSON.stringify({ initData: tg.initData }),
     });
 
-    if (!res.ok) throw new Error(`Auth failed: ${res.status}`);
+    if (!res.ok) throw new Error('Auth failed');
 
     const { user } = await res.json();
 
@@ -6570,6 +6561,7 @@ async function loginWithTelegram() {
     goTo('screen-main');
   } catch (e) {
     console.error('[telegram] auth error', e);
+    // Fallback — показываем обычный экран входа
     goTo('screen-auth');
   }
 }
@@ -7850,7 +7842,7 @@ async function bootstrapApp() {
   log('[bootstrap] старт');
 
   // Telegram Mini App — авторизуемся через Telegram, пропускаем screen-auth
-  if (isTelegram()) {
+  if (isTelegram) {
     await loginWithTelegram();
     return;
   }
@@ -8131,7 +8123,14 @@ if ('serviceWorker' in navigator) {
 // Применяем локализацию сразу при загрузке
 applyLocaleToDOM();
 updateCardsLang();
-bootstrapApp();
+
+// Даём Telegram SDK время инициализироваться перед стартом
+if (window.Telegram && window.Telegram.WebApp) {
+  bootstrapApp();
+} else {
+  // Небольшая задержка на случай если SDK ещё грузится
+  setTimeout(bootstrapApp, 100);
+}
 
 
 </script>
