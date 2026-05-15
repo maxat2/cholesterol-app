@@ -2155,15 +2155,6 @@
           <input type="email" id="input-email" placeholder="you@example.com" readonly tabindex="-1" style="color:var(--muted);" />
         </div>
       </div>
-      <div class="field" id="field-wrap-tg-username" style="display:none;opacity:0.6;pointer-events:none;">
-        <div class="field-label" style="display:flex;justify-content:space-between;align-items:center;">
-          Telegram
-          <span style="font-size:11px;color:var(--muted2);font-weight:400;">не изменяется</span>
-        </div>
-        <div class="field-row">
-          <input type="text" id="input-tg-username" readonly tabindex="-1" style="color:var(--muted);" />
-        </div>
-      </div>
       <div class="field" id="field-wrap-name">
         <div class="field-label" data-i18n="profile.name">Имя</div>
         <div class="field-row">
@@ -6561,18 +6552,21 @@ async function loginWithTelegram() {
     }
 
     const user = data.user;
-    const profile = {
-      id: user.id,
-      name: user.name || (tgUser && tgUser.first_name) || '',
-      email: '',
+
+    // Сохраняем в правильный ключ который читает приложение
+    const existingRaw = localStorage.getItem(LS_USER_PROFILE);
+    const existing = existingRaw ? JSON.parse(existingRaw) : {};
+    const profile = Object.assign({}, existing, {
+      email: existing.email || '',
+      name: existing.name || user.name || (tgUser && tgUser.first_name) || '',
       telegram_id: user.telegram_id,
       tg_user_id: tgUser && tgUser.id,
       tg_username: tgUser && tgUser.username,
       active_plan: user.active_plan || 'trial',
       paid_until: user.paid_until || null,
       trial_start: user.trial_start || new Date().toISOString(),
-    };
-    localStorage.setItem('ch_profile', JSON.stringify(profile));
+    });
+    localStorage.setItem(LS_USER_PROFILE, JSON.stringify(profile));
     if (user.active_plan) localStorage.setItem('ch_active_plan', user.active_plan);
     if (user.paid_until) localStorage.setItem('ch_paid_until', new Date(user.paid_until).getTime());
     if (user.trial_start) localStorage.setItem('ch_trial_start', new Date(user.trial_start).getTime());
@@ -6581,7 +6575,7 @@ async function loginWithTelegram() {
     authNavigationDone = true;
     goTo('screen-main');
 
-    // Обновляем UI профиля для Telegram после рендера
+    // Обновляем UI профиля после рендера
     requestAnimationFrame(() => {
       const emailWrap = document.getElementById('field-wrap-email');
       const tgWrap = document.getElementById('field-wrap-tg-username');
