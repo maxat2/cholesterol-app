@@ -13,34 +13,19 @@ async function verifyTelegramData(initData, botToken) {
   const encoder = new TextEncoder();
 
   const keyMaterial = await crypto.subtle.importKey(
-    'raw',
-    encoder.encode('WebAppData'),
-    { name: 'HMAC', hash: 'SHA-256' },
-    false,
-    ['sign']
+    'raw', encoder.encode('WebAppData'),
+    { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
   );
-  const secretKey = await crypto.subtle.sign(
-    'HMAC',
-    keyMaterial,
-    encoder.encode(botToken)
-  );
+  const secretKey = await crypto.subtle.sign('HMAC', keyMaterial, encoder.encode(botToken));
 
   const verifyKey = await crypto.subtle.importKey(
-    'raw',
-    secretKey,
-    { name: 'HMAC', hash: 'SHA-256' },
-    false,
-    ['sign']
+    'raw', secretKey,
+    { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
   );
-  const signature = await crypto.subtle.sign(
-    'HMAC',
-    verifyKey,
-    encoder.encode(dataCheckString)
-  );
+  const signature = await crypto.subtle.sign('HMAC', verifyKey, encoder.encode(dataCheckString));
 
   const expectedHash = Array.from(new Uint8Array(signature))
-    .map(b => b.toString(16).padStart(2, '0'))
-    .join('');
+    .map(b => b.toString(16).padStart(2, '0')).join('');
 
   return expectedHash === hash;
 }
@@ -51,26 +36,21 @@ export default async function handler(req) {
   }
 
   const { initData } = await req.json();
-
   const botToken = process.env.TELEGRAM_BOT_TOKEN;
 
-  // 1. Верификация подписи Telegram
   const isValid = await verifyTelegramData(initData, botToken);
   if (!isValid) {
     return new Response(JSON.stringify({ error: 'Invalid signature' }), {
-      status: 401,
-      headers: { 'Content-Type': 'application/json' },
+      status: 401, headers: { 'Content-Type': 'application/json' },
     });
   }
 
-  // 2. Достаём данные пользователя
   const params = new URLSearchParams(initData);
   const user = JSON.parse(params.get('user'));
   const telegramId = user.id;
   const firstName = user.first_name || '';
   const username = user.username || '';
 
-  // 3. Ищем или создаём пользователя в Supabase
   const supabaseUrl = process.env.SUPABASE_URL;
   const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
   const headers = {
@@ -79,6 +59,7 @@ export default async function handler(req) {
     'Authorization': `Bearer ${supabaseKey}`,
   };
 
+  // Ищем по telegram_id
   const findRes = await fetch(
     `${supabaseUrl}/rest/v1/users?telegram_id=eq.${telegramId}&select=*`,
     { headers }
@@ -87,9 +68,10 @@ export default async function handler(req) {
 
   let userData;
 
-  if (found.length > 0) {
+  if (found && found.length > 0) {
     userData = found[0];
   } else {
+    // Создаём нового пользователя
     const newUser = {
       telegram_id: telegramId,
       name: firstName,
@@ -103,11 +85,17 @@ export default async function handler(req) {
       body: JSON.stringify(newUser),
     });
     const created = await createRes.json();
-    userData = created[0];
+    // Если created массив — берём первый элемент, иначе сам объект
+    userData = Array.isArray(created) ? created[0] : created;
+  }
+
+  if (!userData) {
+    return new Response(JSON.stringify({ error: 'Failed to create user', debug: { telegramId, firstName } }), {
+      status: 500, headers: { 'Content-Type': 'application/json' },
+    });
   }
 
   return new Response(JSON.stringify({ ok: true, user: userData }), {
-    status: 200,
-    headers: { 'Content-Type': 'application/json' },
+    status: 200, headers: { 'Content-Type': 'application/json' },
   });
 }
