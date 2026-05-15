@@ -2094,8 +2094,8 @@
 
   <div class="screen" id="screen-auth">
     <div class="trial-banner">
-      <span data-i18n="auth.trial_banner">7 дней бесплатно — затем от $9/мес</span>
-      <div class="trial-banner-sub" data-i18n="auth.trial_banner_sub">Без обязательств · Отмена в любой момент</div>
+      <span data-i18n="auth.trial_banner">7 дней бесплатно</span>
+      <div class="trial-banner-sub" data-i18n="auth.trial_banner_sub">Анализ еды по фото · Персональные рекомендации</div>
     </div>
     <div class="auth-screen-inner">
       <div class="auth-status" id="auth-status" role="status" aria-live="polite"></div>
@@ -3178,8 +3178,9 @@ const LOCALES = {
     'onboarding.alt3': 'Пойми, что влияет на твой липидный профиль',
 
     // Баннер триала (экран авторизации)
-    'auth.trial_banner': '7 дней бесплатно — затем от $9/мес',
-    'auth.trial_banner_sub': 'Без обязательств · Отмена в любой момент',
+    'auth.trial_banner': '7 дней бесплатно',
+    'auth.trial_banner_sub': 'Анализ еды по фото · Персональные рекомендации',
+
 
     // Paywall
     'paywall.back': 'Назад',
@@ -3221,6 +3222,7 @@ const LOCALES = {
     'paywall.change_cta': 'Перейти на этот план',
     'paywall.change_cta_plan': 'Перейти на {plan}',
     'paywall.current_plan': 'текущий',
+    'paywall.cta_select_plan': 'Выберите план выше',
 
     // Daily summary — секции
     'daily.good_label': 'Что работало',
@@ -3507,8 +3509,9 @@ const LOCALES = {
     'onboarding.alt3': 'Understand what affects your lipid profile',
 
     // Auth banner
-    'auth.trial_banner': '7 days free — then from $9/mo',
-    'auth.trial_banner_sub': 'No commitment · Cancel anytime',
+    'auth.trial_banner': '7 days free',
+    'auth.trial_banner_sub': 'Food photo analysis · Personalised recommendations',
+
 
     // Paywall
     'paywall.back': 'Back',
@@ -3550,6 +3553,7 @@ const LOCALES = {
     'paywall.change_cta': 'Switch to this plan',
     'paywall.change_cta_plan': 'Switch to {plan}',
     'paywall.current_plan': 'current',
+    'paywall.cta_select_plan': 'Select a plan above',
 
     // Daily summary sections
     'daily.good_label': 'What worked',
@@ -3836,8 +3840,9 @@ const LOCALES = {
     'onboarding.alt3': 'Verstehe dein Lipidprofil',
 
     // Auth banner
-    'auth.trial_banner': '7 Tage kostenlos — dann ab $9/Monat',
-    'auth.trial_banner_sub': 'Keine Verpflichtung · Jederzeit kündbar',
+    'auth.trial_banner': '7 Tage kostenlos',
+    'auth.trial_banner_sub': 'Lebensmittelfoto-Analyse · Persönliche Empfehlungen',
+
 
     // Paywall
     'paywall.back': 'Zurück',
@@ -3879,6 +3884,7 @@ const LOCALES = {
     'paywall.change_cta': 'Zu diesem Plan wechseln',
     'paywall.change_cta_plan': 'Zu {plan} wechseln',
     'paywall.current_plan': 'aktuell',
+    'paywall.cta_select_plan': 'Plan auswählen',
 
     // Daily summary sections
     'daily.good_label': 'Was funktioniert hat',
@@ -4337,7 +4343,60 @@ function syncPaywallState() {
   const activeWrap = document.getElementById('pw-active-wrap');
   if (activeWrap) activeWrap.classList.toggle('visible', isPaid);
 
-  if (!isPaid) return;
+  if (!isPaid) {
+    // ── Режим покупки: настраиваем отображение триала ────────────────────────
+    const trialPlan = document.querySelector('#pw-plans .pw-plan[data-plan="trial"]');
+    const ctaBtn = document.getElementById('pw-cta-btn');
+    const ctaLabel = document.getElementById('pw-cta-label');
+    const trialNote = document.getElementById('pw-trial-note');
+    const isTrialActive = s.plan === 'trial'; // триал ещё идёт
+    const isExpired = s.plan === 'expired';   // триал истёк
+
+    if (trialPlan) {
+      if (isTrialActive) {
+        // Триал активен — план выделен как «текущий», не кликабелен
+        trialPlan.classList.remove('selected');
+        trialPlan.classList.add('current-plan');
+        trialPlan.style.cursor = 'default';
+        trialPlan.onclick = null;
+        // Добавляем метку «текущий» если её нет
+        let namEl = trialPlan.querySelector('.pw-plan-name');
+        if (namEl && !namEl.querySelector('.pw-trial-current-badge')) {
+          const badge = document.createElement('span');
+          badge.className = 'pw-trial-current-badge';
+          badge.style.cssText = 'font-size:11px;color:#22C55E;font-weight:500;margin-left:4px;';
+          badge.textContent = t('paywall.current_plan');
+          namEl.appendChild(badge);
+        }
+        // Убираем зелёную рамку (у current-plan она зелёная, а у триала не нужна)
+        trialPlan.style.borderColor = 'rgba(0,0,0,0.1)';
+        trialPlan.style.background = 'var(--bg, #fff)';
+      } else {
+        // Триал истёк — скрываем карточку триала совсем (он уже использован)
+        trialPlan.style.display = 'none';
+      }
+    }
+
+    if (isTrialActive) {
+      // Кнопка скрыта пока выбран триал (пользователь уже в нём)
+      // Показывается только при выборе платного плана
+      if (ctaBtn) ctaBtn.style.opacity = '0.35';
+      if (ctaBtn) ctaBtn.style.pointerEvents = 'none';
+      if (ctaLabel) ctaLabel.textContent = t('paywall.cta_select_plan');
+      if (trialNote) trialNote.textContent = t('paywall.note_trial');
+
+      // Снимаем selected с триала, выделяем первый платный план
+      document.querySelectorAll('#pw-plans .pw-plan').forEach(p => p.classList.remove('selected'));
+    } else if (isExpired) {
+      // Триал истёк — сразу выделяем первый платный план
+      const firstPaid = document.querySelector('#pw-plans .pw-plan:not([data-plan="trial"])');
+      if (firstPaid) {
+        firstPaid.classList.add('selected');
+        selectPlan(firstPaid);
+      }
+    }
+    return;
+  }
 
   // ── Верх: инфо о текущей подписке ────────────────────────────────────────
   const planKey = localStorage.getItem(LS_ACTIVE_PLAN) || 'month';
@@ -4434,13 +4493,22 @@ function paywallManage() {
 
 // Paywall plan selection
 function selectPlan(el) {
-  document.querySelectorAll('.pw-plan').forEach(p => p.classList.remove('selected'));
+  document.querySelectorAll('#pw-plans .pw-plan').forEach(p => p.classList.remove('selected'));
   el.classList.add('selected');
   const plan = el.dataset.plan;
+  const ctaBtn = document.getElementById('pw-cta-btn');
   const label = document.getElementById('pw-cta-label');
   const note = document.getElementById('pw-trial-note');
+
+  const isPaidPlan = plan !== 'trial';
+  // Активируем кнопку только для платных планов
+  if (ctaBtn) {
+    ctaBtn.style.opacity = isPaidPlan ? '1' : '0.35';
+    ctaBtn.style.pointerEvents = isPaidPlan ? '' : 'none';
+  }
+
   if (plan === 'trial') {
-    if (label) label.textContent = t('paywall.cta_trial');
+    if (label) label.textContent = t('paywall.cta_select_plan');
     if (note) note.textContent = t('paywall.note_trial');
   } else if (plan === 'month') {
     if (label) label.textContent = t('paywall.cta_month');
