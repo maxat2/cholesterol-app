@@ -11,6 +11,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <title data-i18n="app.title">Холестериновая слежка</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -6512,6 +6513,59 @@ const AVG = { total: 5.0, ldl: 3.0, hdl: 1.5, trig: 1.3 };
 const DEV_MODE = false;
 const log  = (...args) => DEV_MODE && console.log(...args);
 const warn = (...args) => DEV_MODE && console.warn(...args);
+
+// ─── Telegram Mini App ───────────────────────────────────────────────────────
+const isTelegram = !!(window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData);
+
+async function loginWithTelegram() {
+  const tg = window.Telegram.WebApp;
+  tg.ready();
+  tg.expand();
+
+  const initData = tg.initDataUnsafe;
+  const tgUser = initData.user;
+
+  // Скрываем экран авторизации пока идёт вход
+  const authScreen = document.getElementById('screen-auth');
+  if (authScreen) authScreen.style.display = 'none';
+
+  try {
+    const res = await fetch('/api/telegram-auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ initData: tg.initData }),
+    });
+
+    if (!res.ok) throw new Error('Auth failed');
+
+    const { user } = await res.json();
+
+    // Сохраняем профиль в localStorage
+    const profile = {
+      id: user.id,
+      name: user.name || tgUser.first_name || '',
+      telegram_id: user.telegram_id,
+      active_plan: user.active_plan || 'trial',
+      paid_until: user.paid_until || null,
+      trial_start: user.trial_start || new Date().toISOString(),
+      tg_user_id: tgUser.id,
+    };
+    localStorage.setItem('ch_profile', JSON.stringify(profile));
+
+    // Восстанавливаем состояние подписки
+    if (user.active_plan) localStorage.setItem('ch_active_plan', user.active_plan);
+    if (user.paid_until) localStorage.setItem('ch_paid_until', new Date(user.paid_until).getTime());
+    if (user.trial_start) localStorage.setItem('ch_trial_start', new Date(user.trial_start).getTime());
+
+    authNavigationDone = true;
+    goTo('screen-main');
+  } catch (e) {
+    console.error('[telegram] auth error', e);
+    // Fallback — показываем обычный экран входа
+    goTo('screen-auth');
+  }
+}
+// ─────────────────────────────────────────────────────────────────────────────
 let dontKnowOn = false;
 let lastFoodObjectUrl = null;
 
@@ -7786,6 +7840,13 @@ function clearBtnLoading(btn) {
 
 async function bootstrapApp() {
   log('[bootstrap] старт');
+
+  // Telegram Mini App — авторизуемся через Telegram, пропускаем screen-auth
+  if (isTelegram) {
+    await loginWithTelegram();
+    return;
+  }
+
   // Показываем онбординг при первом запуске (до авторизации).
   // Если supabase уже установил навигацию через onAuthStateChange — не перебиваем.
   // Используем небольшой таймаут чтобы дать supabase шанс сработать синхронно (INITIAL_SESSION).
