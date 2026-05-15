@@ -10,8 +10,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <title data-i18n="app.title">Холестериновая слежка</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -4077,7 +4077,6 @@ supabaseClient.auth.onAuthStateChange(async (event, session) => {
       setTimeout(() => {
         if (!authNavigationDone) {
           log('[auth] refresh не пришёл за 10с → screen-auth');
-          // В Telegram не показываем онбординг и screen-auth
           if (isTelegram()) return;
           // Показываем онбординг новым пользователям перед экраном входа
           if (!isOnboardingDone()) {
@@ -6518,7 +6517,9 @@ const warn = (...args) => DEV_MODE && console.warn(...args);
 
 // ─── Telegram Mini App ───────────────────────────────────────────────────────
 function isTelegram() {
-  return !!(window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData && window.Telegram.WebApp.initData.length > 0);
+  try {
+    return !!(window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData && window.Telegram.WebApp.initData.length > 0);
+  } catch(e) { return false; }
 }
 
 async function loginWithTelegram() {
@@ -6526,12 +6527,16 @@ async function loginWithTelegram() {
   tg.ready();
   tg.expand();
 
-  const initData = tg.initDataUnsafe;
-  const tgUser = initData.user;
+  // Пропускаем онбординг в Telegram
+  markOnboardingDone();
 
-  // Скрываем экран авторизации пока идёт вход
-  const authScreen = document.getElementById('screen-auth');
-  if (authScreen) authScreen.style.display = 'none';
+  const tgUser = tg.initDataUnsafe?.user;
+
+  if (!tgUser) {
+    console.error('[telegram] нет данных пользователя');
+    goTo('screen-auth');
+    return;
+  }
 
   try {
     const res = await fetch('/api/telegram-auth', {
@@ -6540,7 +6545,7 @@ async function loginWithTelegram() {
       body: JSON.stringify({ initData: tg.initData }),
     });
 
-    if (!res.ok) throw new Error('Auth failed');
+    if (!res.ok) throw new Error(`Auth failed: ${res.status}`);
 
     const { user } = await res.json();
 
@@ -6565,7 +6570,6 @@ async function loginWithTelegram() {
     goTo('screen-main');
   } catch (e) {
     console.error('[telegram] auth error', e);
-    // Fallback — показываем обычный экран входа
     goTo('screen-auth');
   }
 }
