@@ -2254,17 +2254,6 @@
         </div>
       </div>
 
-      <button type="button" class="dontknow-btn" id="dontknow-btn" onclick="toggleDontKnow()">
-        <span class="dontknow-text" data-i18n="profile.fill_avg">Заполнить средними значениями</span>
-        <span class="dontknow-arrow">▾</span>
-      </button>
-
-      <div class="dontknow-hint" id="dontknow-hint">
-        <div class="dontknow-hint-title" data-i18n="profile.fill_avg_title">Всё равно начнём!</div>
-        <div class="dontknow-hint-text">
-          <span data-i18n="profile.fill_avg_text">Мы подставили <b>средние показатели</b> — AI даст общие рекомендации. После анализов обнови цифры в профиле.</span>
-        </div>
-      </div>
 
       <div class="toggle-row-plain">
         <span class="toggle-label" data-i18n="profile.statins">Принимаю статины</span>
@@ -4154,18 +4143,28 @@ async function handleAuthSession(session) {
       const isOnAuthOrEmpty2 = !currentActive2 || currentActive2.id === 'screen-auth';
       if (isOnAuthOrEmpty2) goTo('screen-main');
     } else {
-      // Новый пользователь — подставляем email из Google в поле формы
+      // Новый пользователь — подставляем email и имя из Google
       const emailFromGoogle = session.user.email || '';
       if (emailFromGoogle) {
         const emailEl = document.getElementById('input-email');
         if (emailEl) emailEl.value = emailFromGoogle;
       }
-      // Также имя из Google если есть
       const nameFromGoogle = session.user.user_metadata?.full_name || session.user.user_metadata?.name || '';
       if (nameFromGoogle) {
         const nameEl = document.getElementById('input-name');
         if (nameEl) { nameEl.value = nameFromGoogle; updateName(nameFromGoogle); }
       }
+      // Подставляем средние значения холестерина по умолчанию
+      const vT = document.getElementById('v-total');
+      const vL = document.getElementById('v-ldl');
+      const vH = document.getElementById('v-hdl');
+      const vR = document.getElementById('v-trig');
+      if (vT && !vT.value) vT.value = String(AVG.total);
+      if (vL && !vL.value) vL.value = String(AVG.ldl);
+      if (vH && !vH.value) vH.value = String(AVG.hdl);
+      if (vR && !vR.value) vR.value = String(AVG.trig);
+      dontKnowOn = true;
+      applyDontKnowVisual();
       goTo('screen-profile', { mode: 'onboarding' });
     }
   } catch (e) {
@@ -4945,10 +4944,10 @@ function getProfileFormSnapshot() {
   return JSON.stringify({
     email: (emailEl?.value ?? '').trim(),
     name: (nameEl?.value ?? '').trim(),
-    v_total: vTotal?.value ?? '',
-    v_ldl: vLdl?.value ?? '',
-    v_hdl: vHdl?.value ?? '',
-    v_trig: vTrig?.value ?? '',
+    v_total: vTotal?.value || String(AVG.total),
+    v_ldl: vLdl?.value || String(AVG.ldl),
+    v_hdl: vHdl?.value || String(AVG.hdl),
+    v_trig: vTrig?.value || String(AVG.trig),
     v_apob: (document.getElementById('v-apob')?.value ?? ''),
     dontKnowOn: !!dontKnowOn,
     gender: genderEl ? genderEl.textContent.trim() : t('common.male'),
@@ -5748,10 +5747,10 @@ function saveProfileToStorage() {
   const profile = {
     email: emailEl?.value ?? '',
     name: nameEl?.value ?? '',
-    v_total: vTotal?.value ?? '',
-    v_ldl: vLdl?.value ?? '',
-    v_hdl: vHdl?.value ?? '',
-    v_trig: vTrig?.value ?? '',
+    v_total: vTotal?.value || String(AVG.total),
+    v_ldl: vLdl?.value || String(AVG.ldl),
+    v_hdl: vHdl?.value || String(AVG.hdl),
+    v_trig: vTrig?.value || String(AVG.trig),
     dontKnowOn: !!dontKnowOn,
     gender: genderEl ? genderEl.textContent.trim() : t('common.male'),
     units: unitsEl ? (unitsEl.getAttribute('data-i18n') === 'seg.mgdl' ? 'mgdl' : 'mmol') : 'mmol',
@@ -5830,8 +5829,8 @@ function applyDontKnowVisual() {
   const btn = document.getElementById('dontknow-btn');
   const fields = ['f-total', 'f-ldl', 'f-hdl', 'f-trig'];
   hint.classList.toggle('visible', dontKnowOn);
-  btn.classList.toggle('open', dontKnowOn);
-  fields.forEach((id) => document.getElementById(id).classList.toggle('dimmed', dontKnowOn));
+  if (btn) btn.classList.toggle('open', dontKnowOn);
+  // dimmed убран — поля всегда редактируемы
 }
 
 function loadProfileFromStorage() {
