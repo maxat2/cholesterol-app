@@ -1,16 +1,6 @@
-import crypto from 'crypto';
-
 export const config = { runtime: 'edge' };
 
-export default async function handler(req) {
-  if (req.method !== 'POST') {
-    return new Response('Method not allowed', { status: 405 });
-  }
-
-  const { initData } = await req.json();
-
-  // 1. Верификация подписи Telegram
-  const botToken = process.env.TELEGRAM_BOT_TOKEN;
+async function verifyTelegramData(initData, botToken) {
   const params = new URLSearchParams(initData);
   const hash = params.get('hash');
   params.delete('hash');
@@ -20,17 +10,53 @@ export default async function handler(req) {
     .map(([k, v]) => `${k}=${v}`)
     .join('\n');
 
-  const secretKey = crypto
-    .createHmac('sha256', 'WebAppData')
-    .update(botToken)
-    .digest();
+  const encoder = new TextEncoder();
 
-  const expectedHash = crypto
-    .createHmac('sha256', secretKey)
-    .update(dataCheckString)
-    .digest('hex');
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode('WebAppData'),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+  const secretKey = await crypto.subtle.sign(
+    'HMAC',
+    keyMaterial,
+    encoder.encode(botToken)
+  );
 
-  if (expectedHash !== hash) {
+  const verifyKey = await crypto.subtle.importKey(
+    'raw',
+    secretKey,
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+  const signature = await crypto.subtle.sign(
+    'HMAC',
+    verifyKey,
+    encoder.encode(dataCheckString)
+  );
+
+  const expectedHash = Array.from(new Uint8Array(signature))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
+
+  return expectedHash === hash;
+}
+
+export default async function handler(req) {
+  if (req.method !== 'POST') {
+    return new Response('Method not allowed', { status: 405 });
+  }
+
+  const { initData } = await req.json();
+
+  const botToken = process.env.TELEGRAM_BOT_TOKEN;
+
+  // 1. Верификация подписи Telegram
+  const isValid = await verifyTelegramData(initData, botToken);
+  if (!isValid) {
     return new Response(JSON.stringify({ error: 'Invalid signature' }), {
       status: 401,
       headers: { 'Content-Type': 'application/json' },
@@ -38,6 +64,7 @@ export default async function handler(req) {
   }
 
   // 2. Достаём данные пользователя
+  const params = new URLSearchParams(initData);
   const user = JSON.parse(params.get('user'));
   const telegramId = user.id;
   const firstName = user.first_name || '';
@@ -52,7 +79,6 @@ export default async function handler(req) {
     'Authorization': `Bearer ${supabaseKey}`,
   };
 
-  // Ищем по telegram_id
   const findRes = await fetch(
     `${supabaseUrl}/rest/v1/users?telegram_id=eq.${telegramId}&select=*`,
     { headers }
@@ -62,10 +88,8 @@ export default async function handler(req) {
   let userData;
 
   if (found.length > 0) {
-    // Пользователь найден
     userData = found[0];
   } else {
-    // Создаём нового пользователя
     const newUser = {
       telegram_id: telegramId,
       name: firstName,
