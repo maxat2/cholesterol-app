@@ -6536,16 +6536,14 @@ async function loginWithTelegram() {
       body: JSON.stringify({ initData: tg.initData }),
     });
 
-    alert('fetch done | status: ' + res.status);
+    const data = await res.json();
+    alert('response: ' + JSON.stringify(data).substring(0, 150));
 
-    if (!res.ok) {
-      const errText = await res.text();
-      throw new Error('Auth failed: ' + res.status + ' ' + errText);
+    if (!res.ok || !data.user) {
+      throw new Error('Auth failed: ' + JSON.stringify(data));
     }
 
-    const { user } = await res.json();
-    alert('user: ' + JSON.stringify(user).slice(0, 100));
-
+    const user = data.user;
     const profile = {
       id: user.id,
       name: user.name || (tgUser && tgUser.first_name) || '',
