@@ -8124,13 +8124,13 @@ if ('serviceWorker' in navigator) {
 applyLocaleToDOM();
 updateCardsLang();
 
-// Даём Telegram SDK время инициализироваться перед стартом
-if (window.Telegram && window.Telegram.WebApp) {
-  bootstrapApp();
-} else {
-  // Небольшая задержка на случай если SDK ещё грузится
-  setTimeout(bootstrapApp, 100);
-}
+// ДИАГНОСТИКА — удалить после теста
+const _tg = window.Telegram;
+const _tgWA = _tg && _tg.WebApp;
+const _initData = _tgWA && _tgWA.initData;
+alert('TG: ' + !!_tg + ' | WA: ' + !!_tgWA + ' | initData: ' + (typeof _initData) + ' | len: ' + (_initData ? _initData.length : 'n/a'));
+
+bootstrapApp();
 
 
 </script>
