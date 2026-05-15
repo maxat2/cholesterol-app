@@ -5903,29 +5903,32 @@ async function upsertTelegramProfile() {
   if (!raw) return;
   const profile = JSON.parse(raw);
   if (!profile.telegram_id) return;
+
+  // Сначала загружаем существующую строку из БД
   const headers = {
     'Content-Type': 'application/json',
     'apikey': SUPABASE_ANON_KEY,
     'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
-    'Prefer': 'return=minimal',
   };
-  const patch = {
-    name: profile.name || '',
-    age: profile.age ? parseInt(profile.age) : null,
-    height_cm: profile.height ? parseFloat(profile.height) : null,
-    weight_kg: profile.weight ? parseFloat(profile.weight) : null,
-    sex: (profile.gender === 'Мужской' || profile.gender === 'male') ? 'male'
-       : (profile.gender === 'Женский' || profile.gender === 'female') ? 'female' : null,
-    units: profile.units || 'mmol',
-    body_type: profile.body_type || null,
-    activity_level: profile.activity || null,
-    statins: profile.statins || false,
-  };
+  let existing = {};
   try {
-    const res = await fetch(SUPABASE_URL + '/rest/v1/users?telegram_id=eq.' + profile.telegram_id,
-      { method: 'PATCH', headers, body: JSON.stringify(patch) });
-    warn('[tg] upsert status', res.status);
-  } catch(e) { warn('[tg] upsert error', e); }
+    const getRes = await fetch(
+      SUPABASE_URL + '/rest/v1/users?telegram_id=eq.' + profile.telegram_id + '&select=*',
+      { headers }
+    );
+    const rows = await getRes.json();
+    if (rows && rows.length > 0) existing = rows[0];
+  } catch(e) { warn('[tg] get error', e); }
+
+  // Используем ту же функцию что и веб-версия
+  const patch = buildMergedUserUpdate(existing, profile);
+
+  try {
+    await fetch(
+      SUPABASE_URL + '/rest/v1/users?telegram_id=eq.' + profile.telegram_id,
+      { method: 'PATCH', headers: { ...headers, 'Prefer': 'return=minimal' }, body: JSON.stringify(patch) }
+    );
+  } catch(e) { warn('[tg] patch error', e); }
 }
 
 async function saveProfileAndStart() {
@@ -6580,12 +6583,7 @@ async function loginWithTelegram() {
   tg.expand();
 
   const tgUser = tg.initDataUnsafe?.user;
-
-  // Язык из Telegram
-  const tgLang = tgUser?.language_code?.slice(0, 2).toLowerCase();
-  if (tgLang && typeof LOCALES !== 'undefined' && LOCALES[tgLang]) {
-    setLocale(tgLang);
-  }
+  alert('loginWithTelegram | user: ' + (tgUser ? tgUser.first_name : 'NO USER'));
 
   try {
     const res = await fetch('/api/telegram-auth', {
@@ -6594,82 +6592,49 @@ async function loginWithTelegram() {
       body: JSON.stringify({ initData: tg.initData }),
     });
 
-    if (!res.ok) throw new Error('Auth failed: ' + res.status);
     const data = await res.json();
-    if (!data.user) throw new Error('No user in response');
+    alert('response: ' + JSON.stringify(data).substring(0, 150));
+
+    if (!res.ok || !data.user) {
+      throw new Error('Auth failed: ' + JSON.stringify(data));
+    }
 
     const user = data.user;
-
-    // Мерджим с существующим профилем
-    const existingRaw = localStorage.getItem(LS_USER_PROFILE);
-    const existing = existingRaw ? JSON.parse(existingRaw) : {};
-    const mergedProfile = Object.assign({}, existing, {
-      name: existing.name || user.name || (tgUser && tgUser.first_name) || '',
-      email: existing.email || '',
+    const profile = {
+      id: user.id,
+      name: user.name || (tgUser && tgUser.first_name) || '',
       telegram_id: user.telegram_id,
       tg_user_id: tgUser && tgUser.id,
       tg_username: tgUser && tgUser.username,
-      active_plan: user.active_plan || existing.active_plan || 'trial',
-      paid_until: user.paid_until || existing.paid_until || null,
-      trial_start: user.trial_start || existing.trial_start || new Date().toISOString(),
-    });
-    localStorage.setItem(LS_USER_PROFILE, JSON.stringify(mergedProfile));
+      active_plan: user.active_plan || 'trial',
+      paid_until: user.paid_until || null,
+      trial_start: user.trial_start || new Date().toISOString(),
+    };
+    localStorage.setItem('ch_profile', JSON.stringify(profile));
     if (user.active_plan) localStorage.setItem('ch_active_plan', user.active_plan);
+    if (user.paid_until) localStorage.setItem('ch_paid_until', new Date(user.paid_until).getTime());
+    if (user.trial_start) localStorage.setItem('ch_trial_start', new Date(user.trial_start).getTime());
     try { localStorage.setItem('ch_onboarding_done', '1'); } catch(e) {}
 
-    // Загружаем полные данные из Supabase
-    try {
-      const dbRes = await fetch(
-        SUPABASE_URL + '/rest/v1/users?telegram_id=eq.' + user.telegram_id + '&select=*',
-        { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY } }
-      );
-      const dbRows = await dbRes.json();
-      if (dbRows && dbRows.length > 0) {
-        const dbUser = dbRows[0];
-        const updatedProfile = Object.assign({}, mergedProfile, {
-          name: dbUser.name || mergedProfile.name || '',
-          age: dbUser.age != null ? String(dbUser.age) : mergedProfile.age || '',
-          height: dbUser.height_cm != null ? String(dbUser.height_cm) : mergedProfile.height || '',
-          weight: dbUser.weight_kg != null ? String(dbUser.weight_kg) : mergedProfile.weight || '',
-          gender: dbUser.sex === 'male' ? 'Мужской' : dbUser.sex === 'female' ? 'Женский' : mergedProfile.gender || '',
-          units: dbUser.units || mergedProfile.units || 'mmol',
-          statins: dbUser.statins || false,
-          body_type: dbUser.body_type || mergedProfile.body_type || '',
-          activity: dbUser.activity_level || mergedProfile.activity || '',
-        });
-        localStorage.setItem(LS_USER_PROFILE, JSON.stringify(updatedProfile));
-        mergedProfile.name = updatedProfile.name;
-        mergedProfile.age = updatedProfile.age;
-        if (typeof applySupabaseUserRowToForm === 'function') {
-          applySupabaseUserRowToForm(dbUser);
-          if (typeof saveProfileToStorage === 'function') saveProfileToStorage();
-        }
-      }
-    } catch(e) { warn('[tg] load profile error', e); }
+    // Показываем @username вместо email в профиле
+    const emailWrap = document.getElementById('field-wrap-email');
+    const tgWrap = document.getElementById('field-wrap-tg-username');
+    const tgInput = document.getElementById('input-tg-username');
+    if (emailWrap) emailWrap.style.display = 'none';
+    if (tgWrap) tgWrap.style.display = '';
+    if (tgInput) tgInput.value = tgUser?.username ? '@' + tgUser.username : tgUser?.first_name || '';
 
+    // Язык из Telegram — после goTo чтобы DOM был готов
     authNavigationDone = true;
+    goTo('screen-main');
 
-    // Если профиль не заполнен — показываем экран профиля
-    if (!mergedProfile.name || !mergedProfile.age) {
-      goTo('screen-profile', { mode: 'onboarding' });
-    } else {
-      goTo('screen-main');
+    const tgLang = tgUser?.language_code?.slice(0, 2).toLowerCase();
+    if (tgLang && typeof LOCALES !== 'undefined' && LOCALES[tgLang]) {
+      setLocale(tgLang);
     }
 
-    // UI: username вместо email, подсветка языка
-    requestAnimationFrame(() => {
-      const emailWrap = document.getElementById('field-wrap-email');
-      const tgWrap = document.getElementById('field-wrap-tg-username');
-      const tgInput = document.getElementById('input-tg-username');
-      if (emailWrap) emailWrap.style.display = 'none';
-      if (tgWrap) tgWrap.style.display = '';
-      if (tgInput) tgInput.value = tgUser?.username ? '@' + tgUser.username : tgUser?.first_name || '';
-      const localeLabel = LOCALE === 'ru' ? 'Русский' : LOCALE === 'de' ? 'Deutsch' : 'English';
-      if (typeof setSegActiveByLabel === 'function') setSegActiveByLabel('seg-locale', localeLabel);
-    });
-
   } catch (e) {
-    console.error('[telegram] auth error', e);
+    alert('ERROR: ' + e.message);
     goTo('screen-auth');
   }
 }
