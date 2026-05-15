@@ -1551,14 +1551,14 @@
   }
   /* Текущий план — выделен галочкой, не кликабелен */
   .pw-plan.current-plan {
-    opacity: 1; cursor: default;
-    border-color: #22C55E;
-    background: #F0FDF4;
+    border-color: #000;
+    background: #f7f7f7;
+    cursor: default;
   }
   .pw-plan.current-plan .pw-radio { display: none; }
   .pw-current-check {
     width: 22px; height: 22px; border-radius: 50%;
-    background: #22C55E; display: flex; align-items: center;
+    background: #000; display: flex; align-items: center;
     justify-content: center; flex-shrink: 0; color: white; font-size: 12px;
   }
 
@@ -4364,13 +4364,12 @@ function syncPaywallState() {
         if (namEl && !namEl.querySelector('.pw-trial-current-badge')) {
           const badge = document.createElement('span');
           badge.className = 'pw-trial-current-badge';
-          badge.style.cssText = 'font-size:11px;color:#22C55E;font-weight:500;margin-left:4px;';
+          badge.style.cssText = 'font-size:11px;color:#000;font-weight:500;margin-left:4px;opacity:0.45;';
           badge.textContent = t('paywall.current_plan');
           namEl.appendChild(badge);
         }
-        // Убираем зелёную рамку (у current-plan она зелёная, а у триала не нужна)
-        trialPlan.style.borderColor = 'rgba(0,0,0,0.1)';
-        trialPlan.style.background = 'var(--bg, #fff)';
+        // Убираем onclick чтобы не реагировал на клик
+        trialPlan.onclick = null;
       } else {
         // Триал истёк — скрываем карточку триала совсем (он уже использован)
         trialPlan.style.display = 'none';
@@ -4439,7 +4438,7 @@ function syncPaywallState() {
             ? `<div class="pw-current-check">✓</div>`
             : `<div class="pw-radio"><div class="pw-radio-dot"></div></div>`}
           <div class="pw-plan-left">
-            <div class="pw-plan-name">${p.name}${isCurrent ? ` <span style="font-size:11px;color:#22C55E;font-weight:500;">${t('paywall.current_plan')}</span>` : ''}</div>
+            <div class="pw-plan-name">${p.name}${isCurrent ? ` <span style="font-size:11px;color:#000;font-weight:500;opacity:0.45;">${t('paywall.current_plan')}</span>` : ''}</div>
             <div class="pw-plan-desc">${p.desc}</div>
           </div>
         </div>
