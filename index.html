@@ -6576,8 +6576,6 @@ async function loginWithTelegram() {
   tg.expand();
 
   const tgUser = tg.initDataUnsafe?.user;
-  alert('loginWithTelegram | user: ' + (tgUser ? tgUser.first_name : 'NO USER'));
-
   try {
     const res = await fetch('/api/telegram-auth', {
       method: 'POST',
@@ -6586,8 +6584,6 @@ async function loginWithTelegram() {
     });
 
     const data = await res.json();
-    alert('response: ' + JSON.stringify(data).substring(0, 150));
-
     if (!res.ok || !data.user) {
       throw new Error('Auth failed: ' + JSON.stringify(data));
     }
@@ -6603,31 +6599,54 @@ async function loginWithTelegram() {
       paid_until: user.paid_until || null,
       trial_start: user.trial_start || new Date().toISOString(),
     };
-    localStorage.setItem('ch_profile', JSON.stringify(profile));
+    // Мерджим с существующим профилем чтобы не потерять заполненные поля
+    const existingRaw = localStorage.getItem(LS_USER_PROFILE);
+    const existing = existingRaw ? JSON.parse(existingRaw) : {};
+    const mergedProfile = Object.assign({}, existing, {
+      name: existing.name || user.name || (tgUser && tgUser.first_name) || '',
+      email: existing.email || '',
+      telegram_id: user.telegram_id,
+      tg_user_id: tgUser && tgUser.id,
+      tg_username: tgUser && tgUser.username,
+      active_plan: user.active_plan || existing.active_plan || 'trial',
+      paid_until: user.paid_until || existing.paid_until || null,
+      trial_start: user.trial_start || existing.trial_start || new Date().toISOString(),
+    });
+    localStorage.setItem(LS_USER_PROFILE, JSON.stringify(mergedProfile));
     if (user.active_plan) localStorage.setItem('ch_active_plan', user.active_plan);
     if (user.paid_until) localStorage.setItem('ch_paid_until', new Date(user.paid_until).getTime());
     if (user.trial_start) localStorage.setItem('ch_trial_start', new Date(user.trial_start).getTime());
     try { localStorage.setItem('ch_onboarding_done', '1'); } catch(e) {}
 
-    // Показываем @username вместо email в профиле
-    const emailWrap = document.getElementById('field-wrap-email');
-    const tgWrap = document.getElementById('field-wrap-tg-username');
-    const tgInput = document.getElementById('input-tg-username');
-    if (emailWrap) emailWrap.style.display = 'none';
-    if (tgWrap) tgWrap.style.display = '';
-    if (tgInput) tgInput.value = tgUser?.username ? '@' + tgUser.username : tgUser?.first_name || '';
-
-    // Язык из Telegram — после goTo чтобы DOM был готов
-    authNavigationDone = true;
-    goTo('screen-main');
-
+    // Определяем язык из Telegram
     const tgLang = tgUser?.language_code?.slice(0, 2).toLowerCase();
     if (tgLang && typeof LOCALES !== 'undefined' && LOCALES[tgLang]) {
       setLocale(tgLang);
     }
 
+    authNavigationDone = true;
+
+    // Если профиль не заполнен — показываем экран профиля
+    if (!mergedProfile.name || !mergedProfile.age) {
+      goTo('screen-profile', { mode: 'onboarding' });
+    } else {
+      goTo('screen-main');
+    }
+
+    // Показываем Telegram username вместо email
+    requestAnimationFrame(() => {
+      const emailWrap = document.getElementById('field-wrap-email');
+      const tgWrap = document.getElementById('field-wrap-tg-username');
+      const tgInput = document.getElementById('input-tg-username');
+      if (emailWrap) emailWrap.style.display = 'none';
+      if (tgWrap) tgWrap.style.display = '';
+      if (tgInput) tgInput.value = tgUser?.username ? '@' + tgUser.username : tgUser?.first_name || '';
+      const localeLabel = LOCALE === 'ru' ? 'Русский' : LOCALE === 'de' ? 'Deutsch' : 'English';
+      if (typeof setSegActiveByLabel === 'function') setSegActiveByLabel('seg-locale', localeLabel);
+    });
+
   } catch (e) {
-    alert('ERROR: ' + e.message);
+    console.error('[telegram] auth error', e);
     goTo('screen-auth');
   }
 }
