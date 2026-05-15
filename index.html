@@ -5827,8 +5827,7 @@ function setSegActiveByLabel(containerId, label) {
 function applyDontKnowVisual() {
   const hint = document.getElementById('dontknow-hint');
   const btn = document.getElementById('dontknow-btn');
-  const fields = ['f-total', 'f-ldl', 'f-hdl', 'f-trig'];
-  hint.classList.toggle('visible', dontKnowOn);
+  if (hint) hint.classList.toggle('visible', dontKnowOn);
   if (btn) btn.classList.toggle('open', dontKnowOn);
   // dimmed убран — поля всегда редактируемы
 }
