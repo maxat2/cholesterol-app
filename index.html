@@ -1503,26 +1503,65 @@
   .pw-active-wrap {
     display: none;
     flex-direction: column;
-    align-items: center;
-    padding: 32px 24px 24px;
-    text-align: center;
+    align-items: stretch;
+    padding: 0;
   }
   .pw-active-wrap.visible { display: flex; }
+
+  /* Верхний блок — статус подписки */
+  .pw-active-status {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 28px 24px 24px; text-align: center;
+    border-bottom: 1px solid var(--border, rgba(0,0,0,0.08));
+  }
   .pw-active-icon {
-    width: 64px; height: 64px; border-radius: 50%;
+    width: 56px; height: 56px; border-radius: 50%;
     background: #E8F5E9; display: flex; align-items: center;
-    justify-content: center; font-size: 30px; margin-bottom: 16px;
+    justify-content: center; font-size: 26px; margin-bottom: 12px;
+    color: #2E7D32;
   }
   .pw-active-title {
-    font-size: 20px; font-weight: 700; color: var(--accent);
-    margin-bottom: 6px;
+    font-size: 18px; font-weight: 700; margin-bottom: 4px;
   }
   .pw-active-plan {
-    font-size: 14px; color: var(--muted); margin-bottom: 4px;
+    font-size: 14px; color: var(--muted); margin-bottom: 2px;
   }
   .pw-active-until {
-    font-size: 13px; color: var(--muted2); margin-bottom: 28px;
+    font-size: 13px; color: var(--muted2); margin-bottom: 20px;
   }
+  .pw-cancel-btn {
+    padding: 8px 20px;
+    background: transparent; color: var(--muted);
+    border: 1px solid var(--border, rgba(0,0,0,0.15));
+    border-radius: 20px; font-size: 13px; font-weight: 500;
+    cursor: pointer; font-family: var(--sans);
+    -webkit-tap-highlight-color: transparent;
+    transition: opacity 0.15s;
+  }
+  .pw-cancel-btn:active { opacity: 0.7; }
+
+  /* Нижний блок — смена плана */
+  .pw-change-wrap {
+    padding: 20px 16px 8px;
+  }
+  .pw-change-title {
+    font-size: 13px; font-weight: 600; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.05em;
+    margin-bottom: 12px; padding: 0 4px;
+  }
+  /* Текущий план — выделен галочкой, не кликабелен */
+  .pw-plan.current-plan {
+    opacity: 1; cursor: default;
+    border-color: #22C55E;
+    background: #F0FDF4;
+  }
+  .pw-plan.current-plan .pw-radio { display: none; }
+  .pw-current-check {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: #22C55E; display: flex; align-items: center;
+    justify-content: center; flex-shrink: 0; color: white; font-size: 12px;
+  }
+
   .pw-manage-btn {
     width: 100%; padding: 14px 20px;
     background: transparent; color: var(--accent);
@@ -2732,14 +2771,33 @@
         </div>
       </div>
 
-      <!-- Активная подписка — показывается вместо планов -->
+      <!-- Активная подписка — показывается вместо обычного контента -->
       <div class="pw-active-wrap" id="pw-active-wrap">
-        <div class="pw-active-icon">✓</div>
-        <div class="pw-active-title" data-i18n="paywall.active_title">Подписка активна</div>
-        <div class="pw-active-plan" id="pw-active-plan-label"></div>
-        <div class="pw-active-until" id="pw-active-until-label"></div>
-        <button type="button" class="pw-manage-btn" onclick="paywallManage()" data-i18n="paywall.manage_btn">Управление подпиской</button>
-        <div class="pw-restore" onclick="paywallRestore()" data-i18n="paywall.restore" style="margin-top:0;">Восстановить покупку</div>
+
+        <!-- Верх: статус текущей подписки -->
+        <div class="pw-active-status">
+          <div class="pw-active-icon">✓</div>
+          <div class="pw-active-title" data-i18n="paywall.active_title">Подписка активна</div>
+          <div class="pw-active-plan" id="pw-active-plan-label"></div>
+          <div class="pw-active-until" id="pw-active-until-label"></div>
+          <button type="button" class="pw-cancel-btn" onclick="paywallManage()" data-i18n="paywall.cancel_btn">Отменить подписку</button>
+        </div>
+
+        <!-- Низ: смена плана -->
+        <div class="pw-change-wrap">
+          <div class="pw-change-title" data-i18n="paywall.change_plan">Сменить план</div>
+
+          <!-- Планы для смены — генерируются JS в syncPaywallState() -->
+          <div id="pw-change-plans"></div>
+
+          <div class="pw-cta-wrap" style="margin-top:8px;">
+            <button type="button" class="pw-cta-btn" id="pw-change-cta-btn" onclick="paywallChangePlan()" style="display:none;">
+              <span id="pw-change-cta-label" data-i18n="paywall.change_cta">Перейти на этот план</span>
+            </button>
+          </div>
+          <div class="pw-restore" onclick="paywallRestore()" data-i18n="paywall.restore">Восстановить покупку</div>
+        </div>
+
       </div>
 
       <div class="pw-plans" id="pw-plans">
@@ -3159,6 +3217,11 @@ const LOCALES = {
     'paywall.active_until': 'Действует до {date}',
     'paywall.manage_btn': 'Управление подпиской',
     'paywall.activated': '✓ Подписка активирована',
+    'paywall.cancel_btn': 'Отменить подписку',
+    'paywall.change_plan': 'Сменить план',
+    'paywall.change_cta': 'Перейти на этот план',
+    'paywall.change_cta_plan': 'Перейти на {plan}',
+    'paywall.current_plan': 'текущий',
 
     // Daily summary — секции
     'daily.good_label': 'Что работало',
@@ -3483,6 +3546,11 @@ const LOCALES = {
     'paywall.active_until': 'Valid until {date}',
     'paywall.manage_btn': 'Manage subscription',
     'paywall.activated': '✓ Subscription activated',
+    'paywall.cancel_btn': 'Cancel subscription',
+    'paywall.change_plan': 'Change plan',
+    'paywall.change_cta': 'Switch to this plan',
+    'paywall.change_cta_plan': 'Switch to {plan}',
+    'paywall.current_plan': 'current',
 
     // Daily summary sections
     'daily.good_label': 'What worked',
@@ -3807,6 +3875,11 @@ const LOCALES = {
     'paywall.active_until': 'Gültig bis {date}',
     'paywall.manage_btn': 'Abonnement verwalten',
     'paywall.activated': '✓ Abonnement aktiviert',
+    'paywall.cancel_btn': 'Abonnement kündigen',
+    'paywall.change_plan': 'Plan wechseln',
+    'paywall.change_cta': 'Zu diesem Plan wechseln',
+    'paywall.change_cta_plan': 'Zu {plan} wechseln',
+    'paywall.current_plan': 'aktuell',
 
     // Daily summary sections
     'daily.good_label': 'Was funktioniert hat',
@@ -4249,55 +4322,115 @@ function syncPaywallState() {
   const s = getTrialStatus();
   const isPaid = s.plan === 'paid';
 
-  // Элементы покупки
-  const purchaseEls = ['pw-plans', 'pw-cta-btn', 'pw-trial-note'];
-  purchaseEls.forEach(id => {
+  // Элементы только для режима покупки
+  ['pw-plans', 'pw-cta-btn', 'pw-trial-note'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.style.display = isPaid ? 'none' : '';
   });
-  // Заголовок и subtitle
-  const title = document.querySelector('#screen-paywall .pw-title');
+  const title    = document.querySelector('#screen-paywall .pw-title');
   const subtitle = document.querySelector('#screen-paywall .pw-subtitle');
   const features = document.querySelector('#screen-paywall .pw-features');
-  const restoreEl = document.querySelector('#screen-paywall > div > .pw-restore');
-  if (title) title.style.display = isPaid ? 'none' : '';
+  if (title)    title.style.display    = isPaid ? 'none' : '';
   if (subtitle) subtitle.style.display = isPaid ? 'none' : '';
   if (features) features.style.display = isPaid ? 'none' : '';
-  if (restoreEl) restoreEl.style.display = isPaid ? 'none' : '';
 
   // Блок активной подписки
   const activeWrap = document.getElementById('pw-active-wrap');
   if (activeWrap) activeWrap.classList.toggle('visible', isPaid);
 
-  if (isPaid) {
-    // Название плана
-    const planKey = localStorage.getItem(LS_ACTIVE_PLAN) || 'month';
-    const planNames = {
-      trial: t('paywall.plan_trial_name'),
-      month: t('paywall.plan_month_name'),
-      quarter: t('paywall.plan_quarter_name'),
-      year: t('paywall.plan_year_name'),
-    };
-    const planLabel = document.getElementById('pw-active-plan-label');
-    if (planLabel) planLabel.textContent = planNames[planKey] || planKey;
+  if (!isPaid) return;
 
-    // Дата продления
-    const paidUntil = parseInt(localStorage.getItem(LS_PAID_UNTIL) || '0', 10);
-    const untilLabel = document.getElementById('pw-active-until-label');
-    if (untilLabel && paidUntil) {
-      const dateStr = new Intl.DateTimeFormat(LOCALE, { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(paidUntil));
-      untilLabel.textContent = t('paywall.active_until', { date: dateStr });
-    }
+  // ── Верх: инфо о текущей подписке ────────────────────────────────────────
+  const planKey = localStorage.getItem(LS_ACTIVE_PLAN) || 'month';
+  const planNames = {
+    trial:   t('paywall.plan_trial_name'),
+    month:   t('paywall.plan_month_name'),
+    quarter: t('paywall.plan_quarter_name'),
+    year:    t('paywall.plan_year_name'),
+  };
+  const planLabel = document.getElementById('pw-active-plan-label');
+  if (planLabel) planLabel.textContent = planNames[planKey] || planKey;
+
+  const paidUntil = parseInt(localStorage.getItem(LS_PAID_UNTIL) || '0', 10);
+  const untilLabel = document.getElementById('pw-active-until-label');
+  if (untilLabel && paidUntil) {
+    const dateStr = new Intl.DateTimeFormat(LOCALE, { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(paidUntil));
+    untilLabel.textContent = t('paywall.active_until', { date: dateStr });
   }
+
+  // ── Низ: планы для смены ─────────────────────────────────────────────────
+  const changePlans = document.getElementById('pw-change-plans');
+  const changeCta   = document.getElementById('pw-change-cta-btn');
+  if (!changePlans) return;
+
+  // Планы доступные для смены (без trial, текущий выделен)
+  const plans = [
+    { key: 'month',   price: '$9',  per: t('paywall.plan_month_per'),   name: t('paywall.plan_month_name'),   desc: t('paywall.plan_month_desc') },
+    { key: 'quarter', price: '$15', per: t('paywall.plan_quarter_per'),  name: t('paywall.plan_quarter_name'), desc: t('paywall.plan_quarter_desc'), badge: t('paywall.plan_quarter_badge') },
+    { key: 'year',    price: '$39', per: t('paywall.plan_year_per'),     name: t('paywall.plan_year_name'),    desc: t('paywall.plan_year_desc'),    badge: t('paywall.plan_year_badge') },
+  ];
+
+  changePlans.innerHTML = plans.map(p => {
+    const isCurrent = p.key === planKey;
+    return `
+      <div class="pw-plan ${isCurrent ? 'current-plan' : ''}" data-plan="${p.key}"
+           onclick="${isCurrent ? '' : 'selectChangePlan(this)'}">
+        ${p.badge && !isCurrent ? `<div class="pw-plan-badge">${p.badge}</div>` : ''}
+        <div style="display:flex;align-items:center;gap:12px;">
+          ${isCurrent
+            ? `<div class="pw-current-check">✓</div>`
+            : `<div class="pw-radio"><div class="pw-radio-dot"></div></div>`}
+          <div class="pw-plan-left">
+            <div class="pw-plan-name">${p.name}${isCurrent ? ` <span style="font-size:11px;color:#22C55E;font-weight:500;">${t('paywall.current_plan')}</span>` : ''}</div>
+            <div class="pw-plan-desc">${p.desc}</div>
+          </div>
+        </div>
+        <div class="pw-plan-right">
+          <div class="pw-plan-price">${p.price}</div>
+          <div class="pw-plan-per">${p.per}</div>
+        </div>
+      </div>`;
+  }).join('');
+
+  // Скрываем кнопку CTA пока не выбран другой план
+  if (changeCta) changeCta.style.display = 'none';
+}
+
+// Выбор нового плана в режиме смены
+function selectChangePlan(el) {
+  document.querySelectorAll('#pw-change-plans .pw-plan').forEach(p => {
+    if (!p.classList.contains('current-plan')) p.classList.remove('selected');
+  });
+  el.classList.add('selected');
+
+  const plan = el.dataset.plan;
+  const ctaBtn = document.getElementById('pw-change-cta-btn');
+  const ctaLabel = document.getElementById('pw-change-cta-label');
+  const planNames = {
+    month:   t('paywall.plan_month_name'),
+    quarter: t('paywall.plan_quarter_name'),
+    year:    t('paywall.plan_year_name'),
+  };
+  if (ctaBtn) ctaBtn.style.display = '';
+  if (ctaLabel) ctaLabel.textContent = t('paywall.change_cta_plan', { plan: planNames[plan] || plan });
+}
+
+// Нажатие «Перейти на план»
+function paywallChangePlan() {
+  const selected = document.querySelector('#pw-change-plans .pw-plan.selected');
+  if (!selected) return;
+  const plan = selected.dataset.plan;
+  // STUB — сюда подключишь платёжный провайдер
+  alert(`[STUB] Смена плана на: ${plan}\nПосле оплаты вызови: activateSubscription('${plan}', Date.now() + 30*864e5)`);
 }
 
 function paywallManage() {
-  // Открывает управление подпиской в платёжном провайдере
-  // При подключении реального провайдера — заменить URL:
-  // iOS: 'itms-apps://apps.apple.com/account/subscriptions'
+  // Открывает управление подпиской в платёжном провайдере для ОТМЕНЫ
+  // При подключении реального провайдера — заменить:
+  // iOS:     'itms-apps://apps.apple.com/account/subscriptions'
   // Android: 'https://play.google.com/store/account/subscriptions'
   // LemonSqueezy / Stripe: ссылка на customer portal
-  alert('[STUB] Управление подпиской — здесь будет ссылка в магазин или customer portal');
+  alert('[STUB] Отмена подписки — здесь будет ссылка в магазин или customer portal для отмены');
 }
 
 // Paywall plan selection
