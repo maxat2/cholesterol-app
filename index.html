@@ -2155,6 +2155,15 @@
           <input type="email" id="input-email" placeholder="you@example.com" readonly tabindex="-1" style="color:var(--muted);" />
         </div>
       </div>
+      <div class="field" id="field-wrap-tg-username" style="display:none;opacity:0.6;pointer-events:none;">
+        <div class="field-label" style="display:flex;justify-content:space-between;align-items:center;">
+          Telegram
+          <span style="font-size:11px;color:var(--muted2);font-weight:400;">не изменяется</span>
+        </div>
+        <div class="field-row">
+          <input type="text" id="input-tg-username" readonly tabindex="-1" style="color:var(--muted);" />
+        </div>
+      </div>
       <div class="field" id="field-wrap-name">
         <div class="field-label" data-i18n="profile.name">Имя</div>
         <div class="field-row">
@@ -6529,6 +6538,12 @@ async function loginWithTelegram() {
   const tgUser = tg.initDataUnsafe?.user;
   alert('loginWithTelegram | user: ' + (tgUser ? tgUser.first_name : 'NO USER'));
 
+  // Определяем язык из Telegram
+  const tgLang = tgUser?.language_code?.slice(0, 2).toLowerCase();
+  if (tgLang && typeof LOCALES !== 'undefined' && LOCALES[tgLang]) {
+    setLocale(tgLang);
+  }
+
   try {
     const res = await fetch('/api/telegram-auth', {
       method: 'POST',
@@ -6552,12 +6567,21 @@ async function loginWithTelegram() {
       paid_until: user.paid_until || null,
       trial_start: user.trial_start || new Date().toISOString(),
       tg_user_id: tgUser && tgUser.id,
+      tg_username: tgUser && tgUser.username,
     };
     localStorage.setItem('ch_profile', JSON.stringify(profile));
     if (user.active_plan) localStorage.setItem('ch_active_plan', user.active_plan);
     if (user.paid_until) localStorage.setItem('ch_paid_until', new Date(user.paid_until).getTime());
     if (user.trial_start) localStorage.setItem('ch_trial_start', new Date(user.trial_start).getTime());
     try { localStorage.setItem('ch_onboarding_done', '1'); } catch(e) {}
+
+    // Показываем username вместо email в профиле
+    const emailWrap = document.getElementById('field-wrap-email');
+    const tgWrap = document.getElementById('field-wrap-tg-username');
+    const tgInput = document.getElementById('input-tg-username');
+    if (emailWrap) emailWrap.style.display = 'none';
+    if (tgWrap) tgWrap.style.display = '';
+    if (tgInput) tgInput.value = tgUser?.username ? '@' + tgUser.username : tgUser?.first_name || '';
 
     authNavigationDone = true;
     goTo('screen-main');
