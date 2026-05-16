@@ -6450,6 +6450,39 @@ async function saveMealToHistoryAndGoMain() {
   arr.push(mealLocal);
   setMealHistory(arr);
 
+  // Telegram: сохраняем через серверный эндпоинт
+  if (isTelegram()) {
+    try {
+      const tgProfile = JSON.parse(localStorage.getItem(LS_USER_PROFILE) || '{}');
+      if (tgProfile.telegram_id) {
+        const tgRes = await fetch('/api/telegram-meal', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            telegram_id: tgProfile.telegram_id,
+            meal: mealLocal,
+            photo_base64: lastMealTextOnly ? null : lastMealPhotoDataUrl,
+          }),
+        });
+        const tgData = await tgRes.json();
+        if (tgData.ok && tgData.id) {
+          const next = getMealHistory();
+          const idx = next.findIndex((m) => m.at === atIso && !m.supabaseId);
+          if (idx !== -1) {
+            const merged = { ...next[idx], supabaseId: tgData.id, photo_url: tgData.photo_url || '' };
+            delete merged.photoBase64;
+            next[idx] = merged;
+            setMealHistory(next);
+          }
+        }
+      }
+    } catch (e) {
+      warn('[tg] save meal error', e);
+    }
+    goTo('screen-main');
+    return;
+  }
+
   const uid = getStoredUserId();
   if (uid) {
     try {
@@ -6566,14 +6599,12 @@ async function loginWithTelegram() {
 
   const tgUser = tg.initDataUnsafe?.user;
 
-  // Язык из Telegram
   const tgLang = tgUser?.language_code?.slice(0, 2).toLowerCase();
   if (tgLang && typeof LOCALES !== 'undefined' && LOCALES[tgLang]) {
     setLocale(tgLang);
   }
 
   try {
-    // 1. Авторизация — получаем/создаём пользователя
     const res = await fetch('/api/telegram-auth', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -6584,7 +6615,6 @@ async function loginWithTelegram() {
     if (!data.user) throw new Error('No user in response');
     const user = data.user;
 
-    // 2. Загружаем полный профиль из Supabase по telegram_id
     const dbRes = await fetch(
       SUPABASE_URL + '/rest/v1/users?telegram_id=eq.' + user.telegram_id + '&select=*',
       { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY } }
@@ -6592,12 +6622,10 @@ async function loginWithTelegram() {
     const dbRows = await dbRes.json();
     const dbUser = (dbRows && dbRows.length > 0) ? dbRows[0] : null;
 
-    // 3. Применяем данные из БД к форме (как делает веб-версия)
     if (dbUser && typeof applySupabaseUserRowToForm === 'function') {
       applySupabaseUserRowToForm(dbUser);
     }
 
-    // 4. Сохраняем в localStorage под правильным ключом
     const existingRaw = localStorage.getItem(LS_USER_PROFILE);
     const existing = existingRaw ? JSON.parse(existingRaw) : {};
     const profile = Object.assign({}, existing, {
@@ -6610,7 +6638,6 @@ async function loginWithTelegram() {
       paid_until: user.paid_until || existing.paid_until || null,
       trial_start: user.trial_start || existing.trial_start || new Date().toISOString(),
     });
-    // Если в БД есть данные — обновляем поля профиля из БД
     if (dbUser) {
       if (dbUser.age != null) profile.age = String(dbUser.age);
       if (dbUser.height_cm != null) profile.height = String(dbUser.height_cm);
@@ -6629,20 +6656,16 @@ async function loginWithTelegram() {
     localStorage.setItem(LS_USER_PROFILE, JSON.stringify(profile));
     if (user.active_plan) localStorage.setItem('ch_active_plan', user.active_plan);
     try { localStorage.setItem('ch_onboarding_done', '1'); } catch(e) {}
-
-    // 5. Сохраняем профиль в форме в storage (чтобы всё было актуально)
     if (typeof saveProfileToStorage === 'function') saveProfileToStorage();
 
     authNavigationDone = true;
 
-    // 6. Если профиль не заполнен — показываем экран профиля
     if (!profile.name || !profile.age) {
       goTo('screen-profile', { mode: 'onboarding' });
     } else {
       goTo('screen-main');
     }
 
-    // 7. UI: username вместо email, подсветка языка
     requestAnimationFrame(() => {
       const emailWrap = document.getElementById('field-wrap-email');
       const tgWrap = document.getElementById('field-wrap-tg-username');
