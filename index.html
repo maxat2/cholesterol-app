@@ -6461,7 +6461,7 @@ async function saveMealToHistoryAndGoMain() {
           body: JSON.stringify({
             telegram_id: tgProfile.telegram_id,
             meal: mealLocal,
-            photo_base64: lastMealTextOnly ? null : lastMealPhotoDataUrl,
+            photo_base64: lastMealTextOnly ? null : await compressPhoto(lastMealPhotoDataUrl, 800, 0.6),
           }),
         });
         const tgData = await tgRes.json();
