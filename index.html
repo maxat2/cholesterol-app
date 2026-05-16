@@ -5904,31 +5904,13 @@ async function upsertTelegramProfile() {
   const profile = JSON.parse(raw);
   if (!profile.telegram_id) return;
 
-  // Сначала загружаем существующую строку из БД
-  const headers = {
-    'Content-Type': 'application/json',
-    'apikey': SUPABASE_ANON_KEY,
-    'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
-  };
-  let existing = {};
   try {
-    const getRes = await fetch(
-      SUPABASE_URL + '/rest/v1/users?telegram_id=eq.' + profile.telegram_id + '&select=*',
-      { headers }
-    );
-    const rows = await getRes.json();
-    if (rows && rows.length > 0) existing = rows[0];
-  } catch(e) { warn('[tg] get error', e); }
-
-  // Используем ту же функцию что и веб-версия
-  const patch = buildMergedUserUpdate(existing, profile);
-
-  try {
-    await fetch(
-      SUPABASE_URL + '/rest/v1/users?telegram_id=eq.' + profile.telegram_id,
-      { method: 'PATCH', headers: { ...headers, 'Prefer': 'return=minimal' }, body: JSON.stringify(patch) }
-    );
-  } catch(e) { warn('[tg] patch error', e); }
+    await fetch('/api/telegram-profile', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ telegram_id: profile.telegram_id, profile }),
+    });
+  } catch(e) { warn('[tg] profile save error', e); }
 }
 
 async function saveProfileAndStart() {
