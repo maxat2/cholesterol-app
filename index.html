@@ -6565,58 +6565,97 @@ async function loginWithTelegram() {
   tg.expand();
 
   const tgUser = tg.initDataUnsafe?.user;
-  alert('loginWithTelegram | user: ' + (tgUser ? tgUser.first_name : 'NO USER'));
+
+  // Язык из Telegram
+  const tgLang = tgUser?.language_code?.slice(0, 2).toLowerCase();
+  if (tgLang && typeof LOCALES !== 'undefined' && LOCALES[tgLang]) {
+    setLocale(tgLang);
+  }
 
   try {
+    // 1. Авторизация — получаем/создаём пользователя
     const res = await fetch('/api/telegram-auth', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ initData: tg.initData }),
     });
-
+    if (!res.ok) throw new Error('Auth failed: ' + res.status);
     const data = await res.json();
-    alert('response: ' + JSON.stringify(data).substring(0, 150));
+    if (!data.user) throw new Error('No user in response');
+    const user = data.user;
 
-    if (!res.ok || !data.user) {
-      throw new Error('Auth failed: ' + JSON.stringify(data));
+    // 2. Загружаем полный профиль из Supabase по telegram_id
+    const dbRes = await fetch(
+      SUPABASE_URL + '/rest/v1/users?telegram_id=eq.' + user.telegram_id + '&select=*',
+      { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY } }
+    );
+    const dbRows = await dbRes.json();
+    const dbUser = (dbRows && dbRows.length > 0) ? dbRows[0] : null;
+
+    // 3. Применяем данные из БД к форме (как делает веб-версия)
+    if (dbUser && typeof applySupabaseUserRowToForm === 'function') {
+      applySupabaseUserRowToForm(dbUser);
     }
 
-    const user = data.user;
-    const profile = {
-      id: user.id,
-      name: user.name || (tgUser && tgUser.first_name) || '',
+    // 4. Сохраняем в localStorage под правильным ключом
+    const existingRaw = localStorage.getItem(LS_USER_PROFILE);
+    const existing = existingRaw ? JSON.parse(existingRaw) : {};
+    const profile = Object.assign({}, existing, {
+      name: (dbUser && dbUser.name) || existing.name || (tgUser && tgUser.first_name) || '',
+      email: existing.email || '',
       telegram_id: user.telegram_id,
       tg_user_id: tgUser && tgUser.id,
       tg_username: tgUser && tgUser.username,
-      active_plan: user.active_plan || 'trial',
-      paid_until: user.paid_until || null,
-      trial_start: user.trial_start || new Date().toISOString(),
-    };
-    localStorage.setItem('ch_profile', JSON.stringify(profile));
+      active_plan: user.active_plan || existing.active_plan || 'trial',
+      paid_until: user.paid_until || existing.paid_until || null,
+      trial_start: user.trial_start || existing.trial_start || new Date().toISOString(),
+    });
+    // Если в БД есть данные — обновляем поля профиля из БД
+    if (dbUser) {
+      if (dbUser.age != null) profile.age = String(dbUser.age);
+      if (dbUser.height_cm != null) profile.height = String(dbUser.height_cm);
+      if (dbUser.weight_kg != null) profile.weight = String(dbUser.weight_kg);
+      if (dbUser.sex) profile.gender = dbUser.sex === 'male' ? 'Мужской' : 'Женский';
+      if (dbUser.units) profile.units = dbUser.units;
+      if (dbUser.statins != null) profile.statins = dbUser.statins;
+      if (dbUser.body_type) profile.body_type = dbUser.body_type;
+      if (dbUser.activity_level) profile.activity = dbUser.activity_level;
+      if (dbUser.cholesterol != null) profile.v_total = String(dbUser.cholesterol);
+      if (dbUser.ldl != null) profile.v_ldl = String(dbUser.ldl);
+      if (dbUser.hdl != null) profile.v_hdl = String(dbUser.hdl);
+      if (dbUser.triglycerides != null) profile.v_trig = String(dbUser.triglycerides);
+      if (dbUser.apob != null) profile.v_apob = String(dbUser.apob);
+    }
+    localStorage.setItem(LS_USER_PROFILE, JSON.stringify(profile));
     if (user.active_plan) localStorage.setItem('ch_active_plan', user.active_plan);
-    if (user.paid_until) localStorage.setItem('ch_paid_until', new Date(user.paid_until).getTime());
-    if (user.trial_start) localStorage.setItem('ch_trial_start', new Date(user.trial_start).getTime());
     try { localStorage.setItem('ch_onboarding_done', '1'); } catch(e) {}
 
-    // Показываем @username вместо email в профиле
-    const emailWrap = document.getElementById('field-wrap-email');
-    const tgWrap = document.getElementById('field-wrap-tg-username');
-    const tgInput = document.getElementById('input-tg-username');
-    if (emailWrap) emailWrap.style.display = 'none';
-    if (tgWrap) tgWrap.style.display = '';
-    if (tgInput) tgInput.value = tgUser?.username ? '@' + tgUser.username : tgUser?.first_name || '';
+    // 5. Сохраняем профиль в форме в storage (чтобы всё было актуально)
+    if (typeof saveProfileToStorage === 'function') saveProfileToStorage();
 
-    // Язык из Telegram — после goTo чтобы DOM был готов
     authNavigationDone = true;
-    goTo('screen-main');
 
-    const tgLang = tgUser?.language_code?.slice(0, 2).toLowerCase();
-    if (tgLang && typeof LOCALES !== 'undefined' && LOCALES[tgLang]) {
-      setLocale(tgLang);
+    // 6. Если профиль не заполнен — показываем экран профиля
+    if (!profile.name || !profile.age) {
+      goTo('screen-profile', { mode: 'onboarding' });
+    } else {
+      goTo('screen-main');
     }
 
+    // 7. UI: username вместо email, подсветка языка
+    requestAnimationFrame(() => {
+      const emailWrap = document.getElementById('field-wrap-email');
+      const tgWrap = document.getElementById('field-wrap-tg-username');
+      const tgInput = document.getElementById('input-tg-username');
+      if (emailWrap) emailWrap.style.display = 'none';
+      if (tgWrap) tgWrap.style.display = '';
+      if (tgInput) tgInput.value = tgUser?.username ? '@' + tgUser.username : tgUser?.first_name || '';
+      const localeLabel = LOCALE === 'ru' ? 'Русский' : LOCALE === 'de' ? 'Deutsch' : 'English';
+      if (typeof setSegActiveByLabel === 'function') setSegActiveByLabel('seg-locale', localeLabel);
+    });
+
   } catch (e) {
-    alert('ERROR: ' + e.message);
+    console.error('[telegram] auth error', e);
     goTo('screen-auth');
   }
 }
