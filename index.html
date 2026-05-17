@@ -5172,6 +5172,28 @@ function formatDateRuShort(dateKey) {
 
 async function refreshMealsCacheFromSupabase() {
   const uid = getStoredUserId();
+
+  // Telegram: загружаем историю по telegram_id через REST API
+  if (!uid && isTelegram()) {
+    try {
+      const tgProfile = JSON.parse(localStorage.getItem(LS_USER_PROFILE) || '{}');
+      if (!tgProfile.telegram_id) return;
+      const res = await fetch(
+        SUPABASE_URL + '/rest/v1/meals?user_id=eq.' + tgProfile.id + '&order=created_at.asc&select=*',
+        { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY } }
+      );
+      const data = await res.json();
+      if (!Array.isArray(data)) return;
+      const fromServer = data.map(mealRowToLocal);
+      const local = getMealHistory();
+      const pending = local.filter((m) => !m.supabaseId);
+      const merged = fromServer.concat(pending);
+      merged.sort((a, b) => new Date(a.at).getTime() - new Date(b.at).getTime());
+      setMealHistory(merged);
+    } catch(e) { warn('[tg] meals load error', e); }
+    return;
+  }
+
   if (!uid) return;
   const { data, error } = await supabaseClient
     .from('meals')
