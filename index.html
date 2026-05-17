@@ -4660,15 +4660,13 @@ function mealRowToLocal(row) {
       score: row.score,
       title: row.title || t('common.day_summary'),
       meals_line: parsed.meals_line || '',
-      skew_text: parsed.skew_text || parsed.pattern || '',
-      alerts: Array.isArray(parsed.alerts) ? parsed.alerts : [],
-      tip: parsed.tip || '',
       pattern: parsed.pattern || '',
       strongest_win: parsed.strongest_win || '',
       dominant_issue: parsed.dominant_issue || '',
       balance: parsed.balance || null,
       good: parsed.good || '',
       bad: parsed.bad || '',
+      tip: parsed.tip || '',
       extended: parsed.extended || null,
       vision: '', summary: '', education: '', nuances: '', upgrade: '', factors: []
     };
@@ -7110,6 +7108,14 @@ function openFoodCamera() {
   // На мобильных устройствах — принудительно открываем камеру (capture=environment)
   // На десктопе — открываем файловый диалог без capture (нет камеры для еды)
   const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+  // В Telegram WebView getUserMedia не работает — сразу открываем file picker
+  if (isTelegram()) {
+    camInput.removeAttribute('capture');
+    camInput?.click();
+    return;
+  }
+
   if (isMobile) {
     camInput.setAttribute('capture', 'environment');
   } else {
