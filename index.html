@@ -4660,13 +4660,15 @@ function mealRowToLocal(row) {
       score: row.score,
       title: row.title || t('common.day_summary'),
       meals_line: parsed.meals_line || '',
+      skew_text: parsed.skew_text || parsed.pattern || '',
+      alerts: Array.isArray(parsed.alerts) ? parsed.alerts : [],
+      tip: parsed.tip || '',
       pattern: parsed.pattern || '',
       strongest_win: parsed.strongest_win || '',
       dominant_issue: parsed.dominant_issue || '',
       balance: parsed.balance || null,
       good: parsed.good || '',
       bad: parsed.bad || '',
-      tip: parsed.tip || '',
       extended: parsed.extended || null,
       vision: '', summary: '', education: '', nuances: '', upgrade: '', factors: []
     };
@@ -5178,25 +5180,8 @@ async function refreshMealsCacheFromSupabase() {
     try {
       const tgProfile = JSON.parse(localStorage.getItem(LS_USER_PROFILE) || '{}');
       if (!tgProfile.telegram_id) return;
-
-      // Получаем user_id по telegram_id если нет в профиле
-      let userId = tgProfile.id;
-      if (!userId) {
-        const userRes = await fetch(
-          SUPABASE_URL + '/rest/v1/users?telegram_id=eq.' + tgProfile.telegram_id + '&select=id',
-          { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY } }
-        );
-        const users = await userRes.json();
-        if (users && users.length > 0) {
-          userId = users[0].id;
-          tgProfile.id = userId;
-          localStorage.setItem(LS_USER_PROFILE, JSON.stringify(tgProfile));
-        }
-      }
-      if (!userId) return;
-
       const res = await fetch(
-        SUPABASE_URL + '/rest/v1/meals?user_id=eq.' + userId + '&order=created_at.asc&select=*',
+        SUPABASE_URL + '/rest/v1/meals?user_id=eq.' + tgProfile.id + '&order=created_at.asc&select=*',
         { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY } }
       );
       const data = await res.json();
@@ -6668,7 +6653,6 @@ async function loginWithTelegram() {
     const existingRaw = localStorage.getItem(LS_USER_PROFILE);
     const existing = existingRaw ? JSON.parse(existingRaw) : {};
     const profile = Object.assign({}, existing, {
-      id: user.id,
       name: (dbUser && dbUser.name) || existing.name || (tgUser && tgUser.first_name) || '',
       email: existing.email || '',
       telegram_id: user.telegram_id,
