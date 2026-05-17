@@ -5177,6 +5177,7 @@ async function refreshMealsCacheFromSupabase() {
   if (!uid && isTelegram()) {
     try {
       const tgProfile = JSON.parse(localStorage.getItem(LS_USER_PROFILE) || '{}');
+      alert('[TG meals] id=' + tgProfile.id + ' tg_id=' + tgProfile.telegram_id);
       if (!tgProfile.telegram_id) return;
       const res = await fetch(
         SUPABASE_URL + '/rest/v1/meals?user_id=eq.' + tgProfile.id + '&order=created_at.asc&select=*',
