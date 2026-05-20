@@ -11,7 +11,6 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <title data-i18n="app.title">Холестериновая слежка</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -2153,15 +2152,6 @@
         </div>
         <div class="field-row">
           <input type="email" id="input-email" placeholder="you@example.com" readonly tabindex="-1" style="color:var(--muted);" />
-        </div>
-      </div>
-      <div class="field" id="field-wrap-tg-username" style="display:none;opacity:0.6;pointer-events:none;">
-        <div class="field-label" style="display:flex;justify-content:space-between;align-items:center;">
-          Telegram
-          <span style="font-size:11px;color:var(--muted2);font-weight:400;">не изменяется</span>
-        </div>
-        <div class="field-row">
-          <input type="text" id="input-tg-username" readonly tabindex="-1" style="color:var(--muted);" />
         </div>
       </div>
       <div class="field" id="field-wrap-name">
@@ -5172,28 +5162,6 @@ function formatDateRuShort(dateKey) {
 
 async function refreshMealsCacheFromSupabase() {
   const uid = getStoredUserId();
-
-  // Telegram: загружаем историю по telegram_id через REST API
-  if (!uid && isTelegram()) {
-    try {
-      const tgProfile = JSON.parse(localStorage.getItem(LS_USER_PROFILE) || '{}');
-      if (!tgProfile.telegram_id) return;
-      const res = await fetch(
-        SUPABASE_URL + '/rest/v1/meals?user_id=eq.' + tgProfile.id + '&order=created_at.asc&select=*',
-        { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY } }
-      );
-      const data = await res.json();
-      if (!Array.isArray(data)) return;
-      const fromServer = data.map(mealRowToLocal);
-      const local = getMealHistory();
-      const pending = local.filter((m) => !m.supabaseId);
-      const merged = fromServer.concat(pending);
-      merged.sort((a, b) => new Date(a.at).getTime() - new Date(b.at).getTime());
-      setMealHistory(merged);
-    } catch(e) { warn('[tg] meals load error', e); }
-    return;
-  }
-
   if (!uid) return;
   const { data, error } = await supabaseClient
     .from('meals')
@@ -5747,9 +5715,7 @@ async function submitDescribeFood() {
 }
 
 function profileIsCompleteData(p) {
-  // В Telegram достаточно telegram_id — email не нужен
-  if (p?.telegram_id || p?.tg_user_id) return true;
-  // В веб-версии достаточно email
+  // Достаточно только email — имя необязательно
   const email = String(p?.email || '').trim();
   if (!email) return false;
   const tmp = document.createElement('input');
@@ -5781,16 +5747,8 @@ function saveProfileToStorage() {
   const heightEl = document.getElementById('input-height');
   const weightEl = document.getElementById('input-weight');
   const statinsEl = document.getElementById('toggle-statins');
-
-  // Читаем существующий профиль чтобы сохранить telegram_id и другие поля
-  let existing = {};
-  try {
-    const raw = localStorage.getItem(LS_USER_PROFILE);
-    if (raw) existing = JSON.parse(raw);
-  } catch(e) {}
-
-  const profile = Object.assign({}, existing, {
-    email: emailEl?.value ?? existing.email ?? '',
+  const profile = {
+    email: emailEl?.value ?? '',
     name: nameEl?.value ?? '',
     v_total: vTotal?.value || String(AVG.total),
     v_ldl: vLdl?.value || String(AVG.ldl),
@@ -5806,7 +5764,7 @@ function saveProfileToStorage() {
     v_apob: (document.getElementById('v-apob')?.value ?? ''),
     body_type: segLabelToDb(document.querySelector('#seg-body-type .seg-btn.active')?.textContent.trim() ?? ''),
     activity: segLabelToDb(document.querySelector('#seg-activity .seg-btn.active')?.textContent.trim() ?? '')
-  });
+  };
   try {
     localStorage.setItem(LS_USER_PROFILE, JSON.stringify(profile));
   } catch (e) {}
@@ -5920,21 +5878,6 @@ function loadProfileFromStorage() {
   }
 }
 
-async function upsertTelegramProfile() {
-  const raw = localStorage.getItem(LS_USER_PROFILE);
-  if (!raw) return;
-  const profile = JSON.parse(raw);
-  if (!profile.telegram_id) return;
-
-  try {
-    await fetch('/api/telegram-profile', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ telegram_id: profile.telegram_id, profile }),
-    });
-  } catch(e) { warn('[tg] profile save error', e); }
-}
-
 async function saveProfileAndStart() {
   const emailEl = document.getElementById('input-email');
   const nameEl = document.getElementById('input-name');
@@ -5950,11 +5893,7 @@ async function saveProfileAndStart() {
   saveProfileToStorage();
   profileAutofillFromSupabase = false;
   try {
-    if (isTelegram()) {
-      await upsertTelegramProfile();
-    } else {
-      await upsertUserToSupabase();
-    }
+    await upsertUserToSupabase();
   } catch (e) {
     warn(e);
   }
@@ -6472,39 +6411,6 @@ async function saveMealToHistoryAndGoMain() {
   arr.push(mealLocal);
   setMealHistory(arr);
 
-  // Telegram: сохраняем через серверный эндпоинт
-  if (isTelegram()) {
-    try {
-      const tgProfile = JSON.parse(localStorage.getItem(LS_USER_PROFILE) || '{}');
-      if (tgProfile.telegram_id) {
-        const tgRes = await fetch('/api/telegram-meal', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            telegram_id: tgProfile.telegram_id,
-            meal: mealLocal,
-            photo_base64: lastMealTextOnly ? null : await compressPhoto(lastMealPhotoDataUrl, 800, 0.6),
-          }),
-        });
-        const tgData = await tgRes.json();
-        if (tgData.ok && tgData.id) {
-          const next = getMealHistory();
-          const idx = next.findIndex((m) => m.at === atIso && !m.supabaseId);
-          if (idx !== -1) {
-            const merged = { ...next[idx], supabaseId: tgData.id, photo_url: tgData.photo_url || '' };
-            delete merged.photoBase64;
-            next[idx] = merged;
-            setMealHistory(next);
-          }
-        }
-      }
-    } catch (e) {
-      warn('[tg] save meal error', e);
-    }
-    goTo('screen-main');
-    return;
-  }
-
   const uid = getStoredUserId();
   if (uid) {
     try {
@@ -6606,105 +6512,6 @@ const AVG = { total: 5.0, ldl: 3.0, hdl: 1.5, trig: 1.3 };
 const DEV_MODE = false;
 const log  = (...args) => DEV_MODE && console.log(...args);
 const warn = (...args) => DEV_MODE && console.warn(...args);
-
-// ─── Telegram Mini App ───────────────────────────────────────────────────────
-function isTelegram() {
-  try {
-    return !!(window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData && window.Telegram.WebApp.initData.length > 0);
-  } catch(e) { return false; }
-}
-
-async function loginWithTelegram() {
-  const tg = window.Telegram.WebApp;
-  tg.ready();
-  tg.expand();
-
-  const tgUser = tg.initDataUnsafe?.user;
-
-  const tgLang = tgUser?.language_code?.slice(0, 2).toLowerCase();
-  if (tgLang && typeof LOCALES !== 'undefined' && LOCALES[tgLang]) {
-    setLocale(tgLang);
-  }
-
-  try {
-    const res = await fetch('/api/telegram-auth', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ initData: tg.initData }),
-    });
-    if (!res.ok) throw new Error('Auth failed: ' + res.status);
-    const data = await res.json();
-    if (!data.user) throw new Error('No user in response');
-    const user = data.user;
-
-    const dbRes = await fetch(
-      SUPABASE_URL + '/rest/v1/users?telegram_id=eq.' + user.telegram_id + '&select=*',
-      { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY } }
-    );
-    const dbRows = await dbRes.json();
-    const dbUser = (dbRows && dbRows.length > 0) ? dbRows[0] : null;
-
-    if (dbUser && typeof applySupabaseUserRowToForm === 'function') {
-      applySupabaseUserRowToForm(dbUser);
-    }
-
-    const existingRaw = localStorage.getItem(LS_USER_PROFILE);
-    const existing = existingRaw ? JSON.parse(existingRaw) : {};
-    const profile = Object.assign({}, existing, {
-      name: (dbUser && dbUser.name) || existing.name || (tgUser && tgUser.first_name) || '',
-      email: existing.email || '',
-      telegram_id: user.telegram_id,
-      tg_user_id: tgUser && tgUser.id,
-      tg_username: tgUser && tgUser.username,
-      active_plan: user.active_plan || existing.active_plan || 'trial',
-      paid_until: user.paid_until || existing.paid_until || null,
-      trial_start: user.trial_start || existing.trial_start || new Date().toISOString(),
-    });
-    if (dbUser) {
-      if (dbUser.age != null) profile.age = String(dbUser.age);
-      if (dbUser.height_cm != null) profile.height = String(dbUser.height_cm);
-      if (dbUser.weight_kg != null) profile.weight = String(dbUser.weight_kg);
-      if (dbUser.sex) profile.gender = dbUser.sex === 'male' ? 'Мужской' : 'Женский';
-      if (dbUser.units) profile.units = dbUser.units;
-      if (dbUser.statins != null) profile.statins = dbUser.statins;
-      if (dbUser.body_type) profile.body_type = dbUser.body_type;
-      if (dbUser.activity_level) profile.activity = dbUser.activity_level;
-      if (dbUser.cholesterol != null) profile.v_total = String(dbUser.cholesterol);
-      if (dbUser.ldl != null) profile.v_ldl = String(dbUser.ldl);
-      if (dbUser.hdl != null) profile.v_hdl = String(dbUser.hdl);
-      if (dbUser.triglycerides != null) profile.v_trig = String(dbUser.triglycerides);
-      if (dbUser.apob != null) profile.v_apob = String(dbUser.apob);
-    }
-    localStorage.setItem(LS_USER_PROFILE, JSON.stringify(profile));
-    if (user.active_plan) localStorage.setItem('ch_active_plan', user.active_plan);
-    try { localStorage.setItem('ch_onboarding_done', '1'); } catch(e) {}
-    if (typeof saveProfileToStorage === 'function') saveProfileToStorage();
-
-    authNavigationDone = true;
-
-    if (!profile.name || !profile.age) {
-      goTo('screen-profile', { mode: 'onboarding' });
-    } else {
-      goTo('screen-main');
-    }
-
-    requestAnimationFrame(() => {
-      const emailWrap = document.getElementById('field-wrap-email');
-      const tgWrap = document.getElementById('field-wrap-tg-username');
-      const tgInput = document.getElementById('input-tg-username');
-      if (emailWrap) emailWrap.style.display = 'none';
-      if (tgWrap) tgWrap.style.display = '';
-      if (tgInput) tgInput.value = tgUser?.username ? '@' + tgUser.username : tgUser?.first_name || '';
-      const localeLabel = LOCALE === 'ru' ? 'Русский' : LOCALE === 'de' ? 'Deutsch' : 'English';
-      if (typeof setSegActiveByLabel === 'function') setSegActiveByLabel('seg-locale', localeLabel);
-    });
-
-  } catch (e) {
-    console.error('[telegram] auth error', e);
-    goTo('screen-auth');
-  }
-}
-// ─────────────────────────────────────────────────────────────────────────────
 let dontKnowOn = false;
 let lastFoodObjectUrl = null;
 
@@ -7108,14 +6915,6 @@ function openFoodCamera() {
   // На мобильных устройствах — принудительно открываем камеру (capture=environment)
   // На десктопе — открываем файловый диалог без capture (нет камеры для еды)
   const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-
-  // В Telegram WebView getUserMedia не работает — сразу открываем file picker
-  if (isTelegram()) {
-    camInput.removeAttribute('capture');
-    camInput?.click();
-    return;
-  }
-
   if (isMobile) {
     camInput.setAttribute('capture', 'environment');
   } else {
@@ -7987,13 +7786,6 @@ function clearBtnLoading(btn) {
 
 async function bootstrapApp() {
   log('[bootstrap] старт');
-
-  // Telegram Mini App — авторизуемся через Telegram, пропускаем screen-auth
-  if (isTelegram()) {
-    await loginWithTelegram();
-    return;
-  }
-
   // Показываем онбординг при первом запуске (до авторизации).
   // Если supabase уже установил навигацию через onAuthStateChange — не перебиваем.
   // Используем небольшой таймаут чтобы дать supabase шанс сработать синхронно (INITIAL_SESSION).
