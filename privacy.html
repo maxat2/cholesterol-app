@@ -230,7 +230,7 @@ const T = {
     'third.rows': [
       ['Supabase', 'База данных, аутентификация и хранение файлов', 'Email, профиль, показатели, история еды, фото блюд. Хранение в зашифрованном виде (AES-256)'],
       ['Google OAuth', 'Вход через Google', 'Email и имя из Google-аккаунта (только при выборе этого способа)'],
-      ['OpenAI', 'Анализ фото и текста еды', 'Фото или описание блюда. Не получает email, имя или медицинские данные'],
+      ['OpenAI', 'Анализ фото и текста еды', 'Фото или описание блюда, а также показатели профиля (пол, возраст, ИМТ, липидный профиль, приём статинов) — они нужны, чтобы разбор был персональным. Не получает email, имя и другие контактные данные'],
       ['Firebase Cloud Messaging (Google)', 'Доставка push-уведомлений', 'Токен устройства и текст уведомления. Не получает медицинские данные'],
       ['Google Play Billing', 'Обработка платежей и подписок', 'Данные о покупке (токен, ID подписки). Платёжные реквизиты обрабатывает Google — мы их не получаем и не храним'],
       ['Resend', 'Отправка Magic Link', 'Email для отправки письма-входа'],
@@ -295,7 +295,7 @@ const T = {
     'third.rows': [
       ['Supabase', 'Database, authentication & file storage', 'Email, profile, readings, food history, meal photos. Stored encrypted (AES-256)'],
       ['Google OAuth', 'Sign in with Google', 'Email and name from your Google account (only if you choose this method)'],
-      ['OpenAI', 'Food photo & text analysis', 'Food photo or description. Does not receive your email, name, or medical data'],
+      ['OpenAI', 'Food photo & text analysis', 'Food photo or description, plus profile metrics (sex, age, BMI, lipid panel, statin use) needed to make the analysis personal. Does not receive your email, name, or other contact details'],
       ['Firebase Cloud Messaging (Google)', 'Push notification delivery', 'Device token and notification text. Receives no medical data'],
       ['Google Play Billing', 'Payment & subscription processing', 'Purchase data (token, subscription ID). Payment details are handled by Google — we neither receive nor store them'],
       ['Resend', 'Magic Link emails', 'Your email to send the sign-in link'],
@@ -360,7 +360,7 @@ const T = {
     'third.rows': [
       ['Supabase', 'Datenbank, Authentifizierung & Dateispeicher', 'E-Mail, Profil, Werte, Essensverlauf, Essensfotos. Verschlüsselt gespeichert (AES-256)'],
       ['Google OAuth', 'Mit Google anmelden', 'E-Mail und Name aus deinem Google-Konto (nur bei dieser Anmeldemethode)'],
-      ['OpenAI', 'Foto- und Textanalyse', 'Essensfoto oder Beschreibung. Erhält keine E-Mail, Namen oder medizinischen Daten'],
+      ['OpenAI', 'Foto- und Textanalyse', 'Essensfoto oder Beschreibung sowie Profilwerte (Geschlecht, Alter, BMI, Lipidwerte, Statin-Einnahme), damit die Auswertung personalisiert erfolgt. Erhält keine E-Mail, keinen Namen und keine weiteren Kontaktdaten'],
       ['Firebase Cloud Messaging (Google)', 'Zustellung von Push-Benachrichtigungen', 'Gerätetoken und Benachrichtigungstext. Erhält keine medizinischen Daten'],
       ['Google Play Billing', 'Zahlungs- und Abonnementabwicklung', 'Kaufdaten (Token, Abo-ID). Zahlungsdaten verarbeitet Google — wir erhalten und speichern sie nicht'],
       ['Resend', 'Magic-Link-E-Mails', 'Deine E-Mail zum Versand des Anmeldelinks'],
