@@ -34,6 +34,23 @@ const VAPID_PRIVATE_KEY   = process.env.VAPID_PRIVATE_KEY;
 const VAPID_SUBJECT       = process.env.VAPID_SUBJECT || 'mailto:admin@example.com';
 const CRON_SECRET         = process.env.CRON_SECRET; // защита от случайных вызовов
 
+// Насколько поздно ещё можно сформировать отчёт, в минутах.
+// Точность задаёт ИНТЕРВАЛ вызова, а не это число: первый заход после
+// наступления времени создаёт отчёт, дальше срабатывает защита от повтора.
+// Окно нужно только на случай пропущенных заходов и должно быть >= интервала.
+const WINDOW_MIN = 20;
+
+/** "HH:MM" → минуты от полуночи, либо null. */
+function parseHHMM(v) {
+  if (typeof v !== 'string') return null;
+  const m = v.match(/^(\d{1,2}):(\d{2})$/);
+  if (!m) return null;
+  const h = Number(m[1]);
+  const min = Number(m[2]);
+  if (h > 23 || min > 59) return null;
+  return h * 60 + min;
+}
+
 export default async function handler(req, res) {
   // ── Защита: только Vercel Cron или запрос с секретом ──────────────────────
   const authHeader = req.headers['authorization'];
@@ -55,34 +72,58 @@ export default async function handler(req, res) {
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
-  // Сегодняшняя дата в формате YYYY-MM-DD (UTC+3, Москва)
   const now = new Date();
-  const moscowOffset = 3 * 60; // UTC+3 в минутах
-  const moscowNow = new Date(now.getTime() + (moscowOffset - now.getTimezoneOffset()) * 60000);
-  const todayStr = moscowNow.toISOString().slice(0, 10);
-
-  console.log(`[cron] Запуск для даты: ${todayStr}`);
-
-  const results = { processed: 0, skipped: 0, errors: 0, pushed: 0 };
+  const results = { processed: 0, skipped: 0, errors: 0, pushed: 0, due: 0 };
 
   try {
-    // ── 1. Найти всех пользователей у кого уже есть сегодняшние блюда ──────
-    const { data: mealUsers, error: mealErr } = await supabase
-      .from('meals')
-      .select('user_id')
-      .eq('is_daily_summary', false)
-      .gte('eaten_at', `${todayStr}T00:00:00`)
-      .lt('eaten_at', `${todayStr}T23:59:59`);
+    // ── 1. Кому пора формировать отчёт ПРЯМО СЕЙЧАС ────────────────────────
+    //
+    // Раньше эндпоинт запускался раз в сутки и строил отчёт по МОСКОВСКИМ
+    // суткам для всех сразу. Для пользователя в другом поясе это означало
+    // и чужие границы дня (ужин в 01:00 по Алматы попадал во вчера), и
+    // отчёт, приходящий посреди ночи.
+    //
+    // Теперь эндпоинт вызывается часто (крон Supabase, см. ниже), а мы на
+    // каждом заходе отбираем тех, у кого НАСТУПИЛО их локальное время.
+    const { data: allUsers, error: usersErr } = await supabase
+      .from('users')
+      .select('id, profile_json');
+    if (usersErr) throw usersErr;
 
-    if (mealErr) throw mealErr;
+    const due = [];
+    for (const u of allUsers || []) {
+      const pj = u.profile_json || {};
+      // Смещение пишет приложение при каждом сохранении профиля.
+      // Легаси-пользователи (веб, бот) остаются на Москве.
+      const offsetMin = typeof pj.daily_push_offset === 'number'
+        ? pj.daily_push_offset
+        : 180;
+      const targetMin = parseHHMM(pj.summary_time) ?? parseHHMM('22:00');
 
-    // Уникальные user_id у кого есть блюда сегодня
-    const userIds = [...new Set((mealUsers || []).map(m => m.user_id))];
-    console.log(`[cron] Пользователей с блюдами сегодня: ${userIds.length}`);
+      // Локальное время пользователя в минутах от полуночи.
+      const localMin = (((now.getUTCHours() * 60 + now.getUTCMinutes()) + offsetMin) % 1440 + 1440) % 1440;
+      if (localMin < targetMin || localMin >= targetMin + WINDOW_MIN) continue;
 
-    for (const userId of userIds) {
+      // Его локальная дата — по ней и считаем сутки.
+      const localNow = new Date(now.getTime() + offsetMin * 60000);
+      const dayStr = localNow.toISOString().slice(0, 10);
+
+      // Границы этих локальных суток в UTC.
+      const startUtc = new Date(Date.parse(`${dayStr}T00:00:00Z`) - offsetMin * 60000);
+      const endUtc = new Date(startUtc.getTime() + 86400000);
+
+      due.push({ userId: u.id, dayStr, startUtc, endUtc });
+    }
+
+    results.due = due.length;
+    console.log(`[cron] Пользователей, которым пора: ${due.length}`);
+
+    for (const { userId, dayStr, startUtc, endUtc } of due) {
+      const todayStr = dayStr; // локальная дата пользователя
       try {
-        // ── 2. Проверить что отчёт за сегодня ещё не создан ───────────────
+        // ── 2. Проверить что отчёт за этот день ещё не создан ─────────────
+        // Он же защита от повторов: эндпоинт теперь дёргается часто, и без
+        // этой проверки один и тот же день пересобирался бы каждые N минут.
         const { data: existing } = await supabase
           .from('meals')
           .select('id')
@@ -92,19 +133,21 @@ export default async function handler(req, res) {
           .maybeSingle();
 
         if (existing) {
-          console.log(`[cron] ${userId}: отчёт уже есть, пропускаем`);
           results.skipped++;
           continue;
         }
 
         // ── 3. Загрузить блюда пользователя за сегодня ────────────────────
+        // Границы — локальные сутки пользователя, переведённые в UTC.
+        // Прежний вариант сравнивал с наивной строкой `${todayStr}T00:00:00`,
+        // которую БД трактует как UTC, из-за чего сутки съезжали.
         const { data: meals } = await supabase
           .from('meals')
           .select('title, score, vision, summary')
           .eq('user_id', userId)
           .eq('is_daily_summary', false)
-          .gte('eaten_at', `${todayStr}T00:00:00`)
-          .lt('eaten_at', `${todayStr}T23:59:59`)
+          .gte('eaten_at', startUtc.toISOString())
+          .lt('eaten_at', endUtc.toISOString())
           .order('eaten_at', { ascending: true })
           .limit(10); // максимум 10 блюд в промпте
 
@@ -189,7 +232,9 @@ ${mealsList}
           user_id: userId,
           is_daily_summary: true,
           summary_date: todayStr,
-          eaten_at: new Date(`${todayStr}T22:00:00+03:00`).toISOString(),
+          // Момент формирования. Раньше здесь стояло жёсткое 22:00 по Москве,
+          // что для пользователя в другом поясе было неверной меткой времени.
+          eaten_at: now.toISOString(),
           verdict: 'summary',
           score: parsed.score,
           title: parsed.meals_line || '',
@@ -247,5 +292,6 @@ ${mealsList}
   }
 
   console.log('[cron] Итог:', results);
-  return res.status(200).json({ date: todayStr, ...results });
+  // Единой даты у запуска больше нет — у каждого пользователя своя локальная.
+  return res.status(200).json({ at: now.toISOString(), ...results });
 }
